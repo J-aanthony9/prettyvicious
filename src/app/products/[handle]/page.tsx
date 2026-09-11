@@ -3,11 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Gallery from "@/components/shop/Gallery";
 import AddToCart from "@/components/shop/AddToCart";
-import ProductCard from "@/components/shop/ProductCard";
-import SectionHead from "@/components/SectionHead";
-import Reveal from "@/components/Reveal";
-import { getCollection, getProduct, getProducts } from "@/lib/shopify";
-import { BRAND, COMMERCE, DROPS, FIT_NOTE, PRODUCT_BLURB } from "@/lib/brand";
+import { getProduct, getProducts } from "@/lib/shopify";
+import { BRAND, COMMERCE, FIT_NOTE, PRODUCT_BLURB } from "@/lib/brand";
 
 export const revalidate = 300;
 
@@ -45,11 +42,6 @@ export default async function ProductPage({ params }: Params) {
         ...product.images.filter((image) => image.url !== product.featuredImage!.url),
       ]
     : product.images;
-
-  // The rest of the drop, never this product. Same fallback as the homepage.
-  const drop = await getCollection(DROPS.current.handle, 12);
-  const pool = drop?.products.length ? drop.products : await getProducts(12);
-  const more = pool.filter((candidate) => candidate.handle !== product.handle).slice(0, 3);
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
@@ -115,24 +107,6 @@ export default async function ProductPage({ params }: Params) {
           </div>
         </div>
       </div>
-
-      {more.length > 0 ? (
-        <section className="mt-24 sm:mt-32">
-          <Reveal>
-            <SectionHead eyebrow={`Drop ${DROPS.current.number}`} title="More from the drop" />
-          </Reveal>
-          <div className="mt-12 grid grid-cols-1 gap-4 min-[560px]:grid-cols-3">
-            {more.map((candidate, index) => (
-              <Reveal key={candidate.id} delay={index * 90}>
-                <ProductCard product={candidate} />
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {/* Room for the sticky add to bag bar on phones. */}
-      <div className="h-20 md:hidden" aria-hidden="true" />
     </div>
   );
 }

@@ -4,10 +4,18 @@ import { BRAND, DROPS } from "@/lib/brand";
 export default function Hero() {
   return (
     <section aria-label="Introduction" className="hero relative flex min-h-[92vh] flex-col items-center justify-center overflow-hidden px-[clamp(20px,4vw,48px)] pb-[120px] pt-24 text-center">
-      {/* Compass rose from the brand lockup: four long points, four short. */}
-      <svg className="hero-star" viewBox="0 0 400 400" aria-hidden="true">
-        <path d="M200.0 14.0 L209.2 177.8 L260.8 139.2 L222.2 190.8 L386.0 200.0 L222.2 209.2 L260.8 260.8 L209.2 222.2 L200.0 386.0 L190.8 222.2 L139.2 260.8 L177.8 209.2 L14.0 200.0 L177.8 190.8 L139.2 139.2 L190.8 177.8 Z" fill="#E9DFCE" />
-        <circle cx="200" cy="200" r="7" fill="#0C0A0B" />
+      <svg
+        className="hero-star"
+        viewBox="0 0 400 400"
+        fill="none"
+        aria-hidden="true"
+      >
+        <g stroke="#E9DFCE" strokeWidth="0.7">
+          <path d="M200 8 L212 188 L392 200 L212 212 L200 392 L188 212 L8 200 L188 188 Z" />
+          <path d="M200 60 L208 192 L340 200 L208 208 L200 340 L192 208 L60 200 L192 192 Z" />
+          <circle cx="200" cy="200" r="150" strokeDasharray="1 7" />
+          <circle cx="200" cy="200" r="192" strokeDasharray="1 10" opacity=".6" />
+        </g>
       </svg>
 
       <p className="eyebrow relative mb-7">

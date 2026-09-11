@@ -407,22 +407,12 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(92vw, 560px);
-  height: min(92vw, 560px);
+  width: min(150vw, 1050px);
+  height: min(150vw, 1050px);
   transform: translate(-50%, -50%);
-  opacity: 0.07;
+  opacity: 0.09;
   pointer-events: none;
-  animation: spin 200s linear infinite;
-}
-
-/* On a phone the hero is tall and narrow, so the mark lands over the body
-   copy. Smaller and fainter there, where legibility matters most. */
-@media (max-width: 640px) {
-  .hero-star {
-    width: min(72vw, 300px);
-    height: min(72vw, 300px);
-    opacity: 0.05;
-  }
+  animation: spin 160s linear infinite;
 }
 
 @keyframes spin {

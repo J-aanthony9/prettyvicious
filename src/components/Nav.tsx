@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useCartDrawer } from "@/components/cart/CartDrawerProvider";
 import { useScrollLock } from "@/lib/use-scroll-lock";
 import { Wordmark } from "@/components/Wordmark";
 import { DROPS } from "@/lib/brand";
@@ -17,10 +16,8 @@ const LINKS = [
 const NAV_ITEM =
   "text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--bone-dim)] transition-colors duration-300 hover:text-bone";
 
-export default function Nav() {
+export default function Nav({ cartCount }: { cartCount: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { cart, openDrawer } = useCartDrawer();
-  const cartCount = cart?.totalQuantity ?? 0;
 
   useScrollLock(menuOpen);
 
@@ -57,17 +54,9 @@ export default function Nav() {
               {link.label}
             </Link>
           ))}
-          {/* Opens the drawer when JS is up; a plain link to the bag page otherwise. */}
-          <a
-            href="/cart"
-            className={NAV_ITEM}
-            onClick={(event) => {
-              event.preventDefault();
-              openDrawer();
-            }}
-          >
+          <Link href="/cart" className={NAV_ITEM}>
             Bag ({cartCount})
-          </a>
+          </Link>
         </div>
       </header>
 

@@ -5,11 +5,9 @@ import Atmosphere from "@/components/Atmosphere";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { CartDrawerProvider } from "@/components/cart/CartDrawerProvider";
-import CartDrawer from "@/components/cart/CartDrawer";
-import Script from "next/script";
 import { readCart } from "@/lib/cart-session";
 import { BRAND } from "@/lib/brand";
+import Script from "next/script";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -47,13 +45,6 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: BRAND.name,
     type: "website",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: `${BRAND.name}. ${BRAND.tagline}.` }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${BRAND.name} · ${BRAND.subLabel}`,
-    description: `${BRAND.positioning} ${BRAND.tagline}.`,
-    images: ["/og.png"],
   },
   robots: { index: true, follow: true },
 };
@@ -69,8 +60,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const cart = await readCart();
-  // Cloudflare Web Analytics. Cookieless, free, only rendered once a token
-  // from the Cloudflare dashboard is set. See DEPLOY.md.
+  // Cloudflare Web Analytics. Cookieless, free, and only rendered once a
+  // token from the Cloudflare dashboard is set. See DEPLOY.md.
   const beaconToken = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
 
   return (
@@ -92,15 +83,12 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
-        <CartDrawerProvider cart={cart}>
-          <AnnouncementBar />
-          <Nav />
-          <main id="main" className="relative z-10">
-            {children}
-          </main>
-          <Footer />
-          <CartDrawer />
-        </CartDrawerProvider>
+        <AnnouncementBar />
+        <Nav cartCount={cart?.totalQuantity ?? 0} />
+        <main id="main" className="relative z-10">
+          {children}
+        </main>
+        <Footer />
         {beaconToken ? (
           <Script
             src="https://static.cloudflareinsights.com/beacon.min.js"
