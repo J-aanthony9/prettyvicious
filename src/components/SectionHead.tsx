@@ -1,19 +1,21 @@
 export default function SectionHead({
   eyebrow,
   title,
+  sub,
   align = "center",
 }: {
   eyebrow?: string;
   title: string;
+  sub?: string;
   align?: "center" | "left";
 }) {
   return (
     <div className={align === "center" ? "text-center" : "text-left"}>
-      {eyebrow ? <p className="eyebrow mb-5">{eyebrow}</p> : null}
-      <h2 className="display text-[clamp(1.35rem,3.6vw,2.1rem)]">{title}</h2>
-      <div
-        className={`rule mt-7 ${align === "center" ? "mx-auto w-24" : "w-24"}`}
-      />
+      {eyebrow ? <p className="eyebrow mb-3.5">{eyebrow}</p> : null}
+      <h2 className="sec-title">{title}</h2>
+      {sub ? (
+        <p className="mt-3.5 text-[15px] text-[color:var(--bone-dim)]">{sub}</p>
+      ) : null}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Hero from "@/components/home/Hero";
 import DropLedger from "@/components/home/DropLedger";
 import QuoteBand from "@/components/home/QuoteBand";
@@ -26,25 +25,21 @@ export default async function HomePage() {
       <Hero />
       <DropLedger />
 
-      <section className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8 sm:py-32">
-        <Reveal>
-          <SectionHead
-            eyebrow={`Drop ${DROPS.current.number}`}
-            title={DROPS.current.title}
-          />
-        </Reveal>
+      <section
+        id="drop"
+        className="drop-bg relative z-10 scroll-mt-20 py-[clamp(72px,10vw,128px)]"
+      >
+        <div className="mx-auto max-w-[1200px] px-[clamp(20px,4vw,48px)]">
+          <Reveal className="mb-[clamp(40px,6vw,64px)]">
+            <SectionHead
+              eyebrow={`Drop ${DROPS.current.number} ✦ ${DROPS.current.title}`}
+              title="The First Drop"
+              sub="Four tees. Printed dark."
+            />
+          </Reveal>
 
-        <div className="mt-16">
           <ProductGrid products={products} />
         </div>
-
-        {products.length > 0 ? (
-          <Reveal delay={140} className="mt-16 text-center">
-            <Link href="/products" className="btn">
-              View everything
-            </Link>
-          </Reveal>
-        ) : null}
       </section>
 
       <QuoteBand />

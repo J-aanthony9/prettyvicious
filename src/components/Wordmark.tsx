@@ -1,41 +1,30 @@
+import Image from "next/image";
+import wordmark from "@/../public/brand/wordmark-nav.webp";
+import lockup from "@/../public/brand/lockup-footer.webp";
 import { BRAND } from "@/lib/brand";
 
 /**
- * Type based stand in for the real Pretty Vicious logo.
- *
- * When the transparent PNG lockups arrive, drop them in /public/brand/ and
- * swap the markup here for next/image. Nothing else on the site needs to
- * change. Keep the bone recolour for the nav and the burgundy tint for the
- * footer lockup.
- *
- *   /public/brand/wordmark-bone.png   nav, wordmark only
- *   /public/brand/lockup-burgundy.png footer, wordmark plus tagline
+ * The real logo artwork, lifted from the design prototype.
+ * Bone recoloured wordmark for the nav, dusty burgundy full lockup (wordmark
+ * plus "Beauty is an art") for the footer.
  */
-export function Wordmark({
-  className = "",
-  tone = "bone",
-}: {
-  className?: string;
-  tone?: "bone" | "burgundy";
-}) {
+export function Wordmark({ className = "" }: { className?: string }) {
   return (
-    <span
-      className={`gothic block leading-none ${
-        tone === "burgundy" ? "text-accent" : "text-bone"
-      } ${className}`}
-    >
-      {BRAND.name}
-    </span>
+    <Image
+      src={wordmark}
+      alt={BRAND.name}
+      priority
+      className={`h-[30px] w-auto ${className}`}
+    />
   );
 }
 
 export function Lockup({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex flex-col items-center gap-3 ${className}`}>
-      <Wordmark tone="burgundy" className="text-[30px] sm:text-[38px]" />
-      <span className="display text-[12px] text-[color:var(--bone-faint)]">
-        {BRAND.tagline}
-      </span>
-    </div>
+    <Image
+      src={lockup}
+      alt={`${BRAND.name}. ${BRAND.tagline}`}
+      className={`h-auto w-[min(230px,60%)] ${className}`}
+    />
   );
 }

@@ -58,7 +58,7 @@ src/
   components/
     Atmosphere.tsx              Film grain, parallax fog, star motes
     Nav.tsx  Footer.tsx         Site chrome
-    Wordmark.tsx                Logo stand in, see "Logos" below
+    Wordmark.tsx                Nav wordmark and footer lockup
     home/                       Hero, ledger, quote, manifesto, perks, club
     shop/                       Product cards, gallery, variant selector
   lib/
@@ -120,10 +120,6 @@ US, and Shopify has no other shipping zone.
 
 These are yours, and none of them block anything above.
 
-- **Logos.** `src/components/Wordmark.tsx` currently sets the name in Pirata
-  One as a stand in. Drop the transparent PNGs into `public/brand/` as
-  `wordmark-bone.png` (nav) and `lockup-burgundy.png` (footer), then swap the
-  markup in that one file for `next/image`. Nothing else needs to change.
 - **Product photos.** They come through Shopify, so no code change.
 - **Which blanks are LA available**, chosen in Tapstitch, so the whole drop
   ships domestic on one fulfillment method.

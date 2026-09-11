@@ -8,38 +8,36 @@ export default function ProductCard({ product }: { product: Product }) {
   const soldOut = !product.availableForSale;
 
   return (
-    <Link
-      href={`/products/${product.handle}`}
-      className="group block focus-visible:outline-offset-8"
-    >
-      <div className="relative aspect-[4/5] overflow-hidden border border-[color:var(--hairline)] bg-veil">
+    <Link href={`/products/${product.handle}`} className="group block overflow-hidden rounded">
+      <div className="card-face relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded border border-[color:var(--hairline-soft)] transition-transform duration-[350ms] group-hover:-translate-y-[5px]">
         {image ? (
           <Image
             src={image.url}
             alt={image.altText || product.title}
             fill
-            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 45vw, 90vw"
-            className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+            sizes="(min-width: 900px) 25vw, (min-width: 560px) 50vw, 100vw"
+            className="object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-accent">✦</div>
+          <span className="text-[22px] text-accent">✦</span>
         )}
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent opacity-70 transition-opacity duration-700 group-hover:opacity-40" />
-
-        {soldOut ? (
-          <span className="absolute left-4 top-4 border border-[color:var(--hairline)] bg-ink/80 px-3 py-1.5 text-[10px] uppercase tracking-[0.3em] text-[color:var(--bone-dim)]">
-            Sold out
-          </span>
-        ) : null}
+        <span className="absolute left-3 top-3 rounded-sm bg-accent px-[9px] py-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-[#171012]">
+          {soldOut ? "Sold out" : "Drop 001"}
+        </span>
       </div>
 
-      <div className="mt-5 flex items-baseline justify-between gap-4">
-        <h3 className="display text-[12px] tracking-[0.24em]">{product.title}</h3>
-        <p className="shrink-0 text-[14px] text-[color:var(--bone-dim)]">
+      <div className="flex items-baseline justify-between gap-2.5 px-1 pt-3.5">
+        <h3 className="font-[family-name:var(--font-display)] text-[19px] font-medium tracking-[0.03em]">
+          {product.title}
+        </h3>
+        <span className="shrink-0 text-[13px] font-semibold tracking-[0.08em] text-[color:var(--bone-dim)]">
           {formatMoney(product.priceRange.minVariantPrice)}
-        </p>
+        </span>
       </div>
+      <p className="px-1 pt-0.5 text-[12px] tracking-[0.06em] text-[color:var(--bone-dim)]">
+        Oversized · Vintage black
+      </p>
     </Link>
   );
 }

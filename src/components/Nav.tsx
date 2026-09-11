@@ -5,26 +5,18 @@ import { useEffect, useState } from "react";
 import { Wordmark } from "@/components/Wordmark";
 import { DROPS } from "@/lib/brand";
 
-const LEFT_LINKS = [
+const LINKS = [
+  { label: "Shop", href: "/products" },
   { label: `Drop ${DROPS.current.number}`, href: `/collections/${DROPS.current.handle}` },
-  { label: "Shop all", href: "/products" },
+  { label: "About", href: "/story" },
+  { label: "The Club", href: "/#club" },
 ];
 
-const RIGHT_LINKS = [
-  { label: "Story", href: "/story" },
-  { label: "Club", href: "/#club" },
-];
+const NAV_ITEM =
+  "text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--bone-dim)] transition-colors duration-300 hover:text-bone";
 
 export default function Nav({ cartCount }: { cartCount: number }) {
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -34,22 +26,11 @@ export default function Nav({ cartCount }: { cartCount: number }) {
   }, [menuOpen]);
 
   return (
-    <header
-      className={`sticky top-0 z-50 border-b transition-colors duration-500 ${
-        scrolled
-          ? "border-[color:var(--hairline)] bg-ink/92 backdrop-blur-md"
-          : "border-transparent bg-transparent"
-      }`}
-    >
-      <nav className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-4 sm:px-8">
-        {/* Left */}
-        <div className="hidden items-center gap-8 md:flex">
-          {LEFT_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="link-quiet text-[11px] uppercase tracking-[0.3em]"
-            >
+    <>
+      <header className="sticky top-0 z-50 grid h-16 grid-cols-[1fr_auto_1fr] items-center border-b border-[color:var(--hairline-soft)] bg-[rgba(12,10,11,0.82)] px-[clamp(20px,4vw,48px)] backdrop-blur-[14px]">
+        <div className="hidden gap-7 md:flex">
+          {LINKS.slice(0, 2).map((link) => (
+            <Link key={link.href} href={link.href} className={NAV_ITEM}>
               {link.label}
             </Link>
           ))}
@@ -58,66 +39,52 @@ export default function Nav({ cartCount }: { cartCount: number }) {
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
-          className="justify-self-start text-[11px] uppercase tracking-[0.3em] text-[color:var(--bone-dim)] md:hidden"
+          className="justify-self-start text-bone md:hidden"
           aria-label="Open menu"
           aria-expanded={menuOpen}
         >
-          Menu
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M2 6h18M2 11h18M2 16h18" />
+          </svg>
         </button>
 
-        {/* Centre */}
         <Link href="/" aria-label="Pretty Vicious home" className="justify-self-center">
-          <Wordmark className="text-[22px] sm:text-[26px]" />
+          <Wordmark />
         </Link>
 
-        {/* Right */}
-        <div className="flex items-center justify-end gap-8">
-          {RIGHT_LINKS.map((link) => (
+        <div className="flex items-center justify-end gap-6">
+          {LINKS.slice(2).map((link) => (
+            <Link key={link.href} href={link.href} className={`${NAV_ITEM} hidden md:inline-block`}>
+              {link.label}
+            </Link>
+          ))}
+          <Link href="/cart" className={NAV_ITEM}>
+            Bag ({cartCount})
+          </Link>
+        </div>
+      </header>
+
+      {menuOpen ? (
+        <div className="fixed inset-0 z-[70] flex flex-col gap-2 bg-ink px-[clamp(20px,4vw,48px)] py-8 md:hidden">
+          <div className="mb-6 flex justify-end">
+            <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close menu" className="text-bone">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M5 5l14 14M19 5L5 19" />
+              </svg>
+            </button>
+          </div>
+          {LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="link-quiet hidden text-[11px] uppercase tracking-[0.3em] md:inline-block"
+              onClick={() => setMenuOpen(false)}
+              className="border-b border-[color:var(--hairline-soft)] py-2.5 font-[family-name:var(--font-display)] text-[34px] font-medium"
             >
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/cart"
-            className="link-quiet text-[11px] uppercase tracking-[0.3em]"
-          >
-            Bag{cartCount > 0 ? ` (${cartCount})` : ""}
-          </Link>
-        </div>
-      </nav>
-
-      {menuOpen ? (
-        <div className="fixed inset-0 z-[70] bg-ink backdrop-blur-sm md:hidden">
-          <div className="flex items-center justify-between px-5 py-4">
-            <Wordmark className="text-[22px]" />
-            <button
-              type="button"
-              onClick={() => setMenuOpen(false)}
-              className="text-[11px] uppercase tracking-[0.3em] text-[color:var(--bone-dim)]"
-              aria-label="Close menu"
-            >
-              Close
-            </button>
-          </div>
-          <ul className="mt-10 flex flex-col gap-8 px-8">
-            {[...LEFT_LINKS, ...RIGHT_LINKS].map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="display text-[18px]"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </div>
       ) : null}
-    </header>
+    </>
   );
 }
