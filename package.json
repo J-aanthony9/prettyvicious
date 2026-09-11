@@ -8,9 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "pages:build": "opennextjs-cloudflare build",
-    "pages:preview": "opennextjs-cloudflare preview",
-    "pages:deploy": "opennextjs-cloudflare deploy"
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "next": "^16.3.3",
