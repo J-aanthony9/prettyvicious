@@ -26,8 +26,8 @@ export default function Manifesto() {
             className="mb-1.5 block h-px w-[52px] bg-[color:var(--color-accent-deep)]"
           />
           <p>
-            Pretty Vicious was born in the world where beauty actually gets
-            made: the suites, the studios, the after-hours appointments.
+            Pretty Vicious was born in the rooms where beauty really gets
+            made. The suites, the studios, the after-hours.
           </p>
           <p>
             <strong className="font-semibold text-bone">
