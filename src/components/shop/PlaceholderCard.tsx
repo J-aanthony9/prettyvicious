@@ -32,7 +32,7 @@ export default function PlaceholderCard({
         </span>
       </div>
       <p className="px-1 pt-0.5 text-[12px] tracking-[0.06em] text-[color:var(--bone-dim)]">
-        Oversized · Vintage black
+        Oversized · S to 3XL
       </p>
     </div>
   );

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
+import { cardNote } from "@/lib/product";
 import type { Product } from "@/lib/shopify/types";
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -36,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </span>
       </div>
       <p className="px-1 pt-0.5 text-[12px] tracking-[0.06em] text-[color:var(--bone-dim)]">
-        Oversized · Vintage black
+        {cardNote(product)}
       </p>
     </Link>
   );

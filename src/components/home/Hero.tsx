@@ -23,9 +23,15 @@ export default function Hero() {
       </p>
 
       <h1 className="hero-title relative">
-        We Wear It{" "}
+        We Wear It
         <span className="hero-dark">
+          <span aria-hidden="true" className="hero-star-glyph">
+            ✦
+          </span>
           <span className="distress">Dark</span>
+          <span aria-hidden="true" className="hero-star-glyph">
+            ✦
+          </span>
         </span>
       </h1>
 
