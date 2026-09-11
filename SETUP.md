@@ -40,50 +40,83 @@ invisible to the site, which looks exactly like a broken site.
 
 ---
 
-## 2. Create a custom app
+## 2. Get a Storefront API access token
+
+This is the step people lose an afternoon to. There are two routes to the same
+token. **Take route A.** Route B is the older path and it hides the thing you
+are looking for in two separate places.
+
+### Route A: the Headless channel (recommended)
+
+1. Install **Headless** from the Shopify App Store
+   (`apps.shopify.com/headless`). Free, made by Shopify.
+2. Open it from the admin sidebar and create a storefront.
+3. It shows a **Public access token** and a **Private access token** on one
+   screen, with the product and cart permissions already set.
+4. Copy the **public** token.
+
+Use the public one. It is designed to be used from a storefront and is limited
+to reading products and managing carts. The private token carries elevated
+access and must never go into a website.
+
+### Route B: custom app (the older path)
+
+Only if route A does not work for you.
 
 1. Shopify admin, bottom left, **Settings**.
 2. **Apps and sales channels**.
-3. **Develop apps** (top right). If this is your first time, click
-   **Allow custom app development** and confirm.
-4. **Create an app**.
-5. Name it something obvious like `Pretty Vicious Storefront`. App developer
-   can stay as you.
-6. **Create app**.
-
----
-
-## 3. Turn on the Storefront API scopes
-
-1. In the app you just made, open the **Configuration** tab.
-2. Find **Storefront API integration** and click **Configure**.
-3. Tick these scopes:
+3. **Develop apps**, top right. **If you cannot see this button**, click
+   **Allow custom app development** first and confirm. It is hidden until you
+   opt in, which is the first place people get stuck.
+4. **Create an app**, name it something like `Pretty Vicious Storefront`,
+   **Create app**.
+5. Open the **Configuration** tab, find **Storefront API integration**, click
+   **Configure**, and tick:
    - `unauthenticated_read_product_listings`
    - `unauthenticated_read_product_inventory`
    - `unauthenticated_read_product_tags`
-   - `unauthenticated_read_product_pickup_locations` (optional, harmless)
+   - `unauthenticated_read_content` (lets the site read collection copy)
    - `unauthenticated_write_checkouts`
    - `unauthenticated_read_checkouts`
-   - `unauthenticated_read_content` (lets the site read collection copy)
-4. **Save**.
+6. **Save**.
+7. Open the **API credentials** tab and click **Install app**, then
+   **Install**.
+8. The **Storefront API access token** now appears. Reveal it and copy it.
 
-You do **not** need the Admin API. Leave that section alone. An Admin token
-can read orders and customers, and it must never end up in a website.
+**The token does not exist until you install the app.** Before step 7 you will
+only see an API key and a secret key, neither of which is what you want. That
+is the second place people get stuck, and the Configuration tab where you set
+the scopes is not the tab where the token appears.
+
+You do **not** need the Admin API. Leave that section alone. An Admin token can
+read orders and customers, and it must never end up in a website.
 
 ---
 
-## 4. Install the app and copy the token
+## 3. Check you copied the right string
 
-1. Open the **API credentials** tab.
-2. Click **Install app**, then **Install**.
-3. Under **Storefront API access token**, click to reveal, and copy it.
+Shopify hands out several credentials that look alike. Only one of them works
+here.
 
-That string is your `SHOPIFY_STOREFRONT_ACCESS_TOKEN`. It is a public scoped
-token, so it is not a disaster if it leaks, but do not paste it anywhere
-public on purpose.
+| Credential | Looks like | Use it? |
+|---|---|---|
+| Storefront API access token | 32 hex characters, no prefix | Yes, this one |
+| Admin API access token | starts with `shpat_` | No. Never in a website |
+| API key / secret key | a pair of values | No |
 
-Your `SHOPIFY_STORE_DOMAIN` is the `your-store.myshopify.com` part of your
-admin URL. Not the custom domain. Not `https://`. Just the host.
+If your string starts with `shpat_`, you are holding the Admin token. Go back
+and find the Storefront one.
+
+The Storefront token is public scoped, so it is not a disaster if it leaks, but
+do not paste it anywhere public on purpose.
+
+---
+
+## 4. Your store domain
+
+`SHOPIFY_STORE_DOMAIN` is the `your-store.myshopify.com` part of your admin
+URL. Not the custom domain, which points at the Cloudflare site. No `https://`,
+no trailing slash. Just the host.
 
 ---
 
@@ -150,9 +183,13 @@ at your domain and fight with the Cloudflare site.
 ## Troubleshooting
 
 **Site shows placeholder cards even though products exist.**
-Almost always the Online Store sales channel is unchecked on the product
-(step 1), or the token or domain has a typo. Check the server logs, the
-Storefront API error is printed there.
+The placeholder state is what the site falls back to whenever it cannot read
+products, so it is the symptom of every wiring problem. The actual reason is
+printed in the terminal running `npm run dev`, prefixed `[shopify]`. Read that
+first. Almost always it is one of two things: the **Online Store** sales
+channel is unchecked on the product (step 1), so the Storefront API does not
+return it even though it exists in your admin, or there is a typo in the token
+or the domain.
 
 **Checkout URL 404s or errors.**
 Usually no shipping rate for the United States. See step 6.
