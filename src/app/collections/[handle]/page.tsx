@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import ProductGrid from "@/components/shop/ProductGrid";
 import SectionHead from "@/components/SectionHead";
 import Reveal from "@/components/Reveal";
-import { getCollection } from "@/lib/shopify";
+import { getCollection, getProducts } from "@/lib/shopify";
 import { DROPS } from "@/lib/brand";
 
 export const revalidate = 300;
@@ -31,6 +31,15 @@ export default async function CollectionPage({ params }: Params) {
   const eyebrow = isCurrentDrop ? `Drop ${DROPS.current.number}` : "Collection";
   const title = collection?.title ?? DROPS.current.title;
 
+  // Drop 001 is the whole catalogue right now. If the collection does not
+  // exist in Shopify yet, or is not published to the Online Store channel,
+  // show every product rather than an empty grid. Same fallback as the
+  // homepage.
+  const products =
+    collection?.products.length || !isCurrentDrop
+      ? (collection?.products ?? [])
+      : await getProducts(48);
+
   return (
     <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
       <Reveal>
@@ -46,7 +55,7 @@ export default async function CollectionPage({ params }: Params) {
       ) : null}
 
       <div className="mt-16">
-        <ProductGrid products={collection?.products ?? []} />
+        <ProductGrid products={products} />
       </div>
     </div>
   );

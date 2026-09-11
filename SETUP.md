@@ -158,6 +158,16 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   `src/lib/brand.ts` (`COMMERCE.freeShipping` and `ANNOUNCEMENT`) together.
 - **United States only.** Do not add international shipping zones yet. No
   zone means no checkout for that country, which is what we want at launch.
+- **Size option order.** Tapstitch can sync sizes into Shopify with S at the
+  end of the list. The site sorts sizes into wearing order itself, so this
+  does not need fixing, but if you want the admin tidy, drag them into order
+  on the product's Variants section.
+- **The `drop-001` collection is optional.** Products > Collections > Create
+  collection, title `Beauty Professionals Club`, and set its handle to
+  `drop-001` under Search engine listing. Add the drop's products and make
+  sure it is published to the Online Store channel. Until it exists, the drop
+  pages simply show every product, which is the same thing while the drop is
+  the whole catalogue.
 - **Policies.** Settings > Policies. The copy for the refund and shipping
   policies is in `src/app/policies/`, and matches what the site shows.
   Paste the same text into Shopify so checkout and site agree. Also click

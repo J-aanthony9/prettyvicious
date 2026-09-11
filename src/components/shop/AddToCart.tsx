@@ -7,6 +7,7 @@ import { addItemAction } from "@/lib/actions";
 import { EMPTY_ACTION_STATE } from "@/lib/action-state";
 import { formatMoney } from "@/lib/money";
 import type { Product, ProductVariant } from "@/lib/shopify/types";
+import { isSizeOption, sortSizes } from "@/lib/sizes";
 
 function optionKey(options: { name: string; value: string }[]): string {
   return [...options]
@@ -87,9 +88,19 @@ export default function AddToCart({ product }: { product: Product }) {
 
         {product.options.map((option) => (
           <fieldset key={option.id} className="mb-8">
-            <legend className="eyebrow mb-4">{option.name}</legend>
+            <div className="mb-4 flex items-baseline justify-between gap-4">
+              <legend className="eyebrow">{option.name}</legend>
+              {isSizeOption(option.name) ? (
+                <Link
+                  href="/size-guide"
+                  className="link-quiet text-[11px] uppercase tracking-[0.2em]"
+                >
+                  Size guide
+                </Link>
+              ) : null}
+            </div>
             <div className="flex flex-wrap gap-2.5">
-              {option.values.map((value) => {
+              {(isSizeOption(option.name) ? sortSizes(option.values) : option.values).map((value) => {
                 const isSelected = selected[option.name] === value;
                 const available = isValueAvailable(option.name, value);
                 return (

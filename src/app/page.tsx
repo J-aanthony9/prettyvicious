@@ -12,6 +12,14 @@ import { DROPS } from "@/lib/brand";
 
 export const revalidate = 300;
 
+const WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+
+function teeCount(count: number): string {
+  if (count === 0) return "Printed dark.";
+  const word = WORDS[count] ?? String(count);
+  return `${word} ${count === 1 ? "tee" : "tees"}. Printed dark.`;
+}
+
 export default async function HomePage() {
   // Prefer the drop collection. Fall back to the whole catalogue so the grid
   // still fills in before the collection exists in Shopify.
@@ -34,7 +42,7 @@ export default async function HomePage() {
             <SectionHead
               eyebrow={`Drop ${DROPS.current.number} ✦ ${DROPS.current.title}`}
               title="The First Drop"
-              sub="Four tees. Printed dark."
+              sub={teeCount(products.length)}
             />
           </Reveal>
 

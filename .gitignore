@@ -39,3 +39,6 @@ next-env.d.ts
 .open-next/
 .wrangler/
 .dev.vars
+
+# test fixtures for the mock Storefront API
+public/mock-*.png

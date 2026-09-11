@@ -70,6 +70,12 @@ export default async function ProductPage({ params }: Params) {
               {FIT_NOTE.heading}
             </h2>
             <p className="dim mt-4 text-[15px] leading-[1.85]">{FIT_NOTE.body}</p>
+            <Link
+              href="/size-guide"
+              className="link-quiet mt-5 inline-block text-[11px] uppercase tracking-[0.22em] text-bone"
+            >
+              See the size guide
+            </Link>
           </div>
 
           {product.descriptionHtml ? (

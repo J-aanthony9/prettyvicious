@@ -81,7 +81,7 @@ export const FOOTER_LINKS = [
   {
     heading: "Help",
     links: [
-      { label: "Size guide · soon", href: null },
+      { label: "Size guide", href: "/size-guide" },
       { label: "Contact", href: "/contact" },
       { label: "FAQ", href: "/faq" },
     ],
