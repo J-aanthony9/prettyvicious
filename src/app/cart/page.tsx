@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import SectionHead from "@/components/SectionHead";
-import CartLines from "@/components/cart/CartLines";
 import { readCart } from "@/lib/cart-session";
-import { checkoutAction } from "@/lib/actions";
+import { checkoutAction, removeItemAction, updateItemAction } from "@/lib/actions";
 import { formatMoney } from "@/lib/money";
 import { COMMERCE, DROPS } from "@/lib/brand";
 
@@ -38,9 +38,96 @@ export default async function CartPage() {
     <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8 sm:py-28">
       <SectionHead eyebrow="Your bag" title="Review and check out" align="left" />
 
-      <div className="mt-14">
-        <CartLines lines={lines} />
-      </div>
+      <ul className="mt-14 flex flex-col">
+        {lines.map((line) => {
+          const image = line.merchandise.image ?? line.merchandise.product.featuredImage;
+          return (
+            <li
+              key={line.id}
+              className="flex gap-5 border-b border-[color:var(--hairline)] py-7 sm:gap-8"
+            >
+              <Link
+                href={`/products/${line.merchandise.product.handle}`}
+                className="relative h-28 w-[88px] shrink-0 overflow-hidden border border-[color:var(--hairline)] bg-veil"
+              >
+                {image ? (
+                  <Image
+                    src={image.url}
+                    alt={image.altText || line.merchandise.product.title}
+                    fill
+                    sizes="88px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="flex h-full items-center justify-center text-accent">
+                    ✦
+                  </span>
+                )}
+              </Link>
+
+              <div className="flex min-w-0 flex-1 flex-col justify-between gap-4">
+                <div>
+                  <Link
+                    href={`/products/${line.merchandise.product.handle}`}
+                    className="display text-[12px] tracking-[0.22em]"
+                  >
+                    {line.merchandise.product.title}
+                  </Link>
+                  <p className="dim mt-2 text-[14px]">
+                    {line.merchandise.selectedOptions
+                      .map((option) => `${option.name}: ${option.value}`)
+                      .join(" · ")}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center border border-[color:var(--hairline)]">
+                    <form action={updateItemAction}>
+                      <input type="hidden" name="lineId" value={line.id} />
+                      <input type="hidden" name="quantity" value={line.quantity - 1} />
+                      <button
+                        type="submit"
+                        aria-label="Decrease quantity"
+                        className="px-3.5 py-2 text-[14px] text-[color:var(--bone-dim)] hover:text-bone"
+                      >
+                        &minus;
+                      </button>
+                    </form>
+                    <span className="min-w-8 text-center text-[14px]">
+                      {line.quantity}
+                    </span>
+                    <form action={updateItemAction}>
+                      <input type="hidden" name="lineId" value={line.id} />
+                      <input type="hidden" name="quantity" value={line.quantity + 1} />
+                      <button
+                        type="submit"
+                        aria-label="Increase quantity"
+                        className="px-3.5 py-2 text-[14px] text-[color:var(--bone-dim)] hover:text-bone"
+                      >
+                        +
+                      </button>
+                    </form>
+                  </div>
+
+                  <form action={removeItemAction}>
+                    <input type="hidden" name="lineId" value={line.id} />
+                    <button
+                      type="submit"
+                      className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--bone-faint)] hover:text-accent"
+                    >
+                      Remove
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <p className="shrink-0 text-[15px] text-[color:var(--bone-dim)]">
+                {formatMoney(line.cost.totalAmount)}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
 
       <div className="mt-12 ml-auto max-w-sm">
         <div className="flex items-baseline justify-between">
@@ -65,7 +152,7 @@ export default async function CartPage() {
         </form>
 
         <p className="mt-4 text-center text-[13px] text-[color:var(--bone-faint)]">
-          You finish on Shopify&apos;s secure checkout.
+          You finish on Shopify's secure checkout.
         </p>
       </div>
     </div>
