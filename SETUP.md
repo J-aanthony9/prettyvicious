@@ -175,6 +175,17 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   Service**. Payment providers expect those to exist.
 - **Customer email.** Settings > Notifications. Set the sender to
   `support@shopprettyvicious.com` once Cloudflare email routing is live.
+- **Remove the storefront password.** Checkout is hosted on your store's
+  domain, and a new store is password protected by default, so until this is
+  done every checkout lands on an "Opening soon" page. Online Store >
+  Preferences > Password protection, untick "Restrict access to visitors
+  with the password", Save. Shopify only allows this once you have picked a
+  plan, and the business address under Settings > General has to be filled
+  in for Shopify Payments anyway, so do those first.
+- **Test the flow for free before the real order.** Settings > Payments >
+  Manage (Shopify Payments) > Test mode lets you complete a checkout with a
+  test card number and no money moving. Do one of those to prove the
+  handoff, then place the single real order that proves Tapstitch.
 
 ---
 

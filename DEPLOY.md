@@ -51,6 +51,7 @@ Optional:
 | `NEXT_PUBLIC_SITE_URL` | `https://shopprettyvicious.com` |
 | `SHOPIFY_STOREFRONT_API_VERSION` | pin the API version, defaults to `2026-04` |
 | `CLUB_SIGNUP_WEBHOOK_URL` | where club signups get POSTed |
+| `NEXT_PUBLIC_CF_BEACON_TOKEN` | Cloudflare Web Analytics token, see below |
 
 Or from the CLI:
 
@@ -67,6 +68,22 @@ is a template in `.env.example`.
 `npm run pages:preview` runs the real Workers runtime, which reads `.dev.vars`
 rather than `.env.local`. Copy `.dev.vars.example` to `.dev.vars` (also
 gitignored) if you want products to show up in the preview.
+
+## Analytics
+
+Shopify's analytics only see checkout. To see the storefront itself, turn on
+Cloudflare Web Analytics: dashboard > Analytics & Logs > Web Analytics > Add
+a site, enter `shopprettyvicious.com`, and copy the token out of the snippet
+it offers (you do not need the snippet itself). Set that token as
+`NEXT_PUBLIC_CF_BEACON_TOKEN` and redeploy. It is free, sets no cookies, and
+needs no consent banner. Without the token the site renders no beacon at all.
+
+## Images
+
+Product images are resized by Shopify's CDN, not by Cloudflare. The custom
+loader in `image-loader.ts` appends a width to every `cdn.shopify.com` URL,
+so there is nothing to configure on the Cloudflare side and no image binding
+to add.
 
 ## Connecting the domain
 

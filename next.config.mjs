@@ -11,9 +11,9 @@ const devOrigins = (process.env.NEXT_DEV_ORIGINS ?? "")
 const nextConfig = {
   ...(devOrigins.length ? { allowedDevOrigins: devOrigins } : {}),
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "cdn.shopify.com", pathname: "/**" },
-    ],
+    // Shopify's CDN does the resizing. See image-loader.ts.
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
   },
 };
 
