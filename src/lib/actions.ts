@@ -130,7 +130,7 @@ export async function joinClubAction(
     const response = await fetch(webhook, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, source: "prettyvicious.com/#club" }),
+      body: JSON.stringify({ email, source: "shopprettyvicious.com/#club" }),
     });
     if (!response.ok) throw new Error(`Signup webhook responded ${response.status}`);
   } catch (error) {

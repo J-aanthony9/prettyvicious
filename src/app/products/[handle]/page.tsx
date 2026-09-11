@@ -65,16 +65,16 @@ export default async function ProductPage({ params }: Params) {
           <AddToCart product={product} />
 
           {/* Required fit note. Sits right by the size selector on purpose. */}
-          <div className="mt-12 border-l border-[color:var(--color-accent-deep)] bg-veil/50 p-6">
-            <h2 className="display text-[10px] tracking-[0.24em]">
+          <div className="mt-12 border-l border-[color:var(--color-accent-deep)] bg-veil p-6">
+            <h2 className="display text-[12px] tracking-[0.24em]">
               {FIT_NOTE.heading}
             </h2>
-            <p className="dim mt-4 text-[13px] leading-[1.85]">{FIT_NOTE.body}</p>
+            <p className="dim mt-4 text-[15px] leading-[1.85]">{FIT_NOTE.body}</p>
           </div>
 
           {product.descriptionHtml ? (
             <div
-              className="dim mt-12 text-[14px] leading-[1.85] [&_a]:underline [&_li]:ml-5 [&_li]:list-disc [&_p]:mb-4"
+              className="dim mt-12 text-[15px] leading-[1.85] [&_a]:underline [&_li]:ml-5 [&_li]:list-disc [&_p]:mb-4"
               dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
             />
           ) : null}
@@ -83,8 +83,8 @@ export default async function ProductPage({ params }: Params) {
 
           <div className="mt-8">
             <h2 className="eyebrow mb-4">Shipping and returns</h2>
-            <p className="dim text-[13px] leading-[1.85]">{PRODUCT_BLURB}</p>
-            <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[12px]">
+            <p className="dim text-[15px] leading-[1.85]">{PRODUCT_BLURB}</p>
+            <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[14px]">
               <Link href="/policies/shipping" className="link-quiet">
                 Shipping policy
               </Link>
@@ -95,7 +95,7 @@ export default async function ProductPage({ params }: Params) {
                 {BRAND.supportEmail}
               </a>
             </p>
-            <p className="mt-5 text-[11px] uppercase tracking-[0.24em] text-[color:var(--bone-faint)]">
+            <p className="mt-5 text-[13px] uppercase tracking-[0.24em] text-[color:var(--bone-faint)]">
               Ships within the {COMMERCE.shipsTo} only
             </p>
           </div>

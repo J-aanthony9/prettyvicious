@@ -39,7 +39,7 @@ export default async function CollectionPage({ params }: Params) {
 
       {collection?.description ? (
         <Reveal delay={100}>
-          <p className="dim mx-auto mt-10 max-w-xl text-center text-[14px] leading-[1.85]">
+          <p className="dim mx-auto mt-10 max-w-xl text-center text-[15px] leading-[1.85]">
             {collection.description}
           </p>
         </Reveal>

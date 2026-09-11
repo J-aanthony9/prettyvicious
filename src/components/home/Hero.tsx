@@ -3,50 +3,53 @@ import { BRAND, DROPS } from "@/lib/brand";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="haze" aria-hidden="true" />
+    <section aria-label="Introduction" className="hero relative flex min-h-[92vh] flex-col items-center justify-center overflow-hidden px-[clamp(20px,4vw,48px)] pb-[120px] pt-24 text-center">
+      <svg
+        className="hero-star"
+        viewBox="0 0 400 400"
+        fill="none"
+        aria-hidden="true"
+      >
+        <g stroke="#E9DFCE" strokeWidth="0.7">
+          <path d="M200 8 L212 188 L392 200 L212 212 L200 392 L188 212 L8 200 L188 188 Z" />
+          <path d="M200 60 L208 192 L340 200 L208 208 L200 340 L192 208 L60 200 L192 192 Z" />
+          <circle cx="200" cy="200" r="150" strokeDasharray="1 7" />
+          <circle cx="200" cy="200" r="192" strokeDasharray="1 10" opacity=".6" />
+        </g>
+      </svg>
 
-      <div className="relative mx-auto flex min-h-[88vh] max-w-4xl flex-col items-center justify-center px-5 py-28 text-center sm:px-8">
-        <p className="eyebrow">
-          {BRAND.subLabel} · Est. {BRAND.established}
-        </p>
+      <p className="eyebrow relative mb-7">
+        {BRAND.subLabel} ✦ Est. {BRAND.established}
+      </p>
 
-        <h1 className="mt-10 flex flex-col items-center gap-4">
-          <span className="display text-[clamp(2.4rem,9vw,5.2rem)]">We Wear It</span>
-          <span className="flex items-center gap-5 sm:gap-8">
-            <span
-              aria-hidden="true"
-              className="text-[clamp(0.7rem,2vw,1.1rem)] text-accent"
-            >
-              ✦
-            </span>
-            <span className="gothic distress text-[clamp(3.6rem,15vw,9rem)] leading-[0.85] text-bone">
-              Dark
-            </span>
-            <span
-              aria-hidden="true"
-              className="text-[clamp(0.7rem,2vw,1.1rem)] text-accent"
-            >
-              ✦
-            </span>
+      <h1 className="hero-title relative">
+        We Wear It
+        <span className="hero-dark">
+          <span aria-hidden="true" className="hero-star-glyph">
+            ✦
           </span>
-        </h1>
+          <span className="distress">Dark</span>
+          <span aria-hidden="true" className="hero-star-glyph">
+            ✦
+          </span>
+        </span>
+      </h1>
 
-        <p className="dim mt-10 max-w-md text-[15px] leading-relaxed">
-          {BRAND.positioning} {BRAND.tagline}.
-        </p>
+      <p className="dim relative mx-auto mb-10 mt-8 max-w-[520px] text-[16px] font-medium">
+        {BRAND.positioning} Drop {DROPS.current.number} is dedicated to the
+        beauty professionals.
+      </p>
 
-        <div className="mt-12 flex flex-col gap-4 sm:flex-row">
-          <Link
-            href={`/collections/${DROPS.current.handle}`}
-            className="btn btn-solid"
-          >
-            Shop Drop {DROPS.current.number}
-          </Link>
-          <Link href="/story" className="btn">
-            Read the story
-          </Link>
-        </div>
+      <div className="relative flex flex-wrap justify-center gap-3.5">
+        <Link
+          href={`/collections/${DROPS.current.handle}`}
+          className="btn btn-solid"
+        >
+          Shop the drop
+        </Link>
+        <Link href="/#club" className="btn">
+          Join the club
+        </Link>
       </div>
     </section>
   );

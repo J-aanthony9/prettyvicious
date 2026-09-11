@@ -11,19 +11,20 @@ export const BRAND = {
   tagline: "Beauty is an art",
   positioning: "Alternative apparel for artists.",
   ownerInitials: "MM",
-  supportEmail: "support@prettyvicious.com",
+  supportEmail: "support@shopprettyvicious.com",
   replyWindow: "1 to 2 business days",
 } as const;
 
 export const COMMERCE = {
-  freeShippingThreshold: 68,
   shipsTo: "United States",
   productionWindow: "about 7 to 11 business days",
   claimWindowDays: 5,
+  /** Launch promo. Free on every US order, no minimum, so nothing anywhere
+   *  should quote a spend threshold. */
+  freeShipping: "Free shipping on all U.S. orders, for a limited time.",
 } as const;
 
-export const ANNOUNCEMENT =
-  "Free U.S. shipping over $68 ✦ Drop 002 · All Hallows · coming soon";
+export const ANNOUNCEMENT = "Launch offer · Free U.S. shipping";
 
 export const DROPS = {
   current: {
@@ -39,7 +40,7 @@ export const DROPS = {
 
 /** Product page blurb, sits near add to cart. */
 export const PRODUCT_BLURB =
-  "Made to order and printed in the USA. Ships in about 7 to 11 business days. Free U.S. shipping over $68. All sales final, but if it arrives damaged or misprinted we'll replace it, just send a photo within 5 days. Questions? support@prettyvicious.com.";
+  "Made to order and printed in the USA. Ships in about 7 to 11 business days. Free shipping on all U.S. orders, for a limited time. All sales final, but if it arrives damaged or misprinted we'll replace it, just send a photo within 5 days. Questions? support@shopprettyvicious.com.";
 
 /** Required fit note. The top refund preventer, keep it visible. */
 export const FIT_NOTE = {
@@ -62,8 +63,8 @@ export const PERKS = [
     body: "Heavyweight cotton with a substantial hand. It holds its shape, and the print sits in the fabric instead of on top of it.",
   },
   {
-    title: "Free Shipping Over $68",
-    body: "Two pieces gets you there. U.S. orders only for now, tracking sent the moment it moves.",
+    title: "Free U.S. Shipping",
+    body: "Free shipping on all U.S. orders, for a limited time. Tracking sent the moment it moves.",
   },
 ] as const;
 

@@ -2,10 +2,8 @@ import { ANNOUNCEMENT } from "@/lib/brand";
 
 export default function AnnouncementBar() {
   return (
-    <div className="relative z-30 border-b border-[color:var(--hairline-soft)] bg-wine/70">
-      <p className="mx-auto max-w-7xl px-5 py-2.5 text-center text-[9px] uppercase tracking-[0.34em] text-[color:var(--bone-dim)] sm:text-[10px]">
-        {ANNOUNCEMENT}
-      </p>
+    <div className="relative z-40 bg-accent px-4 py-2.5 text-center text-[11px] font-bold uppercase leading-normal tracking-[0.22em] text-[#171012]">
+      {ANNOUNCEMENT}
     </div>
   );
 }

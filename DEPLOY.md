@@ -48,7 +48,7 @@ Optional:
 
 | Name | Value |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | `https://prettyvicious.com` |
+| `NEXT_PUBLIC_SITE_URL` | `https://shopprettyvicious.com` |
 | `SHOPIFY_STOREFRONT_API_VERSION` | pin the API version, defaults to `2026-04` |
 | `CLUB_SIGNUP_WEBHOOK_URL` | where club signups get POSTed |
 
@@ -74,13 +74,13 @@ Cloudflare already controls DNS for the domain, so this is nearly automatic.
 
 1. **Workers and Pages > prettyvicious > Settings > Domains and Routes**.
 2. **Add > Custom domain**.
-3. Enter `prettyvicious.com`, then repeat for `www.prettyvicious.com`.
+3. Enter `shopprettyvicious.com`, then repeat for `www.shopprettyvicious.com`.
 4. Cloudflare writes the DNS records itself. Certificates issue in a few
    minutes.
 
 The MX records for email routing and the site records live on the same domain
 without conflicting. MX handles mail, the site records handle web traffic.
-Adding the site does not disturb `support@prettyvicious.com` forwarding.
+Adding the site does not disturb `support@shopprettyvicious.com` forwarding.
 
 ## Verify after deploying
 
