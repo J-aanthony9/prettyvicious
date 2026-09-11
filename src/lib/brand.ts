@@ -49,7 +49,7 @@ export const FIT_NOTE = {
 } as const;
 
 export const CLUB = {
-  line: "Stay connected to everything Pretty Vicious. First looks, new drops, and 10% off your first order.",
+  line: "Stay connected to everything Pretty Vicious. First looks, new drops, and whatever we cook up next.",
   success: "You're in. Watch your inbox, it gets dark in there. ✦",
 } as const;
 

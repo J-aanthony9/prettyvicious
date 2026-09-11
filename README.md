@@ -128,7 +128,8 @@ These are yours, and none of them block anything above.
 - **Club signups currently go nowhere.** The form validates and shows the
   success line, but without `CLUB_SIGNUP_WEBHOOK_URL` set, addresses are only
   written to the server log. Point it at Klaviyo, Mailchimp, Beehiiv, or a
-  Zapier catch hook before promising anyone 10% off.
+  Zapier catch hook before the club copy offers anything concrete. The copy
+  deliberately promises nothing specific until then.
 - **Diary the Shopify promo renewal date** so the $1/mo to $39/mo jump is not
   a surprise.
 
