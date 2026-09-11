@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useCartDrawer } from "@/components/cart/CartDrawerProvider";
+import { useScrollLock } from "@/lib/use-scroll-lock";
 import { Wordmark } from "@/components/Wordmark";
 import { DROPS } from "@/lib/brand";
 
@@ -15,15 +17,12 @@ const LINKS = [
 const NAV_ITEM =
   "text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--bone-dim)] transition-colors duration-300 hover:text-bone";
 
-export default function Nav({ cartCount }: { cartCount: number }) {
+export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { cart, openDrawer } = useCartDrawer();
+  const cartCount = cart?.totalQuantity ?? 0;
 
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen]);
+  useScrollLock(menuOpen);
 
   return (
     <>
@@ -58,9 +57,17 @@ export default function Nav({ cartCount }: { cartCount: number }) {
               {link.label}
             </Link>
           ))}
-          <Link href="/cart" className={NAV_ITEM}>
+          {/* Opens the drawer when JS is up; a plain link to the bag page otherwise. */}
+          <a
+            href="/cart"
+            className={NAV_ITEM}
+            onClick={(event) => {
+              event.preventDefault();
+              openDrawer();
+            }}
+          >
             Bag ({cartCount})
-          </Link>
+          </a>
         </div>
       </header>
 
