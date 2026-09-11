@@ -40,8 +40,8 @@ follow **[DEPLOY.md](./DEPLOY.md)**.
 | `npm run dev` | Local dev server |
 | `npm run build` | Production Next build |
 | `npm run typecheck` | TypeScript, no emit |
-| `npm run pages:preview` | Build and serve in the real Cloudflare runtime |
-| `npm run pages:deploy` | Build and deploy to Cloudflare |
+| `npm run cf:preview` | Build and serve in the real Cloudflare runtime |
+| `npm run cf:deploy` | Build and deploy to Cloudflare |
 
 ## Layout
 
