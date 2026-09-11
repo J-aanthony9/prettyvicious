@@ -32,7 +32,7 @@ export default function Hero() {
           </span>
         </h1>
 
-        <p className="dim mt-10 max-w-md text-[15px] leading-relaxed">
+        <p className="dim mt-10 max-w-md text-[16px] leading-relaxed">
           {BRAND.positioning} {BRAND.tagline}.
         </p>
 

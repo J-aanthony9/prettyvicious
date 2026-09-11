@@ -16,7 +16,7 @@ export default function Gallery({
 
   if (!current) {
     return (
-      <div className="flex aspect-[4/5] items-center justify-center border border-dashed border-[color:var(--hairline)] bg-veil/40 text-accent">
+      <div className="flex aspect-[4/5] items-center justify-center border border-dashed border-[color:var(--hairline)] bg-veil text-accent">
         ✦
       </div>
     );

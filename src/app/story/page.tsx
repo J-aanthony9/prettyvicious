@@ -12,21 +12,10 @@ export default function StoryPage() {
   return (
     <PageShell eyebrow="The origin" title="It Started Behind the Chair.">
       <p>
-        Pretty Vicious was built by someone who spent years behind the chair.
-        Long days, tired hands, and a client in front of you who leaves feeling
-        like a different person. That work is art. It just never got dressed like
-        it.
-      </p>
-      <p>
-        So we made something for the people doing it. Not a uniform, and not a
-        novelty tee with a cute pun on the front. Pieces with weight, cut
-        relaxed, printed dark, made for the walk in and the walk out.
-      </p>
-      <p>
-        Drop {DROPS.current.number} is the {DROPS.current.title}, for the lash
-        artists, the nail techs, and the stylists. But the club was never meant
-        to stop at one room. If you make something with your hands and you take
-        it seriously, you already belong here.
+        Pretty Vicious was born in the world where beauty actually gets made:
+        the suites, the studios, the after-hours appointments. Drop{" "}
+        {DROPS.current.number} is for the professionals. The brand doesn&apos;t
+        stop there.
       </p>
       <p>Tees today, more to come as the club grows.</p>
 

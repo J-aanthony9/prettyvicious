@@ -25,12 +25,12 @@ export default function ClubSignup() {
         <h2 className="display mt-6 text-[clamp(1.35rem,3.6vw,2.1rem)]">
           Join the club
         </h2>
-        <p className="dim mx-auto mt-7 max-w-md text-[14px] leading-[1.85]">
+        <p className="dim mx-auto mt-7 max-w-md text-[15px] leading-[1.85]">
           {CLUB.line}
         </p>
 
         {state.ok ? (
-          <p className="display mt-12 text-[12px] leading-[2] text-accent" role="status">
+          <p className="display mt-12 text-[14px] leading-[2] text-accent" role="status">
             {state.message}
           </p>
         ) : (
@@ -64,7 +64,7 @@ export default function ClubSignup() {
         )}
 
         {!state.ok && state.message ? (
-          <p className="mt-5 text-[12px] text-accent" role="alert">
+          <p className="mt-5 text-[14px] text-accent" role="alert">
             {state.message}
           </p>
         ) : null}

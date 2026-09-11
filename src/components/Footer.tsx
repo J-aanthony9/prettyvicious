@@ -4,14 +4,14 @@ import { BRAND, FOOTER_LINKS } from "@/lib/brand";
 
 export default function Footer() {
   return (
-    <footer className="relative z-10 mt-32 overflow-hidden border-t border-[color:var(--hairline)] bg-veil-deep/70">
+    <footer className="relative z-10 mt-32 overflow-hidden border-t border-[color:var(--hairline)] bg-veil-deep">
       <div className="underglow" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-7xl px-5 pb-14 pt-20 sm:px-8">
         <div className="grid gap-14 md:grid-cols-[1.2fr_2fr]">
           <div>
             <Lockup className="items-start" />
-            <p className="dim mt-7 max-w-xs text-[13px]">
+            <p className="dim mt-7 max-w-xs text-[15px]">
               {BRAND.subLabel}. Made to order, printed and shipped in the USA.
             </p>
             <p className="eyebrow mt-7">Established {BRAND.established}</p>
@@ -25,11 +25,11 @@ export default function Footer() {
                   {column.links.map((link) => (
                     <li key={link.label}>
                       {link.href ? (
-                        <Link href={link.href} className="link-quiet text-[13px]">
+                        <Link href={link.href} className="link-quiet text-[15px]">
                           {link.label}
                         </Link>
                       ) : (
-                        <span className="text-[13px] text-[color:var(--bone-faint)]">
+                        <span className="text-[15px] text-[color:var(--bone-faint)]">
                           {link.label}
                         </span>
                       )}
@@ -43,7 +43,7 @@ export default function Footer() {
 
         <div className="rule mt-16" />
 
-        <div className="mt-8 flex flex-col gap-5 text-[11px] text-[color:var(--bone-faint)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-5 text-[13px] text-[color:var(--bone-faint)] sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {BRAND.establishedYear} {BRAND.name}. All rights reserved.
           </p>

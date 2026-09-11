@@ -22,7 +22,7 @@ export default async function CartPage() {
     return (
       <div className="mx-auto max-w-2xl px-5 py-28 text-center sm:px-8 sm:py-36">
         <SectionHead eyebrow="Your bag" title="Nothing in here yet" />
-        <p className="dim mt-10 text-[14px]">
+        <p className="dim mt-10 text-[15px]">
           Drop {DROPS.current.number} is waiting.
         </p>
         <div className="mt-10">
@@ -33,9 +33,6 @@ export default async function CartPage() {
       </div>
     );
   }
-
-  const subtotal = Number(cart!.cost.subtotalAmount.amount);
-  const remaining = COMMERCE.freeShippingThreshold - subtotal;
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8 sm:py-28">
@@ -72,11 +69,11 @@ export default async function CartPage() {
                 <div>
                   <Link
                     href={`/products/${line.merchandise.product.handle}`}
-                    className="display text-[11px] tracking-[0.22em]"
+                    className="display text-[12px] tracking-[0.22em]"
                   >
                     {line.merchandise.product.title}
                   </Link>
-                  <p className="dim mt-2 text-[12px]">
+                  <p className="dim mt-2 text-[14px]">
                     {line.merchandise.selectedOptions
                       .map((option) => `${option.name}: ${option.value}`)
                       .join(" · ")}
@@ -91,12 +88,12 @@ export default async function CartPage() {
                       <button
                         type="submit"
                         aria-label="Decrease quantity"
-                        className="px-3.5 py-2 text-[12px] text-[color:var(--bone-dim)] hover:text-bone"
+                        className="px-3.5 py-2 text-[14px] text-[color:var(--bone-dim)] hover:text-bone"
                       >
                         &minus;
                       </button>
                     </form>
-                    <span className="min-w-8 text-center text-[12px]">
+                    <span className="min-w-8 text-center text-[14px]">
                       {line.quantity}
                     </span>
                     <form action={updateItemAction}>
@@ -105,7 +102,7 @@ export default async function CartPage() {
                       <button
                         type="submit"
                         aria-label="Increase quantity"
-                        className="px-3.5 py-2 text-[12px] text-[color:var(--bone-dim)] hover:text-bone"
+                        className="px-3.5 py-2 text-[14px] text-[color:var(--bone-dim)] hover:text-bone"
                       >
                         +
                       </button>
@@ -116,7 +113,7 @@ export default async function CartPage() {
                     <input type="hidden" name="lineId" value={line.id} />
                     <button
                       type="submit"
-                      className="text-[10px] uppercase tracking-[0.26em] text-[color:var(--bone-faint)] hover:text-accent"
+                      className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--bone-faint)] hover:text-accent"
                     >
                       Remove
                     </button>
@@ -124,7 +121,7 @@ export default async function CartPage() {
                 </div>
               </div>
 
-              <p className="shrink-0 text-[13px] text-[color:var(--bone-dim)]">
+              <p className="shrink-0 text-[15px] text-[color:var(--bone-dim)]">
                 {formatMoney(line.cost.totalAmount)}
               </p>
             </li>
@@ -140,12 +137,10 @@ export default async function CartPage() {
           </span>
         </div>
 
-        <p className="dim mt-4 text-[12px] leading-[1.8]">
-          {remaining > 0
-            ? `${formatMoney({ amount: remaining.toFixed(2), currencyCode: cart!.cost.subtotalAmount.currencyCode })} away from free U.S. shipping.`
-            : "Free U.S. shipping unlocked. ✦"}
+        <p className="dim mt-4 text-[14px] leading-[1.8]">
+          {COMMERCE.freeShipping} ✦
         </p>
-        <p className="mt-2 text-[11px] text-[color:var(--bone-faint)]">
+        <p className="mt-2 text-[13px] text-[color:var(--bone-faint)]">
           Shipping and tax are calculated at checkout. We ship within the{" "}
           {COMMERCE.shipsTo} only.
         </p>
@@ -156,7 +151,7 @@ export default async function CartPage() {
           </button>
         </form>
 
-        <p className="mt-4 text-center text-[11px] text-[color:var(--bone-faint)]">
+        <p className="mt-4 text-center text-[13px] text-[color:var(--bone-faint)]">
           You finish on Shopify's secure checkout.
         </p>
       </div>

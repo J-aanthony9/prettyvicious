@@ -104,7 +104,7 @@ export default function AddToCart({ product }: { product: Product }) {
                     }
                     aria-pressed={isSelected}
                     title={available ? value : `${value} is sold out`}
-                    className={`min-w-[52px] border px-4 py-2.5 text-[10px] uppercase tracking-[0.22em] transition-colors duration-400 ${
+                    className={`min-w-[52px] border px-4 py-2.5 text-[11px] uppercase tracking-[0.22em] transition-colors duration-400 ${
                       isSelected
                         ? "border-[color:var(--color-accent)] bg-[rgba(166,110,122,0.14)] text-bone"
                         : "border-[color:var(--hairline)] text-[color:var(--bone-dim)] hover:border-[color:var(--color-accent-deep)]"
@@ -126,7 +126,7 @@ export default function AddToCart({ product }: { product: Product }) {
 
       {state.message ? (
         <p
-          className={`mt-5 text-[12px] ${state.ok ? "text-[color:var(--bone-dim)]" : "text-accent"}`}
+          className={`mt-5 text-[14px] ${state.ok ? "text-[color:var(--bone-dim)]" : "text-accent"}`}
           role="status"
         >
           {state.message}{" "}

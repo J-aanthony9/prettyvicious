@@ -33,7 +33,7 @@ export function Lockup({ className = "" }: { className?: string }) {
   return (
     <div className={`flex flex-col items-center gap-3 ${className}`}>
       <Wordmark tone="burgundy" className="text-[30px] sm:text-[38px]" />
-      <span className="display text-[9px] text-[color:var(--bone-faint)]">
+      <span className="display text-[12px] text-[color:var(--bone-faint)]">
         {BRAND.tagline}
       </span>
     </div>

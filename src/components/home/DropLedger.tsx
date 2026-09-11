@@ -7,11 +7,11 @@ import { DROPS } from "@/lib/brand";
  */
 export default function DropLedger() {
   return (
-    <section className="relative border-y border-[color:var(--hairline)] bg-veil/50">
+    <section className="relative border-y border-[color:var(--hairline)] bg-veil">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-4 px-5 py-6 text-center sm:flex-row sm:gap-8 sm:px-8">
         <Link
           href={`/collections/${DROPS.current.handle}`}
-          className="group flex items-center gap-3 text-[10px] uppercase tracking-[0.34em]"
+          className="group flex items-center gap-3 text-[11px] uppercase tracking-[0.34em]"
         >
           <span className="text-[color:var(--bone-faint)]">
             Drop {DROPS.current.number}
@@ -27,7 +27,7 @@ export default function DropLedger() {
           className="hidden h-3 w-px bg-[color:var(--hairline)] sm:block"
         />
 
-        <p className="flex items-center gap-3 text-[10px] uppercase tracking-[0.34em] text-[color:var(--bone-faint)]">
+        <p className="flex items-center gap-3 text-[11px] uppercase tracking-[0.34em] text-[color:var(--bone-faint)]">
           <span>Next</span>
           <span className="text-accent">✦</span>
           <span>{DROPS.next.title}</span>

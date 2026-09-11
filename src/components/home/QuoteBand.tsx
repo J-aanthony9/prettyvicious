@@ -2,7 +2,7 @@ import { BRAND } from "@/lib/brand";
 
 export default function QuoteBand() {
   return (
-    <section className="relative border-y border-[color:var(--hairline)] bg-wine/60">
+    <section className="relative border-y border-[color:var(--hairline)] bg-wine">
       <div className="mx-auto max-w-3xl px-5 py-24 text-center sm:px-8 sm:py-32">
         <blockquote className="display text-[clamp(1.25rem,4vw,2.15rem)] leading-[1.5]">
           {BRAND.tagline}. Art was never meant to be{" "}

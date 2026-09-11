@@ -37,7 +37,7 @@ export default function Nav({ cartCount }: { cartCount: number }) {
     <header
       className={`sticky top-0 z-50 border-b transition-colors duration-500 ${
         scrolled
-          ? "border-[color:var(--hairline)] bg-ink/88 backdrop-blur-md"
+          ? "border-[color:var(--hairline)] bg-ink/92 backdrop-blur-md"
           : "border-transparent bg-transparent"
       }`}
     >
@@ -48,7 +48,7 @@ export default function Nav({ cartCount }: { cartCount: number }) {
             <Link
               key={link.href}
               href={link.href}
-              className="link-quiet text-[10px] uppercase tracking-[0.3em]"
+              className="link-quiet text-[11px] uppercase tracking-[0.3em]"
             >
               {link.label}
             </Link>
@@ -58,7 +58,7 @@ export default function Nav({ cartCount }: { cartCount: number }) {
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
-          className="justify-self-start text-[10px] uppercase tracking-[0.3em] text-[color:var(--bone-dim)] md:hidden"
+          className="justify-self-start text-[11px] uppercase tracking-[0.3em] text-[color:var(--bone-dim)] md:hidden"
           aria-label="Open menu"
           aria-expanded={menuOpen}
         >
@@ -76,14 +76,14 @@ export default function Nav({ cartCount }: { cartCount: number }) {
             <Link
               key={link.href}
               href={link.href}
-              className="link-quiet hidden text-[10px] uppercase tracking-[0.3em] md:inline-block"
+              className="link-quiet hidden text-[11px] uppercase tracking-[0.3em] md:inline-block"
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/cart"
-            className="link-quiet text-[10px] uppercase tracking-[0.3em]"
+            className="link-quiet text-[11px] uppercase tracking-[0.3em]"
           >
             Bag{cartCount > 0 ? ` (${cartCount})` : ""}
           </Link>
@@ -91,13 +91,13 @@ export default function Nav({ cartCount }: { cartCount: number }) {
       </nav>
 
       {menuOpen ? (
-        <div className="fixed inset-0 z-[70] bg-ink/97 backdrop-blur-sm md:hidden">
+        <div className="fixed inset-0 z-[70] bg-ink backdrop-blur-sm md:hidden">
           <div className="flex items-center justify-between px-5 py-4">
             <Wordmark className="text-[22px]" />
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
-              className="text-[10px] uppercase tracking-[0.3em] text-[color:var(--bone-dim)]"
+              className="text-[11px] uppercase tracking-[0.3em] text-[color:var(--bone-dim)]"
               aria-label="Close menu"
             >
               Close

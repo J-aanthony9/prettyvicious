@@ -115,10 +115,14 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   shipping zone covering the United States and give it at least one rate.
   This is not optional. **A store with no shipping rate for the customer's
   country breaks checkout**, and the error message Shopify shows is vague.
-- **Free shipping over $68.** In that same US zone, add a second rate,
-  condition "based on order price", minimum `$68.00`, price `$0.00`.
-  The roughly $5 Tapstitch shipping cost comes out of margin. That is
-  expected and already priced in.
+- **Free shipping on everything, no minimum.** Shipping is a launch promo
+  right now, so that US zone needs exactly one rate, priced `$0.00`, with no
+  order-value condition on it. Do not add a "spend this much" threshold rate.
+  The site says free shipping on all U.S. orders with no minimum anywhere, so
+  a threshold in Shopify would contradict it at checkout. The roughly $5
+  Tapstitch shipping cost comes out of margin. That is expected.
+  When the promo ends, change the rate here and the wording in
+  `src/lib/brand.ts` (`COMMERCE.freeShipping` and `ANNOUNCEMENT`) together.
 - **United States only.** Do not add international shipping zones yet. No
   zone means no checkout for that country, which is what we want at launch.
 - **Policies.** Settings > Policies. The copy for the refund and shipping
@@ -127,7 +131,7 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   the buttons to generate the starter **Privacy Policy** and **Terms of
   Service**. Payment providers expect those to exist.
 - **Customer email.** Settings > Notifications. Set the sender to
-  `support@prettyvicious.com` once Cloudflare email routing is live.
+  `support@shopprettyvicious.com` once Cloudflare email routing is live.
 
 ---
 
