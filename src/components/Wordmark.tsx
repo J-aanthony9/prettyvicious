@@ -14,6 +14,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
       src={wordmark}
       alt={BRAND.name}
       priority
+      unoptimized
       className={`h-[30px] w-auto ${className}`}
     />
   );
@@ -24,6 +25,7 @@ export function Lockup({ className = "" }: { className?: string }) {
     <Image
       src={lockup}
       alt={`${BRAND.name}. ${BRAND.tagline}`}
+      unoptimized
       className={`h-auto w-[min(230px,60%)] ${className}`}
     />
   );
