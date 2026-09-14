@@ -302,6 +302,32 @@ body {
   width: 100%;
 }
 
+/* Touch devices never fire hover, so the growing underline never appears and
+   these links read as plain text. On those devices the underline is simply
+   always there, at a lower opacity so it stays quiet rather than shouting,
+   and the colour is lifted to full bone so the link separates from body copy.
+   Desktop is untouched: it keeps the animation. */
+@media (hover: none) {
+  .link-quiet {
+    color: var(--color-bone);
+  }
+
+  .link-quiet::after {
+    width: 100%;
+    opacity: 0.45;
+    transition: none;
+  }
+
+  /* A pressed state, since there is no hover to acknowledge the tap. */
+  .link-quiet:active {
+    color: var(--color-accent);
+  }
+
+  .link-quiet:active::after {
+    opacity: 1;
+  }
+}
+
 /* --------------------------------------------------------------------------
    Motion preferences
    Everything above degrades to a still, readable page.

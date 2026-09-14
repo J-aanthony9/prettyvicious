@@ -24,7 +24,7 @@ export default function Footer() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="block py-[5px] text-[14px] text-[color:var(--bone-dim)] transition-colors duration-300 hover:text-accent"
+                    className="link-quiet inline-block py-[5px] text-[14px]"
                   >
                     {link.label}
                   </Link>
@@ -46,13 +46,13 @@ export default function Footer() {
             © {BRAND.established} {BRAND.name}. {BRAND.tagline}.
           </span>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <Link href="/policies/shipping" className="transition-colors duration-300 hover:text-accent">
+            <Link href="/policies/shipping" className="link-quiet">
               Shipping policy
             </Link>
-            <Link href="/policies/refunds" className="transition-colors duration-300 hover:text-accent">
+            <Link href="/policies/refunds" className="link-quiet">
               Refund policy
             </Link>
-            <a href={`mailto:${BRAND.supportEmail}`} className="transition-colors duration-300 hover:text-accent">
+            <a href={`mailto:${BRAND.supportEmail}`} className="link-quiet">
               {BRAND.supportEmail}
             </a>
           </div>

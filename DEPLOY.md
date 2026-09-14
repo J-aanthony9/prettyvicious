@@ -143,7 +143,9 @@ cart is misconfigured.
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Secret | Required |
 | `NEXT_PUBLIC_SITE_URL` | Variable | Canonical and share URLs |
 | `SHOPIFY_STOREFRONT_API_VERSION` | Variable | Pins the API version, defaults to `2026-04` |
-| `CLUB_SIGNUP_WEBHOOK_URL` | Secret | Where club signups POST. Unset means they only reach the log |
+| `KLAVIYO_PRIVATE_API_KEY` | Secret | Sends club signups to Klaviyo. Starts with `pk_` |
+| `KLAVIYO_LIST_ID` | Variable | The list signups join |
+| `CLUB_SIGNUP_WEBHOOK_URL` | Secret | Fallback for non Klaviyo tools. Ignored when the two above are set |
 | `NEXT_PUBLIC_CF_BEACON_TOKEN` | Variable | Cloudflare Web Analytics, see below |
 
 For local development the same values go in `.env.local` (gitignored). There

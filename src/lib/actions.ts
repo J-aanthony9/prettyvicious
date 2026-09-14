@@ -10,6 +10,7 @@ import {
 } from "@/lib/shopify";
 import { clearCartId, readCart, readCartId, writeCartId } from "@/lib/cart-session";
 import { CLUB } from "@/lib/brand";
+import { isKlaviyoConfigured, subscribeToKlaviyo } from "@/lib/klaviyo";
 import type { ActionState } from "@/lib/action-state";
 
 /* -------------------------------------------------------------------------
@@ -119,20 +120,29 @@ export async function joinClubAction(
     return { ok: false, message: "That address doesn't look right." };
   }
 
+  const source = "shopprettyvicious.com/#club";
   const webhook = process.env.CLUB_SIGNUP_WEBHOOK_URL;
-  if (!webhook) {
+
+  // Klaviyo first when it is configured, because it is the real list. The
+  // generic webhook stays as an escape hatch for any tool that does accept a
+  // plain {email, source} POST (a Zapier or Make catch hook, for instance).
+  if (!isKlaviyoConfigured() && !webhook) {
     // No list connected yet. Recorded in the logs so nothing is silently lost.
     console.info("[club:signup]", email);
     return { ok: true, message: CLUB.success };
   }
 
   try {
-    const response = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, source: "shopprettyvicious.com/#club" }),
-    });
-    if (!response.ok) throw new Error(`Signup webhook responded ${response.status}`);
+    if (isKlaviyoConfigured()) {
+      await subscribeToKlaviyo(email, source);
+    } else if (webhook) {
+      const response = await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source }),
+      });
+      if (!response.ok) throw new Error(`Signup webhook responded ${response.status}`);
+    }
   } catch (error) {
     console.error("[club:signup]", error);
     return { ok: false, message: "Something went wrong. Try again in a moment." };
