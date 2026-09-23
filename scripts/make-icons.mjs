@@ -14,6 +14,7 @@
  */
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 const ORIGIN = process.env.ICON_ORIGIN ?? "http://localhost:3000";
 const CHROME = process.env.CHROME_PATH ?? undefined;
@@ -23,6 +24,43 @@ const BONE = "#E9DFCE";
 const ACCENT = "#A66E7A";
 
 const SIZES = [16, 32, 48, 96, 180, 192, 512];
+
+// Two tiers. The full emblem is too detailed to read in a browser tab, so the
+// tab sizes keep the PV monogram and the emblem is used only where there is
+// room for it: the iOS home screen (180) and Android (192, 512). Until
+// public/brand/emblem.png exists, every size falls back to the monogram.
+const EMBLEM = "public/brand/emblem.png";
+const hasEmblem = existsSync(EMBLEM);
+const EMBLEM_SIZES = new Set([180, 192, 512]);
+
+console.log(
+  hasEmblem
+    ? "  using public/brand/emblem.png for 180, 192 and 512"
+    : "  public/brand/emblem.png not found, monogram at every size",
+);
+
+/**
+ * The emblem on the ink field. `scale` is the share of the tile it fills.
+ * Android masks icons marked maskable to a circle that can cut into the outer
+ * 20%, so the maskable render passes a smaller scale to keep the ring whole.
+ */
+function emblemMarkup(size, scale) {
+  const box = Math.round(size * scale);
+  return `
+    <div id="tile" style="
+      position:fixed; left:0; top:0; width:${size}px; height:${size}px;
+      overflow:hidden; background:${INK};
+      display:flex; align-items:center; justify-content:center;
+    ">
+      <div style="
+        position:absolute; inset:0; pointer-events:none;
+        background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(166,110,122,.18), transparent 70%);
+      "></div>
+      <img src="/brand/emblem.png" style="
+        position:relative; width:${box}px; height:${box}px; object-fit:contain; display:block;
+      " />
+    </div>`;
+}
 
 /**
  * One tile. Proportions are expressed as fractions of the size so every
@@ -96,21 +134,40 @@ await page.waitForFunction(() => document.fonts.status === "loaded");
 
 await mkdir("public/icons", { recursive: true });
 
-for (const size of SIZES) {
+async function render(size, html, name) {
   await page.setViewportSize({ width: size, height: size });
   await page.evaluate((html) => {
     document.body.innerHTML = html;
     document.documentElement.style.overflow = "hidden";
     document.body.style.margin = "0";
-  }, markup(size));
+  }, html);
+  // Wait for the emblem to decode, or the tile renders empty.
+  await page.waitForFunction(() => {
+    const img = document.querySelector("#tile img");
+    return !img || (img.complete && img.naturalWidth > 0);
+  });
   await page.waitForTimeout(120);
   // omitBackground keeps the alpha channel. Chromium drops it when every
   // pixel is opaque, and Next's favicon.ico parser rejects non RGBA PNGs.
   await page
     .locator("#tile")
-    .screenshot({ path: `public/icons/icon-${size}.png`, omitBackground: true });
-  console.log(`  icon-${size}.png`);
+    .screenshot({ path: `public/icons/${name}`, omitBackground: true });
+  console.log(`  ${name}`);
 }
+
+for (const size of SIZES) {
+  const html =
+    hasEmblem && EMBLEM_SIZES.has(size) ? emblemMarkup(size, 0.86) : markup(size);
+  await render(size, html, `icon-${size}.png`);
+}
+
+// The maskable variant for Android. The monogram already sits well inside
+// the safe zone, so without the emblem it is the same drawing as icon-512.
+await render(
+  512,
+  hasEmblem ? emblemMarkup(512, 0.7) : markup(512),
+  "icon-maskable-512.png",
+);
 
 await browser.close();
 
