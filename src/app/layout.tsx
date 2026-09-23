@@ -32,6 +32,9 @@ const manrope = Manrope({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://shopprettyvicious.com";
 
+/** The 1200x630 share card. Regenerate with scripts/make-og.mjs. */
+const SHARE_IMAGE = "/og.png";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -45,6 +48,26 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: BRAND.name,
     type: "website",
+    // Absolute, because Slack, iMessage and the rest will not resolve a
+    // relative path. metadataBase would make it absolute anyway, but spelling
+    // it out means a misconfigured NEXT_PUBLIC_SITE_URL fails loudly instead
+    // of silently emitting a localhost URL into a share card.
+    images: [
+      {
+        url: `${siteUrl}${SHARE_IMAGE}`,
+        width: 1200,
+        height: 630,
+        alt: `${BRAND.name}. ${BRAND.tagline}.`,
+      },
+    ],
+  },
+  twitter: {
+    // summary_large_image gives the full width card. Plain "summary" is the
+    // small square thumbnail, which is what a 1200x630 graphic gets wasted on.
+    card: "summary_large_image",
+    title: `${BRAND.name} · ${BRAND.subLabel}`,
+    description: `${BRAND.positioning} ${BRAND.tagline}.`,
+    images: [`${siteUrl}${SHARE_IMAGE}`],
   },
   robots: { index: true, follow: true },
 };
