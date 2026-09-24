@@ -64,7 +64,7 @@ export const ORIGIN = {
   headingLead: "Some Dreams Don't",
   headingAccent: "Wait",
   teaser:
-    "Pretty Vicious started in the last month of my pregnancy, and launched just one week after my baby boy was born. This is for the women behind the beauty, and anyone holding onto a dream.",
+    "Pretty Vicious started in the last month of my pregnancy, and launched just one week after my baby boy was born. This is for the artists behind the beauty, and anyone holding onto a dream.",
   signature: "Meghan Michelle",
 } as const;
 

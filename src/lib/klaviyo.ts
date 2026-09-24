@@ -31,13 +31,15 @@ export type KlaviyoConfig = {
 };
 
 export function getKlaviyoConfig(): KlaviyoConfig | null {
-  const apiKey = process.env.KLAVIYO_PRIVATE_API_KEY;
-  const listId = process.env.KLAVIYO_LIST_ID;
+  // Trimmed, because a secret pasted into the dashboard easily picks up a
+  // trailing space or newline, and Klaviyo then rejects the key or list id.
+  const apiKey = process.env.KLAVIYO_PRIVATE_API_KEY?.trim();
+  const listId = process.env.KLAVIYO_LIST_ID?.trim();
   if (!apiKey || !listId) return null;
   return {
     apiKey,
     listId,
-    revision: process.env.KLAVIYO_REVISION || DEFAULT_REVISION,
+    revision: process.env.KLAVIYO_REVISION?.trim() || DEFAULT_REVISION,
   };
 }
 
@@ -67,15 +69,19 @@ export async function subscribeToKlaviyo(
     data: {
       type: "profile-subscription-bulk-create-job",
       attributes: {
+        // Where the signup came from. It belongs here on the job, where
+        // Klaviyo stores it on the consent record. It cannot go on the
+        // profile: see below.
+        custom_source: source,
         profiles: {
           data: [
             {
+              // Only email and subscriptions here. This endpoint rejects the
+              // whole request if a profile carries anything else, custom
+              // properties included.
               type: "profile",
               attributes: {
                 email,
-                // Recorded on the profile so a Klaviyo segment can tell club
-                // signups apart from customers synced in from Shopify.
-                properties: { signup_source: source },
                 subscriptions: {
                   email: { marketing: { consent: "SUBSCRIBED" } },
                 },
