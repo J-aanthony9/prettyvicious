@@ -143,7 +143,7 @@ cart is misconfigured.
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Secret | Required |
 | `NEXT_PUBLIC_SITE_URL` | Variable | Canonical and share URLs |
 | `SHOPIFY_STOREFRONT_API_VERSION` | Variable | Pins the API version, defaults to `2026-04` |
-| `KLAVIYO_PRIVATE_API_KEY` | Secret | Sends club signups to Klaviyo. Starts with `pk_` |
+| `KLAVIYO_PRIVATE_API_KEY` | Secret | Sends club signups to Klaviyo. Starts with `pk_`. Needs Full Access on Lists, Profiles and Subscriptions |
 | `KLAVIYO_LIST_ID` | Variable | The list signups join |
 | `CLUB_SIGNUP_WEBHOOK_URL` | Secret | Fallback for non Klaviyo tools. Ignored when the two above are set |
 | `NEXT_PUBLIC_CF_BEACON_TOKEN` | Variable | Cloudflare Web Analytics, see below |
@@ -218,6 +218,14 @@ did not redeploy. See step 4.
 
 **Worker deploys but every route 500s.** Check `nodejs_compat` is still in
 `compatibility_flags`. Watch live logs with `npx wrangler tail`.
+
+**Club signup says "Something went wrong".** Klaviyo refused the request,
+and the reason is in the Worker's log. Run `npx wrangler tail`, submit the
+form again, and look for the `[club:signup]` line. `Klaviyo responded 401`
+is a wrong or public key (it must be the private `pk_` one). `403` is a key
+missing one of the Lists, Profiles or Subscriptions scopes. `404` or a
+message about the list is a wrong `KLAVIYO_LIST_ID`. After fixing a secret,
+redeploy.
 
 **Checkout lands on "Opening soon".** That is Shopify's storefront password,
 not this site. Online Store → Preferences → Password protection. See SETUP.md.

@@ -31,13 +31,15 @@ export type KlaviyoConfig = {
 };
 
 export function getKlaviyoConfig(): KlaviyoConfig | null {
-  const apiKey = process.env.KLAVIYO_PRIVATE_API_KEY;
-  const listId = process.env.KLAVIYO_LIST_ID;
+  // Trimmed, because a secret pasted into the dashboard easily picks up a
+  // trailing space or newline, and Klaviyo then rejects the key or list id.
+  const apiKey = process.env.KLAVIYO_PRIVATE_API_KEY?.trim();
+  const listId = process.env.KLAVIYO_LIST_ID?.trim();
   if (!apiKey || !listId) return null;
   return {
     apiKey,
     listId,
-    revision: process.env.KLAVIYO_REVISION || DEFAULT_REVISION,
+    revision: process.env.KLAVIYO_REVISION?.trim() || DEFAULT_REVISION,
   };
 }
 
@@ -56,10 +58,7 @@ export function isKlaviyoConfigured(): boolean {
  * Throws on failure so the caller can tell the visitor something went wrong
  * rather than silently dropping the address.
  */
-export async function subscribeToKlaviyo(
-  email: string,
-  source: string,
-): Promise<void> {
+export async function subscribeToKlaviyo(email: string): Promise<void> {
   const config = getKlaviyoConfig();
   if (!config) throw new Error("Klaviyo is not configured");
 
@@ -70,12 +69,13 @@ export async function subscribeToKlaviyo(
         profiles: {
           data: [
             {
+              // Only email and subscriptions here. This endpoint rejects the
+              // whole request if a profile carries anything else, custom
+              // properties included, so the list itself is what marks a
+              // club signup.
               type: "profile",
               attributes: {
                 email,
-                // Recorded on the profile so a Klaviyo segment can tell club
-                // signups apart from customers synced in from Shopify.
-                properties: { signup_source: source },
                 subscriptions: {
                   email: { marketing: { consent: "SUBSCRIBED" } },
                 },

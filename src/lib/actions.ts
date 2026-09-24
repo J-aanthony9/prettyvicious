@@ -134,7 +134,7 @@ export async function joinClubAction(
 
   try {
     if (isKlaviyoConfigured()) {
-      await subscribeToKlaviyo(email, source);
+      await subscribeToKlaviyo(email);
     } else if (webhook) {
       const response = await fetch(webhook, {
         method: "POST",
