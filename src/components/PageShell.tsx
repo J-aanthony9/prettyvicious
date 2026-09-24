@@ -6,7 +6,7 @@ export default function PageShell({
   children,
 }: {
   eyebrow?: string;
-  title: string;
+  title: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (

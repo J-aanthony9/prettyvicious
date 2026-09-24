@@ -1,5 +1,6 @@
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
-import { DROPS } from "@/lib/brand";
+import { ORIGIN } from "@/lib/brand";
 
 export default function Manifesto() {
   return (
@@ -10,11 +11,9 @@ export default function Manifesto() {
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-[clamp(32px,6vw,88px)] px-[clamp(20px,4vw,48px)] md:grid-cols-2">
         <Reveal>
           <h2 className="font-[family-name:var(--font-display)] text-[clamp(34px,4.6vw,56px)] font-medium uppercase leading-[1.08] tracking-[0.05em]">
-            It Started
-            <br />
-            Behind the{" "}
+            {ORIGIN.headingLead}{" "}
             <span className="gothic text-[1.08em] normal-case text-accent">
-              Chair
+              {ORIGIN.headingAccent}
             </span>
             .
           </h2>
@@ -25,16 +24,14 @@ export default function Manifesto() {
             aria-hidden="true"
             className="mb-1.5 block h-px w-[52px] bg-[color:var(--color-accent-deep)]"
           />
+          <p>{ORIGIN.teaser}</p>
           <p>
-            Pretty Vicious was born in the rooms where beauty really gets
-            made. The suites, the studios, the after-hours.
-          </p>
-          <p>
-            <strong className="font-semibold text-bone">
-              Drop {DROPS.current.number} is for the professionals. The brand
-              doesn&apos;t stop there.
-            </strong>{" "}
-            Tees today, more to come as the club grows.
+            <Link
+              href="/story"
+              className="link-quiet inline-block py-1 text-[12px] font-semibold uppercase tracking-[0.26em]"
+            >
+              Read my story
+            </Link>
           </p>
         </Reveal>
       </div>

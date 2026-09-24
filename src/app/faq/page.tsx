@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import { BRAND } from "@/lib/brand";
+import { BRAND, COMMERCE } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -15,6 +15,10 @@ const FAQS = [
   {
     q: "How long until it arrives?",
     a: "About 7 to 11 business days. Every piece is printed after you order it, so a few days go to production and a few to transit. Tracking is emailed the moment it ships.",
+  },
+  {
+    q: "Is shipping free?",
+    a: `On U.S. orders over $${COMMERCE.freeShippingThreshold}, yes. Below that, shipping is calculated at checkout before you pay.`,
   },
   {
     q: "Do you ship outside the US?",

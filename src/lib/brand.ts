@@ -15,16 +15,23 @@ export const BRAND = {
   replyWindow: "1 to 2 business days",
 } as const;
 
+/**
+ * U.S. orders at or above this subtotal (in dollars) ship free. The one place
+ * to change it. Shopify decides the real charge at checkout, so keep the free
+ * shipping rate in Settings > Shipping and delivery on the same number.
+ * Never quote a shipping price on the site, only this threshold.
+ */
+export const FREE_SHIPPING_THRESHOLD = 64;
+
 export const COMMERCE = {
   shipsTo: "United States",
   productionWindow: "about 7 to 11 business days",
   claimWindowDays: 5,
-  /** Launch promo. Free on every US order, no minimum, so nothing anywhere
-   *  should quote a spend threshold. */
-  freeShipping: "Free shipping on all U.S. orders, for a limited time.",
+  freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+  freeShipping: `Free shipping on U.S. orders over $${FREE_SHIPPING_THRESHOLD}.`,
 } as const;
 
-export const ANNOUNCEMENT = "Launch offer · Free U.S. shipping";
+export const ANNOUNCEMENT = `Free U.S. shipping on orders over $${FREE_SHIPPING_THRESHOLD}`;
 
 export const DROPS = {
   current: {
@@ -40,12 +47,25 @@ export const DROPS = {
 
 /** Product page blurb, sits near add to cart. */
 export const PRODUCT_BLURB =
-  "Made to order and printed in the USA. Ships in about 7 to 11 business days. Free shipping on all U.S. orders, for a limited time. All sales final, but if it arrives damaged or misprinted we'll replace it, just send a photo within 5 days. Questions? support@shopprettyvicious.com.";
+  `Made to order and printed in the USA. Ships in about 7 to 11 business days. Free shipping on U.S. orders over $${FREE_SHIPPING_THRESHOLD}. All sales final, but if it arrives damaged or misprinted we'll replace it, just send a photo within 5 days. Questions? support@shopprettyvicious.com.`;
 
 /** Required fit note. The top refund preventer, keep it visible. */
 export const FIT_NOTE = {
   heading: "Runs oversized. Wear it that way, or size down.",
   body: "These are heavyweight, relaxed streetwear cuts, so they wear big and boxy on purpose. The size chart shows flat, laid-flat measurements (the garment on a table), not body measurements. If you want the oversized look, take your usual size. If you want a closer fit, size down. Check the chart before you order, since made-to-order pieces can't be exchanged for fit.",
+} as const;
+
+/**
+ * The origin story. The heading is split so the last word can take the
+ * gothic accent. The full text lives on the story page, verbatim.
+ */
+export const ORIGIN = {
+  eyebrow: "The Origin",
+  headingLead: "Some Dreams Don't",
+  headingAccent: "Wait",
+  teaser:
+    "Pretty Vicious started in the last month of my pregnancy, and launched just one week after my baby boy was born. This is for the women behind the beauty, and anyone holding onto a dream.",
+  signature: "Meghan Michelle",
 } as const;
 
 export const CLUB = {
@@ -63,8 +83,8 @@ export const PERKS = [
     body: "Heavyweight cotton with a substantial hand. It holds its shape, and the print sits in the fabric instead of on top of it.",
   },
   {
-    title: "Free U.S. Shipping",
-    body: "Free shipping on all U.S. orders, for a limited time. Tracking sent the moment it moves.",
+    title: `Free Shipping Over $${FREE_SHIPPING_THRESHOLD}`,
+    body: `Orders over $${FREE_SHIPPING_THRESHOLD} ship free. Tracking sent the moment it moves.`,
   },
 ] as const;
 
