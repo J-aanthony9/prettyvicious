@@ -58,7 +58,10 @@ export function isKlaviyoConfigured(): boolean {
  * Throws on failure so the caller can tell the visitor something went wrong
  * rather than silently dropping the address.
  */
-export async function subscribeToKlaviyo(email: string): Promise<void> {
+export async function subscribeToKlaviyo(
+  email: string,
+  source: string,
+): Promise<void> {
   const config = getKlaviyoConfig();
   if (!config) throw new Error("Klaviyo is not configured");
 
@@ -66,13 +69,16 @@ export async function subscribeToKlaviyo(email: string): Promise<void> {
     data: {
       type: "profile-subscription-bulk-create-job",
       attributes: {
+        // Where the signup came from. It belongs here on the job, where
+        // Klaviyo stores it on the consent record. It cannot go on the
+        // profile: see below.
+        custom_source: source,
         profiles: {
           data: [
             {
               // Only email and subscriptions here. This endpoint rejects the
               // whole request if a profile carries anything else, custom
-              // properties included, so the list itself is what marks a
-              // club signup.
+              // properties included.
               type: "profile",
               attributes: {
                 email,

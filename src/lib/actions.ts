@@ -121,6 +121,8 @@ export async function joinClubAction(
   }
 
   const source = "shopprettyvicious.com/#club";
+  // Stored by Klaviyo on the consent record, so it reads as a label there.
+  const KLAVIYO_SOURCE = "Pretty Vicious site club form";
   const webhook = process.env.CLUB_SIGNUP_WEBHOOK_URL;
 
   // Klaviyo first when it is configured, because it is the real list. The
@@ -134,7 +136,7 @@ export async function joinClubAction(
 
   try {
     if (isKlaviyoConfigured()) {
-      await subscribeToKlaviyo(email);
+      await subscribeToKlaviyo(email, KLAVIYO_SOURCE);
     } else if (webhook) {
       const response = await fetch(webhook, {
         method: "POST",
