@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+import { COMMERCE } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "Shipping policy",
-  description:
-    "Made to order and shipped from the USA. Most orders arrive in about 7 to 11 business days. Free shipping on all U.S. orders, for a limited time.",
+  description: `Made to order and shipped from the USA. Most orders arrive in about 7 to 11 business days. ${COMMERCE.freeShipping}`,
 };
 
 export default function ShippingPolicyPage() {
@@ -19,8 +19,8 @@ export default function ShippingPolicyPage() {
         moment it&apos;s on the way.
       </p>
       <p>
-        Free shipping on all U.S. orders, for a limited time. We ship within
-        the United States only at this time.
+        {COMMERCE.freeShipping} Shipping for your order is calculated at
+        checkout. We ship within the United States only at this time.
       </p>
     </PageShell>
   );

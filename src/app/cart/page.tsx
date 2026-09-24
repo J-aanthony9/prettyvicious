@@ -6,8 +6,23 @@ import { readCart } from "@/lib/cart-session";
 import { checkoutAction, removeItemAction, updateItemAction } from "@/lib/actions";
 import { formatMoney } from "@/lib/money";
 import { COMMERCE, DROPS } from "@/lib/brand";
+import type { Money } from "@/lib/shopify/types";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Display only. Shopify applies the real shipping rate at checkout, so this
+ * mirrors the free shipping threshold without deciding anything. At or above
+ * the threshold counts as unlocked, matching a Shopify minimum order rule.
+ */
+function freeShippingNote(subtotal: Money): string {
+  const remaining = COMMERCE.freeShippingThreshold - Number(subtotal.amount);
+  if (!Number.isFinite(remaining) || remaining <= 0) {
+    return "You've unlocked free shipping.";
+  }
+  const away = formatMoney({ amount: remaining.toFixed(2), currencyCode: subtotal.currencyCode });
+  return `You're ${away} away from free shipping.`;
+}
 
 export const metadata: Metadata = {
   title: "Bag",
@@ -138,10 +153,10 @@ export default async function CartPage() {
         </div>
 
         <p className="dim mt-4 text-[14px] leading-[1.8]">
-          {COMMERCE.freeShipping} ✦
+          {freeShippingNote(cart!.cost.subtotalAmount)} ✦
         </p>
         <p className="mt-2 text-[13px] text-[color:var(--bone-faint)]">
-          Shipping and tax are calculated at checkout. We ship within the{" "}
+          Shipping and taxes calculated at checkout. We ship within the{" "}
           {COMMERCE.shipsTo} only.
         </p>
 

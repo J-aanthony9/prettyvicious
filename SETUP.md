@@ -148,14 +148,16 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   shipping zone covering the United States and give it at least one rate.
   This is not optional. **A store with no shipping rate for the customer's
   country breaks checkout**, and the error message Shopify shows is vague.
-- **Free shipping on everything, no minimum.** Shipping is a launch promo
-  right now, so that US zone needs exactly one rate, priced `$0.00`, with no
-  order-value condition on it. Do not add a "spend this much" threshold rate.
-  The site says free shipping on all U.S. orders with no minimum anywhere, so
-  a threshold in Shopify would contradict it at checkout. The roughly $5
-  Tapstitch shipping cost comes out of margin. That is expected.
-  When the promo ends, change the rate here and the wording in
-  `src/lib/brand.ts` (`COMMERCE.freeShipping` and `ANNOUNCEMENT`) together.
+- **Free shipping over $64.** The US zone needs two rates: a free `$0.00`
+  rate with the condition "based on order price", minimum `$64.00`, and a
+  paid rate for orders under that. The site only ever quotes the threshold,
+  never a shipping price, so the paid rate can be whatever you choose.
+  If you change the threshold, change it here and `FREE_SHIPPING_THRESHOLD`
+  in `src/lib/brand.ts` together. Every line of site copy, and the cart's
+  "away from free shipping" note, reads from that one value.
+- **Sales tax.** Settings > Taxes and duties. Shopify adds tax at checkout.
+  The bag says "Shipping and taxes calculated at checkout" so the subtotal is
+  not mistaken for the total.
 - **United States only.** Do not add international shipping zones yet. No
   zone means no checkout for that country, which is what we want at launch.
 - **Size option order.** Tapstitch can sync sizes into Shopify with S at the

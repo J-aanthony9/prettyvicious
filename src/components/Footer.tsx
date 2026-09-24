@@ -24,7 +24,7 @@ export default function Footer() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="link-quiet inline-block py-[5px] text-[14px]"
+                    className="link-quiet block w-fit py-[5px] text-[14px]"
                   >
                     {link.label}
                   </Link>
