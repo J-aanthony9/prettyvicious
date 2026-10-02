@@ -14,7 +14,7 @@ const FAQS = [
   },
   {
     q: "How long until it arrives?",
-    a: "About 7 to 11 business days. Every piece is printed after you order it, so a few days go to production and a few to transit. Tracking is emailed the moment it ships.",
+    a: "Every piece is made to order after you buy it, so it takes a little longer than off the shelf. Tracking is emailed the moment it ships.",
   },
   {
     q: "Is shipping free?",

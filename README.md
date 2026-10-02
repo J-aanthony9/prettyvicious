@@ -12,7 +12,7 @@ print on demand fulfillment, hosted on Cloudflare.
 | Shopify Storefront API (GraphQL) | Products, variants, prices, cart, checkout URL |
 | Shopify hosted checkout | Takes the money. We never build a checkout |
 | Cloudflare (`@opennextjs/cloudflare`) | Hosting, DNS, and email routing |
-| Tapstitch | Prints and ships, US fulfillment |
+| Tapstitch | Prints and ships, made to order |
 
 ## Getting started
 
@@ -125,8 +125,9 @@ These are yours, and none of them block anything above.
 - **Product photos.** They come through Shopify, so no code change.
 - **Which blanks are LA available**, chosen in Tapstitch, so the whole drop
   ships domestic on one fulfillment method.
-- **Confirm US fulfillment routing with Tapstitch** for drops. USA flagged
-  items can occasionally route through China on larger orders.
+- **No "Made in USA" or delivery time claims.** Some blanks are not made in
+  the US, and production time varies, so the site only says "made to order".
+  Keep it that way unless a whole drop is confirmed US made.
 - **Club signups go to Klaviyo** once `KLAVIYO_PRIVATE_API_KEY` and
   `KLAVIYO_LIST_ID` are set (see DEPLOY.md). Without them, addresses are only
   written to the server log.

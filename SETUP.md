@@ -187,7 +187,9 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   order, is the drop on the homepage and on its collection page.
 - **Policies.** Settings > Policies. The copy for the refund and shipping
   policies is in `src/app/policies/`, and matches what the site shows.
-  Paste the same text into Shopify so checkout and site agree. Also click
+  Paste the same text into Shopify so checkout and site agree. The shipping
+  policy no longer promises "shipped from the USA" or 7 to 11 days, so
+  update Shopify's copy to match. Also click
   the buttons to generate the starter **Privacy Policy** and **Terms of
   Service**. Payment providers expect those to exist.
 - **Customer email.** Settings > Notifications. Set the sender to

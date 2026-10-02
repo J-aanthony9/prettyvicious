@@ -10,7 +10,7 @@ export default function Footer() {
           <div>
             <Lockup className="mb-5" />
             <p className="max-w-[260px] text-[14px] text-[color:var(--bone-dim)]">
-              {BRAND.subLabel}. Made to order, printed and shipped in the USA.
+              {BRAND.subLabel}. Made to order, just for you.
             </p>
           </div>
 

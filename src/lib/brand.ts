@@ -25,7 +25,6 @@ export const FREE_SHIPPING_THRESHOLD = 64;
 
 export const COMMERCE = {
   shipsTo: "United States",
-  productionWindow: "about 7 to 11 business days",
   claimWindowDays: 5,
   freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
   freeShipping: `Free shipping on U.S. orders over $${FREE_SHIPPING_THRESHOLD}.`,
@@ -83,7 +82,7 @@ export const SEASON: Season = "all-hallows";
 
 /** Product page blurb, sits near add to cart. */
 export const PRODUCT_BLURB =
-  `Made to order and printed in the USA. Ships in about 7 to 11 business days. Free shipping on U.S. orders over $${FREE_SHIPPING_THRESHOLD}. All sales final, but if it arrives damaged or misprinted we'll replace it, just send a photo within 5 days. Questions? support@shopprettyvicious.com.`;
+  `Made to order, just for you. Free shipping on U.S. orders over $${FREE_SHIPPING_THRESHOLD}. All sales final, but if it arrives damaged or misprinted we'll replace it, just send a photo within 5 days. Questions? support@shopprettyvicious.com.`;
 
 /**
  * Fit notes, one per garment type (see src/lib/garments.ts). The top refund
@@ -120,8 +119,8 @@ export const CLUB = {
 
 export const PERKS = [
   {
-    title: "Made in USA",
-    body: "Printed and shipped from our US facility. One drop, one fulfillment method, no split shipments.",
+    title: "Made to Order",
+    body: "Printed for you after you order, so nothing sits in a warehouse. Tracking sent the moment it ships.",
   },
   {
     title: "Quality You Can Feel",
