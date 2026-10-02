@@ -9,7 +9,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Shop",
-  description: "Every piece, made to order and printed in the USA.",
+  description: "Every piece, made to order.",
 };
 
 type Props = { searchParams: Promise<{ type?: string | string[] }> };
