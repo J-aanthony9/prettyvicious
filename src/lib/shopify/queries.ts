@@ -7,27 +7,31 @@ export const IMAGE_FRAGMENT = /* GraphQL */ `
   }
 `;
 
-export const PRODUCT_FRAGMENT = /* GraphQL */ `
-  fragment ProductParts on Product {
+/**
+ * Card level fields. Listings use only this, so paging through a large
+ * catalogue never drags every variant of every product along with it.
+ */
+export const PRODUCT_SUMMARY_FRAGMENT = /* GraphQL */ `
+  fragment ProductSummaryParts on Product {
     id
     handle
     title
-    description
-    descriptionHtml
+    productType
     availableForSale
     tags
     featuredImage {
       ...ImageParts
     }
-    images(first: 10) {
-      nodes {
-        ...ImageParts
-      }
-    }
     options {
       id
       name
       values
+    }
+    collections(first: 20) {
+      nodes {
+        handle
+        title
+      }
     }
     priceRange {
       minVariantPrice {
@@ -39,7 +43,24 @@ export const PRODUCT_FRAGMENT = /* GraphQL */ `
         currencyCode
       }
     }
-    variants(first: 100) {
+  }
+`;
+
+/**
+ * The product page. 250 is the most a single Storefront API page returns,
+ * which covers color x size x design listings with room to spare.
+ */
+export const PRODUCT_FRAGMENT = /* GraphQL */ `
+  fragment ProductParts on Product {
+    ...ProductSummaryParts
+    description
+    descriptionHtml
+    images(first: 50) {
+      nodes {
+        ...ImageParts
+      }
+    }
+    variants(first: 250) {
       nodes {
         id
         title
@@ -62,6 +83,7 @@ export const PRODUCT_FRAGMENT = /* GraphQL */ `
       }
     }
   }
+  ${PRODUCT_SUMMARY_FRAGMENT}
   ${IMAGE_FRAGMENT}
 `;
 
@@ -120,16 +142,29 @@ export const CART_FRAGMENT = /* GraphQL */ `
   ${IMAGE_FRAGMENT}
 `;
 
+const PAGE_INFO = /* GraphQL */ `
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+`;
+
 export const GET_PRODUCTS = /* GraphQL */ `
-  query GetProducts($first: Int!, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean)
-  @inContext(country: US) {
-    products(first: $first, query: $query, sortKey: $sortKey, reverse: $reverse) {
+  query GetProducts(
+    $first: Int!
+    $after: String
+    $sortKey: ProductSortKeys
+    $reverse: Boolean
+  ) @inContext(country: US) {
+    products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse) {
+      ${PAGE_INFO}
       nodes {
-        ...ProductParts
+        ...ProductSummaryParts
       }
     }
   }
-  ${PRODUCT_FRAGMENT}
+  ${PRODUCT_SUMMARY_FRAGMENT}
+  ${IMAGE_FRAGMENT}
 `;
 
 export const GET_PRODUCT_BY_HANDLE = /* GraphQL */ `
@@ -141,19 +176,26 @@ export const GET_PRODUCT_BY_HANDLE = /* GraphQL */ `
   ${PRODUCT_FRAGMENT}
 `;
 
+/**
+ * A collection in the order set in Shopify (Products > Collections > Sort).
+ * Paged, so a collection of any size comes back whole.
+ */
 export const GET_COLLECTION_PRODUCTS = /* GraphQL */ `
-  query GetCollectionProducts($handle: String!, $first: Int!) @inContext(country: US) {
+  query GetCollectionProducts($handle: String!, $first: Int!, $after: String)
+  @inContext(country: US) {
     collection(handle: $handle) {
       title
       description
-      products(first: $first) {
+      products(first: $first, after: $after) {
+        ${PAGE_INFO}
         nodes {
-          ...ProductParts
+          ...ProductSummaryParts
         }
       }
     }
   }
-  ${PRODUCT_FRAGMENT}
+  ${PRODUCT_SUMMARY_FRAGMENT}
+  ${IMAGE_FRAGMENT}
 `;
 
 export const GET_CART = /* GraphQL */ `

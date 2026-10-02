@@ -31,22 +31,37 @@ export type ProductOption = {
   values: string[];
 };
 
-export type Product = {
+export type CollectionRef = {
+  handle: string;
+  title: string;
+};
+
+/**
+ * What a product card needs. Listings fetch only this, so a long catalogue
+ * stays a light query: no variants, one image.
+ */
+export type ProductSummary = {
   id: string;
   handle: string;
   title: string;
-  description: string;
-  descriptionHtml: string;
+  productType: string;
   availableForSale: boolean;
   tags: string[];
   featuredImage: ShopifyImage | null;
-  images: ShopifyImage[];
   options: ProductOption[];
-  variants: ProductVariant[];
+  collections: CollectionRef[];
   priceRange: {
     minVariantPrice: Money;
     maxVariantPrice: Money;
   };
+};
+
+/** Everything the product page needs. */
+export type Product = ProductSummary & {
+  description: string;
+  descriptionHtml: string;
+  images: ShopifyImage[];
+  variants: ProductVariant[];
 };
 
 export type CartLine = {

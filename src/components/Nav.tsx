@@ -8,7 +8,7 @@ import { DROPS } from "@/lib/brand";
 
 const LINKS = [
   { label: "Shop", href: "/products" },
-  { label: `Drop ${DROPS.current.number}`, href: `/collections/${DROPS.current.handle}` },
+  { label: DROPS.current.title, href: `/collections/${DROPS.current.handle}` },
   { label: "About", href: "/story" },
   { label: "The Club", href: "/#club" },
 ];

@@ -7,26 +7,30 @@ import ClubSignup from "@/components/home/ClubSignup";
 import ProductGrid from "@/components/shop/ProductGrid";
 import SectionHead from "@/components/SectionHead";
 import Reveal from "@/components/Reveal";
-import { getCollection, getProducts } from "@/lib/shopify";
+import { getAllProducts, getCollection } from "@/lib/shopify";
 import { DROPS } from "@/lib/brand";
 
 export const revalidate = 300;
 
-const WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+const WORDS = [
+  "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+  "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
+  "Eighteen", "Nineteen", "Twenty",
+];
 
-function teeCount(count: number): string {
-  if (count === 0) return "Printed dark.";
+/** The drop line, with the real piece count spelled out. */
+function dropLine(count: number): string {
+  if (count === 0) return "Under wraps. Printed dark.";
   const word = WORDS[count] ?? String(count);
-  return `${word} ${count === 1 ? "tee" : "tees"}. Printed dark.`;
+  const line = DROPS.current.sub.replace("{count}", word);
+  return count === 1 ? line.replace("pieces", "piece") : line;
 }
 
 export default async function HomePage() {
-  // Prefer the drop collection. Fall back to the whole catalogue so the grid
-  // still fills in before the collection exists in Shopify.
-  const collection = await getCollection(DROPS.current.handle, 8);
-  const products = collection?.products.length
-    ? collection.products
-    : await getProducts(8);
+  // The whole drop collection, in its Shopify order. If the collection
+  // cannot be read yet, fall back to everything so the grid still fills.
+  const collection = await getCollection(DROPS.current.handle);
+  const products = collection ? collection.products : await getAllProducts();
 
   return (
     <>
@@ -41,8 +45,8 @@ export default async function HomePage() {
           <Reveal className="mb-[clamp(40px,6vw,64px)]">
             <SectionHead
               eyebrow={`Drop ${DROPS.current.number} ✦ ${DROPS.current.title}`}
-              title="The First Drop"
-              sub={teeCount(products.length)}
+              title={DROPS.current.heading}
+              sub={dropLine(products.length)}
             />
           </Reveal>
 

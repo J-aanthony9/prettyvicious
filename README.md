@@ -42,6 +42,7 @@ follow **[DEPLOY.md](./DEPLOY.md)**.
 | `npm run typecheck` | TypeScript, no emit |
 | `npm run cf:preview` | Build and serve in the real Cloudflare runtime |
 | `npm run cf:deploy` | Build and deploy to Cloudflare |
+| `npm run catalog:check` | List what the site's Shopify token can see, and anything it cannot |
 
 ## Layout
 
@@ -50,7 +51,7 @@ src/
   app/
     page.tsx                    Homepage, all sections in order
     products/                   Shop all, and the product page
-    collections/[handle]/       Drop pages
+    collections/[handle]/       Drop and collection pages
     cart/                       Bag, quantities, checkout handoff
     policies/                   Refunds and shipping (matches Shopify)
     contact/  faq/  story/      Content pages
@@ -62,7 +63,8 @@ src/
     home/                       Hero, ledger, quote, manifesto, perks, club
     shop/                       Product cards, gallery, variant selector
   lib/
-    brand.ts                    Every fixed brand string, one place
+    brand.ts                    Brand strings, the featured drop, season
+    garments.ts  size-guide.ts  Garment types, charts and fit note mapping
     shopify/                    Storefront API client, queries, types
     actions.ts                  Cart and club signup server actions
     cart-session.ts             Cart id cookie
@@ -125,11 +127,9 @@ These are yours, and none of them block anything above.
   ships domestic on one fulfillment method.
 - **Confirm US fulfillment routing with Tapstitch** for drops. USA flagged
   items can occasionally route through China on larger orders.
-- **Club signups currently go nowhere.** The form validates and shows the
-  success line, but without `CLUB_SIGNUP_WEBHOOK_URL` set, addresses are only
-  written to the server log. Point it at Klaviyo, Mailchimp, Beehiiv, or a
-  Zapier catch hook before the club copy offers anything concrete. The copy
-  deliberately promises nothing specific until then.
+- **Club signups go to Klaviyo** once `KLAVIYO_PRIVATE_API_KEY` and
+  `KLAVIYO_LIST_ID` are set (see DEPLOY.md). Without them, addresses are only
+  written to the server log.
 - **Diary the Shopify promo renewal date** so the $1/mo to $39/mo jump is not
   a surprise.
 

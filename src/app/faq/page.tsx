@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How does the sizing run?",
-    a: "Oversized, on purpose. These are heavyweight, relaxed streetwear cuts, so they wear big and boxy. The size chart shows flat, laid-flat measurements (the garment on a table), not body measurements. Take your usual size for the oversized look, or size down one for a closer fit.",
+    a: "It depends on the piece, so each one has its own chart. The snow washed oversized tees run big on purpose: take your usual size for the oversized look, or size down one for a closer fit. The essential tees and crewnecks have their own charts on the size guide, and every product page links to the right one. All charts are flat, laid-flat measurements (the garment on a table), not body measurements.",
   },
   {
     q: "How long until it arrives?",
@@ -38,7 +38,7 @@ const FAQS = [
   },
   {
     q: "When is the next drop?",
-    a: "Drop 002 is All Hallows. Join the club and you will hear about it before the feed does.",
+    a: "It is under wraps for now. Join the club and you will hear about it before the feed does.",
   },
 ];
 

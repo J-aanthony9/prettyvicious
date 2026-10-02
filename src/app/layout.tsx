@@ -6,7 +6,7 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { readCart } from "@/lib/cart-session";
-import { BRAND } from "@/lib/brand";
+import { BRAND, SEASON } from "@/lib/brand";
 import Script from "next/script";
 
 const cormorant = Cormorant_Garamond({
@@ -90,6 +90,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      data-season={SEASON}
       className={`${cormorant.variable} ${pirata.variable} ${manrope.variable}`}
     >
       <head>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ProductGrid from "@/components/shop/ProductGrid";
 import SectionHead from "@/components/SectionHead";
 import Reveal from "@/components/Reveal";
-import { getProducts } from "@/lib/shopify";
+import { getAllProducts } from "@/lib/shopify";
 
 export const revalidate = 300;
 
@@ -12,7 +12,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-  const products = await getProducts(48);
+  // Every product published to the storefront, however many there are.
+  const products = await getAllProducts();
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
