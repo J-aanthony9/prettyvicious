@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
-import { cardNote, hasPriceRange, inCurrentDrop } from "@/lib/product";
+import { cardNote, cardSwatches, hasPriceRange, inCurrentDrop } from "@/lib/product";
 import { DROPS } from "@/lib/brand";
 import type { ProductSummary } from "@/lib/shopify/types";
 
@@ -13,42 +13,65 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
   const badge = soldOut ? "Sold out" : inCurrentDrop(product) ? DROPS.current.title : null;
   const price = formatMoney(product.priceRange.minVariantPrice);
   const note = cardNote(product);
+  const swatches = cardSwatches(product);
+  const href = `/products/${product.handle}`;
 
   return (
-    <Link href={`/products/${product.handle}`} className="group block overflow-hidden rounded">
-      <div className="card-face relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded border border-[color:var(--hairline-soft)] transition-transform duration-[350ms] group-hover:-translate-y-[5px]">
-        {image ? (
-          <Image
-            src={image.url}
-            alt={image.altText || product.title}
-            fill
-            sizes="(min-width: 900px) 33vw, (min-width: 560px) 50vw, 100vw"
-            className="object-cover"
-          />
-        ) : (
-          <span className="text-[22px] text-accent">✦</span>
-        )}
+    <div className="group">
+      <Link href={href} className="block overflow-hidden rounded active:opacity-90">
+        <div className="card-face relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded border border-[color:var(--hairline-soft)] transition-transform duration-[350ms] group-hover:-translate-y-[5px]">
+          {image ? (
+            <Image
+              src={image.url}
+              alt={image.altText || product.title}
+              fill
+              sizes="(min-width: 900px) 33vw, (min-width: 560px) 50vw, 100vw"
+              className="object-cover"
+            />
+          ) : (
+            <span className="text-[22px] text-accent">✦</span>
+          )}
 
-        {badge ? (
-          <span className="absolute left-3 top-3 rounded-sm bg-accent px-[9px] py-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-[#171012]">
-            {badge}
+          {badge ? (
+            <span className="absolute left-3 top-3 rounded-sm bg-accent px-[9px] py-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-[#171012]">
+              {badge}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="flex items-baseline justify-between gap-3 px-1 pt-3.5">
+          <h3 className="font-[family-name:var(--font-display)] text-[19px] font-medium leading-[1.25] tracking-[0.03em]">
+            {product.title}
+          </h3>
+          <span className="shrink-0 text-[13px] font-semibold tracking-[0.08em] text-[color:var(--bone-dim)]">
+            {hasPriceRange(product) ? `From ${price}` : price}
           </span>
+        </div>
+        {note ? (
+          <p className="px-1 pt-1 text-[12px] tracking-[0.06em] text-[color:var(--bone-dim)]">
+            {note}
+          </p>
         ) : null}
-      </div>
+      </Link>
 
-      <div className="flex items-baseline justify-between gap-3 px-1 pt-3.5">
-        <h3 className="font-[family-name:var(--font-display)] text-[19px] font-medium leading-[1.25] tracking-[0.03em]">
-          {product.title}
-        </h3>
-        <span className="shrink-0 text-[13px] font-semibold tracking-[0.08em] text-[color:var(--bone-dim)]">
-          {hasPriceRange(product) ? `From ${price}` : price}
-        </span>
-      </div>
-      {note ? (
-        <p className="px-1 pt-1 text-[12px] tracking-[0.06em] text-[color:var(--bone-dim)]">
-          {note}
-        </p>
+      {/* Each design, one tap from the grid. Opens the product with that
+          design already chosen. */}
+      {swatches.length ? (
+        <ul className="mt-3 flex flex-wrap gap-2 px-1" aria-label={`${product.title} designs`}>
+          {swatches.map((swatch) => (
+            <li key={swatch.value}>
+              <Link
+                href={`${href}?design=${encodeURIComponent(swatch.value)}`}
+                title={swatch.value}
+                aria-label={`${product.title}, ${swatch.value}`}
+                className="relative block h-11 w-11 overflow-hidden rounded-sm border border-[color:var(--hairline)] bg-white transition-colors duration-300 hover:border-[color:var(--color-accent)] active:border-[color:var(--color-accent)]"
+              >
+                <Image src={swatch.image.url} alt="" fill sizes="44px" className="object-contain" />
+              </Link>
+            </li>
+          ))}
+        </ul>
       ) : null}
-    </Link>
+    </div>
   );
 }

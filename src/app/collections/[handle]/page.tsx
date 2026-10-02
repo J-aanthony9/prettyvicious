@@ -5,10 +5,12 @@ import SectionHead from "@/components/SectionHead";
 import Reveal from "@/components/Reveal";
 import { getAllProducts, getCollection } from "@/lib/shopify";
 import { DROPS } from "@/lib/brand";
+import TypeChips, { activeType, filterByType } from "@/components/shop/TypeChips";
 
 export const revalidate = 300;
 
 type Params = { params: Promise<{ handle: string }> };
+type Props = Params & { searchParams: Promise<{ type?: string | string[] }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { handle } = await params;
@@ -19,9 +21,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { title, description: collection?.description || undefined };
 }
 
-export default async function CollectionPage({ params }: Params) {
+export default async function CollectionPage({ params, searchParams }: Props) {
   const { handle } = await params;
-  const collection = await getCollection(handle);
+    const collection = await getCollection(handle);
 
   // The current drop's page always renders, even before its collection is
   // visible to the storefront, so the hero and nav never lead to a 404.
@@ -45,6 +47,8 @@ export default async function CollectionPage({ params }: Params) {
     products = await getAllProducts();
   }
 
+  const type = activeType((await searchParams).type, products);
+
   return (
     <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
       <Reveal>
@@ -59,8 +63,9 @@ export default async function CollectionPage({ params }: Params) {
         </Reveal>
       ) : null}
 
-      <div className="mt-16">
-        <ProductGrid products={products} />
+      <div className="mt-16 flex flex-col gap-10">
+        <TypeChips products={products} active={type} basePath={`/collections/${handle}`} />
+        <ProductGrid products={filterByType(products, type)} />
       </div>
     </div>
   );

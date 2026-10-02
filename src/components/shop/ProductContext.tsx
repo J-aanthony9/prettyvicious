@@ -5,6 +5,7 @@ import type { Product, ProductVariant } from "@/lib/shopify/types";
 import {
   defaultVariant,
   findVariant,
+  isDesignOption,
   selectValue,
   selectionOf,
   type Selection,
@@ -26,14 +27,23 @@ const ProductContext = createContext<ProductState | null>(null);
  */
 export function ProductProvider({
   product,
+  initialDesign,
   children,
 }: {
   product: Product;
+  /** A design value from the URL (?design=), set when arriving from a card swatch. */
+  initialDesign?: string;
   children: React.ReactNode;
 }) {
   const [selection, setSelection] = useState<Selection>(() => {
     const initial = defaultVariant(product);
-    return initial ? selectionOf(initial) : {};
+    const selection = initial ? selectionOf(initial) : {};
+    const designOption = product.options.find(
+      (option) => isDesignOption(option) && option.values.includes(initialDesign ?? ""),
+    );
+    return designOption && initialDesign
+      ? selectValue(product, selection, designOption.name, initialDesign)
+      : selection;
   });
 
   const state = useMemo<ProductState>(

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useScrollLock } from "@/lib/use-scroll-lock";
 import { Wordmark } from "@/components/Wordmark";
 import { DROPS } from "@/lib/brand";
@@ -20,6 +20,20 @@ export default function Nav({ cartCount }: { cartCount: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useScrollLock(menuOpen);
+
+  // A small pulse when the bag count goes up, so an add registers even with
+  // the button scrolled out of view. Skipped on first render.
+  const [pulse, setPulse] = useState(false);
+  const previous = useRef(cartCount);
+  useEffect(() => {
+    if (cartCount > previous.current) {
+      setPulse(true);
+      const timer = window.setTimeout(() => setPulse(false), 700);
+      previous.current = cartCount;
+      return () => window.clearTimeout(timer);
+    }
+    previous.current = cartCount;
+  }, [cartCount]);
 
   return (
     <>
@@ -54,7 +68,7 @@ export default function Nav({ cartCount }: { cartCount: number }) {
               {link.label}
             </Link>
           ))}
-          <Link href="/cart" className={NAV_ITEM}>
+          <Link href="/cart" className={`${NAV_ITEM} ${pulse ? "bag-pulse" : ""}`}>
             Bag ({cartCount})
           </Link>
         </div>

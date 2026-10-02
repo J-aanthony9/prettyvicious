@@ -1,13 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { addItemAction } from "@/lib/actions";
 import { EMPTY_ACTION_STATE } from "@/lib/action-state";
 import { formatMoney } from "@/lib/money";
 import { useProduct } from "@/components/shop/ProductContext";
+import SizeSheet from "@/components/shop/SizeSheet";
+import BagToast from "@/components/shop/BagToast";
+import type { GarmentKey } from "@/lib/garments";
 import {
   optionHasImages,
   optionLabel,
@@ -42,9 +44,21 @@ function stateTitle(value: string, state: ValueState): string {
   return value;
 }
 
-export default function AddToCart({ sizeGuideHref }: { sizeGuideHref: string }) {
+export default function AddToCart({ garment }: { garment: GarmentKey | null }) {
   const { product, selection, variant, choose } = useProduct();
   const [state, formAction] = useActionState(addItemAction, EMPTY_ACTION_STATE);
+
+  // A fresh token per successful add, so adding twice shows the toast twice.
+  // The label is what was added, captured at submit time.
+  const [toastToken, setToastToken] = useState(0);
+  const [toastLabel, setToastLabel] = useState("");
+  const submitted = useRef("");
+  useEffect(() => {
+    if (state.ok && state.message) {
+      setToastLabel(submitted.current);
+      setToastToken((token) => token + 1);
+    }
+  }, [state]);
 
   const price = variant?.price ?? product.priceRange.minVariantPrice;
   const buyable = Boolean(variant?.availableForSale);
@@ -56,7 +70,15 @@ export default function AddToCart({ sizeGuideHref }: { sizeGuideHref: string }) 
         {formatMoney(price)}
       </p>
 
-      <form action={formAction} className="mt-10">
+      <form
+        action={formAction}
+        onSubmit={() => {
+          submitted.current = [product.title, ...(variant?.selectedOptions ?? [])
+            .filter((option) => (product.options.find((o) => o.name === option.name)?.values.length ?? 0) > 1)
+            .map((option) => option.value)].join(" · ");
+        }}
+        className="mt-10"
+      >
         <input type="hidden" name="variantId" value={variant?.id ?? ""} />
         <input type="hidden" name="quantity" value="1" />
 
@@ -87,12 +109,7 @@ export default function AddToCart({ sizeGuideHref }: { sizeGuideHref: string }) 
                   {chosen ? <span className="text-[13px] text-bone">{chosen}</span> : null}
                 </p>
                 {size ? (
-                  <Link
-                    href={sizeGuideHref}
-                    className="link-quiet shrink-0 py-1 text-[11px] uppercase tracking-[0.2em]"
-                  >
-                    Size guide
-                  </Link>
+                  <SizeSheet garment={garment} />
                 ) : null}
               </div>
 
@@ -164,19 +181,13 @@ export default function AddToCart({ sizeGuideHref }: { sizeGuideHref: string }) 
         <SubmitButton disabled={!buyable} label={buttonLabel} />
       </form>
 
-      {state.message ? (
-        <p
-          className={`mt-5 text-[14px] ${state.ok ? "text-[color:var(--bone-dim)]" : "text-accent"}`}
-          role="status"
-        >
-          {state.message}{" "}
-          {state.ok ? (
-            <Link href="/cart" className="link-quiet text-bone">
-              View bag
-            </Link>
-          ) : null}
+      {/* Success is the toast below; only a failure stays inline, by the button. */}
+      {state.message && !state.ok ? (
+        <p className="mt-5 text-[14px] text-accent" role="status">
+          {state.message}
         </p>
       ) : null}
+      <BagToast token={toastToken} label={toastLabel} />
     </div>
   );
 }

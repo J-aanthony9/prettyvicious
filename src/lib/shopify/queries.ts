@@ -33,6 +33,18 @@ export const PRODUCT_SUMMARY_FRAGMENT = /* GraphQL */ `
         title
       }
     }
+    # Just enough of each variant to draw design swatches on a card.
+    swatchVariants: variants(first: 100) {
+      nodes {
+        selectedOptions {
+          name
+          value
+        }
+        image {
+          ...ImageParts
+        }
+      }
+    }
     priceRange {
       minVariantPrice {
         amount

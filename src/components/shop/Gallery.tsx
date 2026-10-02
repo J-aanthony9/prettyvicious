@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ShopifyImage } from "@/lib/shopify/types";
 import { useScrollLock } from "@/lib/use-scroll-lock";
 import Portal from "@/components/Portal";
+import ZoomImage from "@/components/shop/ZoomImage";
 
 /**
  * Product images, never cropped.
@@ -196,7 +197,8 @@ export default function Gallery({
             className={`relative mx-4 mb-4 flex-1 overflow-hidden ${FRAME}`}
             onClick={(event) => event.stopPropagation()}
           >
-            <Image src={current.url} alt={alt} fill sizes="100vw" className="object-contain" />
+            {/* Keyed so a new image always starts unzoomed. */}
+            <ZoomImage key={current.url} image={current} alt={alt} />
           </div>
 
           {count > 1 ? (

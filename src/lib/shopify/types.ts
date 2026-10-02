@@ -50,6 +50,8 @@ export type ProductSummary = {
   featuredImage: ShopifyImage | null;
   options: ProductOption[];
   collections: CollectionRef[];
+  /** Options and image of each variant, for swatches on cards. */
+  swatchVariants: Array<Pick<ProductVariant, "selectedOptions" | "image">>;
   priceRange: {
     minVariantPrice: Money;
     maxVariantPrice: Money;

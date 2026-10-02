@@ -50,6 +50,32 @@ export function designCount(product: Pick<ProductSummary, "options">): number {
 }
 
 /**
+ * Design swatches for a card: one per value of the product's design option,
+ * each with that design's image. Empty when the product has a single
+ * design, or when its designs do not have distinct images to show.
+ */
+export function cardSwatches(
+  product: Pick<ProductSummary, "options" | "swatchVariants">,
+): Array<{ value: string; image: ShopifyImage }> {
+  const option = product.options.find(
+    (candidate) => isDesignOption(candidate) && candidate.values.length > 1,
+  );
+  if (!option) return [];
+  const swatches = option.values.map((value) => ({
+    value,
+    image:
+      product.swatchVariants.find(
+        (variant) =>
+          variant.image &&
+          variant.selectedOptions.some((o) => o.name === option.name && o.value === value),
+      )?.image ?? null,
+  }));
+  const urls = new Set(swatches.map((swatch) => swatch.image?.url));
+  if (swatches.some((swatch) => !swatch.image) || urls.size !== swatches.length) return [];
+  return swatches as Array<{ value: string; image: ShopifyImage }>;
+}
+
+/**
  * The line under a card title. "Oversized" only on the oversized tee, where
  * the fit note says so. Everything else is read from the product's options.
  */

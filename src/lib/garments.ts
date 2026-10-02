@@ -13,21 +13,24 @@ export type GarmentKey = "oversized-tee" | "essential-tee" | "crewneck";
 
 export const GARMENTS: Record<
   GarmentKey,
-  { label: string; tab: string; productType: string }
+  { label: string; tab: string; plural: string; productType: string }
 > = {
   "oversized-tee": {
     label: "Snow washed oversized tee",
     tab: "Oversized tee",
+    plural: "Oversized tees",
     productType: "Oversized Tee",
   },
   "essential-tee": {
     label: "Essential tee",
     tab: "Essential tee",
+    plural: "Essential tees",
     productType: "Essential Tee",
   },
   crewneck: {
     label: "Crewneck",
     tab: "Crewneck",
+    plural: "Crewnecks",
     productType: "Crewneck",
   },
 };
@@ -35,7 +38,7 @@ export const GARMENTS: Record<
 export const GARMENT_ORDER: GarmentKey[] = ["oversized-tee", "essential-tee", "crewneck"];
 
 export function isGarmentKey(value: unknown): value is GarmentKey {
-  return typeof value === "string" && value in GARMENTS;
+  return typeof value === "string" && Object.hasOwn(GARMENTS, value);
 }
 
 /**
