@@ -58,6 +58,18 @@ export const DROPS = {
 } as const;
 
 /**
+ * The first-visit welcome on the homepage (components/WelcomeVeil.tsx).
+ * Plays once per visitor per drop: the storage key carries the drop number,
+ * so the next drop greets everyone again. Set enabled to false to turn it off.
+ */
+export const INTRO = {
+  enabled: true,
+  eyebrow: `Drop ${DROPS.current.number}`,
+  title: DROPS.current.title,
+  storageKey: `pv-intro-${DROPS.current.number}`,
+} as const;
+
+/**
  * Old URLs that may already be shared. Each one redirects to the current
  * drop's collection page (see next.config.ts). Add a retired drop's handles
  * here when it is replaced.
