@@ -10,7 +10,7 @@ export default function Manifesto() {
     >
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-[clamp(32px,6vw,88px)] px-[clamp(20px,4vw,48px)] md:grid-cols-2">
         <Reveal>
-          <h2 className="font-[family-name:var(--font-display)] text-[clamp(34px,4.6vw,56px)] font-medium uppercase leading-[1.08] tracking-[0.05em]">
+          <h2 className="ink-title font-[family-name:var(--font-display)] text-[clamp(34px,4.6vw,56px)] font-medium uppercase leading-[1.08] tracking-[0.05em]">
             {ORIGIN.headingLead}{" "}
             <span className="gothic text-[1.08em] normal-case text-accent">
               {ORIGIN.headingAccent}
