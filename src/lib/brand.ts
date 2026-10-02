@@ -33,27 +33,72 @@ export const COMMERCE = {
 
 export const ANNOUNCEMENT = `Free U.S. shipping on orders over $${FREE_SHIPPING_THRESHOLD}`;
 
+/**
+ * The featured drop. Swapping to the next drop is an edit to this block:
+ * the homepage drop section, ledger strip, hero, nav, footer, product badges
+ * and every "shop the drop" button read from it.
+ *
+ * `handle` is the Shopify collection handle (Products > Collections > the
+ * collection > Search engine listing). Whatever is in that collection in
+ * Shopify is what the drop shows. No product list lives in code.
+ */
 export const DROPS = {
   current: {
-    number: "001",
-    title: "Beauty Professionals Club",
-    handle: "drop-001",
-  },
-  next: {
     number: "002",
     title: "All Hallows",
+    handle: "all-hallows",
+    /** Homepage drop section heading. */
+    heading: "To Die For",
+    /** Homepage drop section line. {count} becomes the piece count, spelled out. */
+    sub: "{count} pieces for the haunting season. Printed dark.",
+    /** Hero line, after the positioning sentence. */
+    heroLine: "Drop 002 is All Hallows. Booked to death, still to die for.",
   },
+  /** Teased in the ledger strip. Null shows "Under wraps". */
+  next: null as { number: string; title: string } | null,
 } as const;
+
+/**
+ * Old URLs that may already be shared. Each one redirects to the current
+ * drop's collection page (see next.config.ts). Add a retired drop's handles
+ * here when it is replaced.
+ */
+export const RETIRED = {
+  collections: ["drop-001"],
+  products: [
+    "the-lash-artist-tee",
+    "the-nail-tech-tee",
+    "the-hair-stylist-tee",
+    "the-esthetician-tee",
+  ],
+} as const;
+
+/**
+ * Seasonal look. "all-hallows" swaps the hero star for engraved bats, lets a
+ * couple of bats into the drifting motes and cools the fog a touch. Set it
+ * back to "default" after Halloween and everything returns to the core look.
+ */
+export type Season = "default" | "all-hallows";
+export const SEASON: Season = "all-hallows";
 
 /** Product page blurb, sits near add to cart. */
 export const PRODUCT_BLURB =
   `Made to order and printed in the USA. Ships in about 7 to 11 business days. Free shipping on U.S. orders over $${FREE_SHIPPING_THRESHOLD}. All sales final, but if it arrives damaged or misprinted we'll replace it, just send a photo within 5 days. Questions? support@shopprettyvicious.com.`;
 
-/** Required fit note. The top refund preventer, keep it visible. */
-export const FIT_NOTE = {
-  heading: "Runs oversized. Wear it that way, or size down.",
-  body: "These are heavyweight, relaxed streetwear cuts, so they wear big and boxy on purpose. The size chart shows flat, laid-flat measurements (the garment on a table), not body measurements. If you want the oversized look, take your usual size. If you want a closer fit, size down. Check the chart before you order, since made-to-order pieces can't be exchanged for fit.",
-} as const;
+/**
+ * Fit notes, one per garment type (see src/lib/garments.ts). The top refund
+ * preventer, shown right by the size picker. A garment set to null shows
+ * only a link to its chart: no fit claim is made until one is written here.
+ */
+export const FIT_NOTES = {
+  "oversized-tee": {
+    heading: "Runs oversized. Wear it that way, or size down.",
+    body: "These are heavyweight, relaxed streetwear cuts, so they wear big and boxy on purpose. The size chart shows flat, laid-flat measurements (the garment on a table), not body measurements. If you want the oversized look, take your usual size. If you want a closer fit, size down. Check the chart before you order, since made-to-order pieces can't be exchanged for fit.",
+  },
+  // Waiting on fit notes from Meghan. Do not invent these.
+  "essential-tee": null,
+  crewneck: null,
+} as const satisfies Record<string, { heading: string; body: string } | null>;
 
 /**
  * The origin story. The heading is split so the last word can take the
@@ -93,9 +138,8 @@ export const FOOTER_LINKS = [
   {
     heading: "Shop",
     links: [
-      { label: "Drop 001", href: "/collections/drop-001" },
-      { label: "All tees", href: "/products" },
-      { label: "All Hallows · soon", href: null },
+      { label: DROPS.current.title, href: `/collections/${DROPS.current.handle}` },
+      { label: "All products", href: "/products" },
     ],
   },
   {

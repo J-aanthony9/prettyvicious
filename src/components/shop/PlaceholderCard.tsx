@@ -1,7 +1,8 @@
 /**
  * Pre-live state. Shown when Shopify has no products yet, or when the
  * Storefront credentials are not wired up. Keeps the drop grid composed
- * instead of collapsing to an empty row.
+ * instead of collapsing to an empty row. No price or fit is claimed here,
+ * since none is known until the products exist.
  */
 export default function PlaceholderCard({
   label,
@@ -23,16 +24,13 @@ export default function PlaceholderCard({
           Under wraps
         </span>
       </div>
-      <div className="flex items-baseline justify-between gap-2.5 px-1 pt-3.5">
+      <div className="px-1 pt-3.5">
         <h3 className="font-[family-name:var(--font-display)] text-[19px] font-medium tracking-[0.03em]">
           {label}
         </h3>
-        <span className="shrink-0 text-[13px] font-semibold tracking-[0.08em] text-[color:var(--bone-dim)]">
-          $34.99
-        </span>
       </div>
       <p className="px-1 pt-0.5 text-[12px] tracking-[0.06em] text-[color:var(--bone-dim)]">
-        Oversized · S to 3XL
+        Coming soon
       </p>
     </div>
   );

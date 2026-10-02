@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import ProductGrid from "@/components/shop/ProductGrid";
 import SectionHead from "@/components/SectionHead";
 import Reveal from "@/components/Reveal";
-import { getCollection, getProducts } from "@/lib/shopify";
+import { getAllProducts, getCollection } from "@/lib/shopify";
 import { DROPS } from "@/lib/brand";
 
 export const revalidate = 300;
@@ -12,7 +12,7 @@ type Params = { params: Promise<{ handle: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { handle } = await params;
-  const collection = await getCollection(handle, 1);
+  const collection = await getCollection(handle);
   const title =
     collection?.title ??
     (handle === DROPS.current.handle ? DROPS.current.title : "Collection");
@@ -21,24 +21,29 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function CollectionPage({ params }: Params) {
   const { handle } = await params;
-  const collection = await getCollection(handle, 48);
+  const collection = await getCollection(handle);
 
-  // The drop 001 handle always renders, with placeholder cards if the
-  // collection has not been created in Shopify yet.
+  // The current drop's page always renders, even before its collection is
+  // visible to the storefront, so the hero and nav never lead to a 404.
   const isCurrentDrop = handle === DROPS.current.handle;
   if (!collection && !isCurrentDrop) notFound();
 
   const eyebrow = isCurrentDrop ? `Drop ${DROPS.current.number}` : "Collection";
   const title = collection?.title ?? DROPS.current.title;
 
-  // Drop 001 is the whole catalogue right now. If the collection does not
-  // exist in Shopify yet, or is not published to the Online Store channel,
-  // show every product rather than an empty grid. Same fallback as the
-  // homepage.
-  const products =
-    collection?.products.length || !isCurrentDrop
-      ? (collection?.products ?? [])
-      : await getProducts(48);
+  // Whatever is in the collection in Shopify, in its Shopify order. If the
+  // current drop's collection cannot be read at all (not created yet, or not
+  // published to the storefront's sales channel), show every product rather
+  // than an empty page, and say why in the log.
+  let products = collection?.products ?? [];
+  if (!collection && isCurrentDrop) {
+    console.warn(
+      `[shopify] Collection "${handle}" is not visible to the storefront. ` +
+        "Check it exists and is published to the storefront's sales channel. " +
+        "Showing all products instead.",
+    );
+    products = await getAllProducts();
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">

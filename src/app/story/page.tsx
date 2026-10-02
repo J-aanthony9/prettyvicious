@@ -48,7 +48,7 @@ export default function StoryPage() {
 
       <p>
         <Link href={`/collections/${DROPS.current.handle}`} className="btn inline-flex">
-          Shop Drop {DROPS.current.number}
+          Shop {DROPS.current.title}
         </Link>
       </p>
     </PageShell>

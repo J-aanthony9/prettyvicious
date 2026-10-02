@@ -19,24 +19,15 @@ export default function Footer() {
               <h2 className="mb-[18px] text-[11px] font-bold uppercase tracking-[0.26em] text-[color:var(--bone-dim)]">
                 {column.heading}
               </h2>
-              {column.links.map((link) =>
-                link.href ? (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="link-quiet block w-fit py-[5px] text-[14px]"
-                  >
-                    {link.label}
-                  </Link>
-                ) : (
-                  <span
-                    key={link.label}
-                    className="block py-[5px] text-[14px] text-[color:var(--bone-faint)]"
-                  >
-                    {link.label}
-                  </span>
-                ),
-              )}
+              {column.links.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="link-quiet block w-fit py-[5px] text-[14px]"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
           ))}
         </div>

@@ -154,6 +154,20 @@ body {
   transform: translateY(calc(var(--sy) * -0.08));
 }
 
+/* All Hallows: the same three blooms, a shade cooler and deeper. Rose
+   drifts toward mauve, plum toward near black, bone toward moonlight. */
+[data-season="all-hallows"] .fog-a {
+  background: radial-gradient(ellipse at center, rgba(128, 102, 128, 0.055), transparent 62%);
+}
+
+[data-season="all-hallows"] .fog-b {
+  background: radial-gradient(ellipse at center, rgba(56, 38, 54, 0.11), transparent 62%);
+}
+
+[data-season="all-hallows"] .fog-c {
+  background: radial-gradient(ellipse at center, rgba(200, 206, 216, 0.032), transparent 62%);
+}
+
 /* --------------------------------------------------------------------------
    Atmosphere: star motes
    -------------------------------------------------------------------------- */
@@ -165,6 +179,14 @@ body {
   font-size: 10px;
   pointer-events: none;
   animation: drift 30s ease-in-out infinite;
+}
+
+/* A mote that is a tiny bat rather than a star. */
+.mote-bat {
+  display: block;
+  width: 15px;
+  height: auto;
+  fill: currentColor;
 }
 
 @keyframes drift {
@@ -428,8 +450,9 @@ body {
     var(--color-ink);
 }
 
-/* Slow turning star mandala behind the hero type. */
-.hero-star {
+/* The engraved mark behind the hero type: the star mandala by default, the
+   bats for All Hallows (see HeroMark.tsx). .hero-turn is the slow turn. */
+.hero-mark {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -438,6 +461,9 @@ body {
   transform: translate(-50%, -50%);
   opacity: 0.09;
   pointer-events: none;
+}
+
+.hero-turn {
   animation: spin 160s linear infinite;
 }
 

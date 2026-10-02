@@ -1,3 +1,4 @@
+import { cache } from "react";
 import {
   ADD_CART_LINES,
   CREATE_CART,
@@ -9,25 +10,42 @@ import {
   UPDATE_CART_LINES,
 } from "./queries";
 import { isStorefrontConfigured, ShopifyError, storefront } from "./client";
-import type { Cart, Product } from "./types";
+import type { Cart, CollectionRef, Product, ProductSummary } from "./types";
 
 export { isStorefrontConfigured, ShopifyError };
 export * from "./types";
 
 type Connection<T> = { nodes: T[] };
-
-type RawProduct = Omit<Product, "images" | "variants"> & {
-  images: Connection<Product["images"][number]>;
-  variants: Connection<Product["variants"][number]>;
+type Page<T> = Connection<T> & {
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
 };
+
+type RawSummary = Omit<ProductSummary, "collections"> & {
+  collections: Connection<CollectionRef>;
+};
+
+type RawProduct = RawSummary &
+  Omit<Product, keyof ProductSummary | "images" | "variants"> & {
+    images: Connection<Product["images"][number]>;
+    variants: Connection<Product["variants"][number]>;
+  };
 
 type RawCart = Omit<Cart, "lines"> & {
   lines: Connection<Cart["lines"][number]>;
 };
 
+function reshapeSummary(raw: RawSummary): ProductSummary {
+  return {
+    ...raw,
+    productType: raw.productType ?? "",
+    collections: raw.collections?.nodes ?? [],
+  };
+}
+
 function reshapeProduct(raw: RawProduct): Product {
   return {
     ...raw,
+    ...reshapeSummary(raw),
     images: raw.images?.nodes ?? [],
     variants: raw.variants?.nodes ?? [],
   };
@@ -53,18 +71,51 @@ async function safe<T>(work: () => Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-export async function getProducts(first = 24): Promise<Product[]> {
-  return safe(async () => {
-    const data = await storefront<{ products: Connection<RawProduct> }>({
-      query: GET_PRODUCTS,
-      variables: { first, sortKey: "BEST_SELLING", reverse: false },
-      tags: ["products"],
-    });
-    return data.products.nodes.map(reshapeProduct);
-  }, []);
+/**
+ * Products per request. Listings ask for card fields only, so a full page
+ * is cheap. Every listing follows the cursor until Shopify says there is no
+ * next page, so nothing is ever cut off by a limit.
+ */
+const PAGE_SIZE = 100;
+/** A runaway guard, not a limit anyone should reach: 100 pages of 100. */
+const MAX_PAGES = 100;
+
+async function collectPages<T>(
+  fetchPage: (after: string | null) => Promise<Page<T> | null>,
+): Promise<T[]> {
+  const items: T[] = [];
+  let after: string | null = null;
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const result = await fetchPage(after);
+    if (!result) break;
+    items.push(...result.nodes);
+    if (!result.pageInfo.hasNextPage || !result.pageInfo.endCursor) break;
+    after = result.pageInfo.endCursor;
+  }
+  return items;
 }
 
-export async function getProduct(handle: string): Promise<Product | null> {
+/*
+ * Reads are wrapped in React's cache so a page and its generateMetadata share
+ * one request. Storefront calls are POSTs, which fetch does not dedupe.
+ */
+
+/** Every product published to the storefront's sales channel. */
+export const getAllProducts = cache(async (): Promise<ProductSummary[]> => {
+  return safe(async () => {
+    const raw = await collectPages<RawSummary>(async (after) => {
+      const data = await storefront<{ products: Page<RawSummary> }>({
+        query: GET_PRODUCTS,
+        variables: { first: PAGE_SIZE, after, sortKey: "BEST_SELLING", reverse: false },
+        tags: ["products"],
+      });
+      return data.products;
+    });
+    return raw.map(reshapeSummary);
+  }, []);
+});
+
+export const getProduct = cache(async (handle: string): Promise<Product | null> => {
   return safe(async () => {
     const data = await storefront<{ product: RawProduct | null }>({
       query: GET_PRODUCT_BY_HANDLE,
@@ -73,38 +124,47 @@ export async function getProduct(handle: string): Promise<Product | null> {
     });
     return data.product ? reshapeProduct(data.product) : null;
   }, null);
-}
+});
 
 export type CollectionResult = {
   title: string;
   description: string;
-  products: Product[];
+  products: ProductSummary[];
 } | null;
 
-export async function getCollection(
-  handle: string,
-  first = 24,
-): Promise<CollectionResult> {
+type RawCollection = {
+  title: string;
+  description: string;
+  products: Page<RawSummary>;
+} | null;
+
+/**
+ * A whole collection, in the order set in Shopify. Returns null when the
+ * handle does not exist or the collection is not published to the
+ * storefront's sales channel.
+ */
+export const getCollection = cache(async (handle: string): Promise<CollectionResult> => {
   return safe(async () => {
-    const data = await storefront<{
-      collection: {
-        title: string;
-        description: string;
-        products: Connection<RawProduct>;
-      } | null;
-    }>({
-      query: GET_COLLECTION_PRODUCTS,
-      variables: { handle, first },
-      tags: ["products", `collection:${handle}`],
+    // Held in an object because it is filled in from inside the page callback.
+    const found: { meta: { title: string; description: string } | null } = { meta: null };
+    const raw = await collectPages<RawSummary>(async (after) => {
+      const data = await storefront<{ collection: RawCollection }>({
+        query: GET_COLLECTION_PRODUCTS,
+        variables: { handle, first: PAGE_SIZE, after },
+        tags: ["products", `collection:${handle}`],
+      });
+      if (!data.collection) return null;
+      found.meta ??= {
+        title: data.collection.title,
+        description: data.collection.description,
+      };
+      return data.collection.products;
     });
-    if (!data.collection) return null;
-    return {
-      title: data.collection.title,
-      description: data.collection.description,
-      products: data.collection.products.nodes.map(reshapeProduct),
-    };
+    if (!found.meta) return null;
+    const { title, description } = found.meta;
+    return { title, description, products: raw.map(reshapeSummary) };
   }, null);
-}
+});
 
 /* -------------------------------------------------------------------------
    Cart

@@ -13,7 +13,7 @@ export default function NotFound() {
       </p>
       <div className="mt-10 flex flex-col gap-4 sm:flex-row">
         <Link href={`/collections/${DROPS.current.handle}`} className="btn btn-solid">
-          Shop Drop {DROPS.current.number}
+          Shop {DROPS.current.title}
         </Link>
         <Link href="/" className="btn">
           Back home

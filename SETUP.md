@@ -32,11 +32,24 @@ Products are created in Tapstitch and synced into Shopify, so:
 1. Open Tapstitch and publish at least one product to Shopify.
 2. In Shopify go to **Products** and confirm it landed there.
 3. Open the product and make sure it is set to **Active**, and that the
-   **Online Store** sales channel is checked under Publishing.
+   **Headless** sales channel is ticked under Publishing (Sales channels).
 
-That last bit matters. The Storefront API only returns products published to
-the Online Store channel. A product that exists but is not published will be
-invisible to the site, which looks exactly like a broken site.
+That last bit matters, and it is the usual reason a new product "does not
+show up". The site's token belongs to the Headless channel (step 2, route A),
+and the Storefront API only returns products and collections published to
+that channel. Tapstitch publishes what it syncs to the Online Store, not to
+Headless, so every new product needs Headless ticked. A product that exists
+but is not published there is invisible to the site, which looks exactly like
+a broken site.
+
+To publish several at once: **Products**, tick them, then **More actions >
+Include in sales channels** (or **Publish**), and choose Headless.
+Collections have their own Publishing setting, so do the same for the drop's
+collection.
+
+`npm run catalog:check` lists exactly what the site's token can see, and
+names any product that is live on the Online Store but missing from the
+site's channel.
 
 ---
 
@@ -143,7 +156,9 @@ These live in Shopify, not in this codebase. The site cannot fix them.
 
 - **Shopify Payments** connected to your bank account, in
   Settings > Payments. Without this you cannot take money.
-- **Price** set to `$34.99` per tee on each product.
+- **Prices** are whatever you set in Shopify. The site reads them, and a
+  card shows "From $X" by itself when a product's variants are not all one
+  price.
 - **Shipping rate exists.** Settings > Shipping and delivery. Create a
   shipping zone covering the United States and give it at least one rate.
   This is not optional. **A store with no shipping rate for the customer's
@@ -164,12 +179,12 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   end of the list. The site sorts sizes into wearing order itself, so this
   does not need fixing, but if you want the admin tidy, drag them into order
   on the product's Variants section.
-- **The `drop-001` collection is optional.** Products > Collections > Create
-  collection, title `Beauty Professionals Club`, and set its handle to
-  `drop-001` under Search engine listing. Add the drop's products and make
-  sure it is published to the Online Store channel. Until it exists, the drop
-  pages simply show every product, which is the same thing while the drop is
-  the whole catalogue.
+- **The current drop's collection.** The featured drop is a Shopify
+  collection whose handle matches `DROPS.current.handle` in
+  `src/lib/brand.ts` (right now `all-hallows`, the ALL HALLOWS collection).
+  The handle is under the collection's Search engine listing. Publish the
+  collection to Headless. Whatever is in it, in the collection's own sort
+  order, is the drop on the homepage and on its collection page.
 - **Policies.** Settings > Policies. The copy for the refund and shipping
   policies is in `src/app/policies/`, and matches what the site shows.
   Paste the same text into Shopify so checkout and site agree. Also click
@@ -191,9 +206,57 @@ These live in Shopify, not in this codebase. The site cannot fix them.
 
 ---
 
-## 7. Do not connect the custom domain to Shopify
+## 7. Adding products: what updates by itself
 
-The domain points at the Cloudflare Pages site, not at Shopify. Shopify keeps
+The site reads the catalogue from Shopify on every visit (allow a few
+minutes at most), so most changes need no code and no redeploy.
+
+**Updates by itself, from Shopify:**
+
+- **New products.** Published to Headless, they appear on Shop all. Every
+  published product is listed, however many there are.
+- **What is in the drop.** Add a product to the drop's collection and it
+  appears in the homepage drop section and on the collection page. Remove it
+  and it goes. The order is the collection's sort order.
+- **Titles, prices, photos, sizes, colours and designs.** Options of any
+  kind (Size, Color, Design, or anything else) become pickers on the product
+  page. Variant images swap the gallery and become design swatches.
+- **Sold out.** A sold out variant is crossed out and cannot be bought.
+- **Descriptions.** A real description shows under the fit note. A blank
+  one (or Tapstitch's lone "." or its supplier sales copy) shows nothing.
+- **Which size chart and fit note a product gets**, from its **Product
+  type**. Use exactly `Oversized Tee`, `Essential Tee` or `Crewneck`. With
+  no type set, the site guesses from the title ("Snow Washed" means the
+  oversized tee, "Essential" the essential tee, "Crew" the crewneck), which
+  works for the current titles but is easy to break with a design name.
+- **Deleting a product.** It disappears from the site and its page 404s.
+
+**Tidy up each new Tapstitch product in Shopify:**
+
+- Tick **Headless** under Publishing.
+- Set the **Product type** (above).
+- Rename a design option called after the product, or "Category", to
+  **Design**, and its values to the design names. "T-Shirts1" is what a
+  shopper would see otherwise.
+- Clear Tapstitch's description, or write your own. The site hides the
+  supplier copy, but it would still show in Shopify's own emails.
+
+**Still needs a code change** (all in `src/lib/brand.ts` unless noted):
+
+- **Switching the featured drop**: `DROPS` (number, name, collection handle
+  and the drop copy). Add the old drop's handles to `RETIRED` so shared
+  links redirect.
+- **Fit notes and size charts**: `FIT_NOTES`, and `src/lib/size-guide.ts`.
+  A brand new garment type also goes in `src/lib/garments.ts`.
+- **The seasonal look**: `SEASON`. Set it to `"default"` after Halloween.
+- **Site copy**: the announcement bar, free shipping threshold, story,
+  perks and policies.
+
+---
+
+## 8. Do not connect the custom domain to Shopify
+
+The domain points at the Cloudflare site, not at Shopify. Shopify keeps
 using its free `myshopify.com` URL, and customers only ever see it during
 checkout.
 
@@ -209,10 +272,16 @@ at your domain and fight with the Cloudflare site.
 The placeholder state is what the site falls back to whenever it cannot read
 products, so it is the symptom of every wiring problem. The actual reason is
 printed in the terminal running `npm run dev`, prefixed `[shopify]`. Read that
-first. Almost always it is one of two things: the **Online Store** sales
-channel is unchecked on the product (step 1), so the Storefront API does not
+first. Almost always it is one of two things: the **Headless** sales
+channel is unticked on the product (step 1), so the Storefront API does not
 return it even though it exists in your admin, or there is a typo in the token
 or the domain.
+
+**A new product does not show up.**
+It is not published to Headless (step 1). Run `npm run catalog:check`: it
+lists what the site can see and names anything live on the Online Store that
+the site cannot. If the whole drop section shows every product instead of
+the drop, the drop's collection is not published to Headless either.
 
 **Checkout URL 404s or errors.**
 Usually no shipping rate for the United States. See step 6.

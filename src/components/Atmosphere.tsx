@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
+import { SEASON } from "@/lib/brand";
+import { BAT_PATH } from "@/components/bat-path";
 
 const MOTES = [
   { left: "12%", top: "18%", delay: "0s", duration: "22s" },
-  { left: "78%", top: "26%", delay: "5s", duration: "26s" },
+  { left: "78%", top: "26%", delay: "5s", duration: "26s", bat: true },
   { left: "34%", top: "62%", delay: "11s", duration: "24s" },
   { left: "64%", top: "74%", delay: "16s", duration: "28s" },
-  { left: "88%", top: "48%", delay: "8s", duration: "21s" },
+  { left: "88%", top: "48%", delay: "8s", duration: "21s", bat: true },
 ];
+
+/** In the All Hallows season, two of the five motes are tiny bats. */
+const BATS = SEASON === "all-hallows";
 
 /**
  * Film grain, parallax fog and a few drifting motes.
@@ -62,7 +67,13 @@ export default function Atmosphere() {
               animationDuration: mote.duration,
             }}
           >
-            ✦
+            {BATS && mote.bat ? (
+              <svg className="mote-bat" viewBox="-22 -9 44 17" aria-hidden="true">
+                <path d={BAT_PATH} />
+              </svg>
+            ) : (
+              "✦"
+            )}
           </span>
         ))}
       </div>

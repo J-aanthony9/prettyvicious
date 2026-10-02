@@ -227,6 +227,10 @@ missing one of the Lists, Profiles or Subscriptions scopes. `404` or a
 message about the list is a wrong `KLAVIYO_LIST_ID`. After fixing a secret,
 redeploy.
 
+**New products are missing from the live site.** Not a deploy problem: the
+products are not published to the Headless sales channel. See SETUP.md
+step 1, and run `npm run catalog:check`.
+
 **Checkout lands on "Opening soon".** That is Shopify's storefront password,
 not this site. Online Store → Preferences → Password protection. See SETUP.md.
 

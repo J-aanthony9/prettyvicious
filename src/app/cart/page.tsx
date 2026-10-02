@@ -6,6 +6,7 @@ import { readCart } from "@/lib/cart-session";
 import { checkoutAction, removeItemAction, updateItemAction } from "@/lib/actions";
 import { formatMoney } from "@/lib/money";
 import { COMMERCE, DROPS } from "@/lib/brand";
+import { optionLabel } from "@/lib/product";
 import type { Money } from "@/lib/shopify/types";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,7 @@ export default async function CartPage() {
       <div className="mx-auto max-w-2xl px-5 py-28 text-center sm:px-8 sm:py-36">
         <SectionHead eyebrow="Your bag" title="Nothing in here yet" />
         <p className="dim mt-10 text-[15px]">
-          Drop {DROPS.current.number} is waiting.
+          {DROPS.current.title} is waiting.
         </p>
         <div className="mt-10">
           <Link href={`/collections/${DROPS.current.handle}`} className="btn btn-solid">
@@ -90,7 +91,10 @@ export default async function CartPage() {
                   </Link>
                   <p className="dim mt-2 text-[14px]">
                     {line.merchandise.selectedOptions
-                      .map((option) => `${option.name}: ${option.value}`)
+                      .map(
+                        (option) =>
+                          `${optionLabel(option.name, line.merchandise.product.title)}: ${option.value}`,
+                      )
                       .join(" · ")}
                   </p>
                 </div>
