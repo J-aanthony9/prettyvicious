@@ -6,7 +6,8 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { readCart } from "@/lib/cart-session";
-import { BRAND, SEASON } from "@/lib/brand";
+import { BRAND, INTRO, SEASON } from "@/lib/brand";
+import WelcomeVeil from "@/components/WelcomeVeil";
 import Script from "next/script";
 
 const cormorant = Cormorant_Garamond({
@@ -91,15 +92,28 @@ export default async function RootLayout({
     <html
       lang="en"
       data-season={SEASON}
+      // The intro script below may add data-intro before React hydrates.
+      suppressHydrationWarning
       className={`${cormorant.variable} ${pirata.variable} ${manrope.variable}`}
     >
       <head>
+        {/* Decides before first paint whether the welcome plays, so the page
+            never shows first and then gets covered. Homepage only, once per
+            drop, never with reduced motion. See WelcomeVeil.tsx. */}
+        {INTRO.enabled ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `try{if(location.pathname==="/"&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!localStorage.getItem(${JSON.stringify(INTRO.storageKey)}))document.documentElement.setAttribute("data-intro","")}catch(e){}`,
+            }}
+          />
+        ) : null}
         {/* Without JS the reveal observer never runs, so show everything. */}
         <noscript>
           <style>{`.reveal { opacity: 1; transform: none; }`}</style>
         </noscript>
       </head>
       <body>
+        <WelcomeVeil />
         <Atmosphere />
         <a
           href="#main"
