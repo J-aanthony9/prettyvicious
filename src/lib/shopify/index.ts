@@ -20,8 +20,9 @@ type Page<T> = Connection<T> & {
   pageInfo: { hasNextPage: boolean; endCursor: string | null };
 };
 
-type RawSummary = Omit<ProductSummary, "collections"> & {
+type RawSummary = Omit<ProductSummary, "collections" | "swatchVariants"> & {
   collections: Connection<CollectionRef>;
+  swatchVariants: Connection<ProductSummary["swatchVariants"][number]>;
 };
 
 type RawProduct = RawSummary &
@@ -39,6 +40,7 @@ function reshapeSummary(raw: RawSummary): ProductSummary {
     ...raw,
     productType: raw.productType ?? "",
     collections: raw.collections?.nodes ?? [],
+    swatchVariants: raw.swatchVariants?.nodes ?? [],
   };
 }
 
@@ -61,12 +63,19 @@ function reshapeCart(raw: RawCart): Cart {
  * 500 page. Cart writes below do the opposite: they surface the failure,
  * because a silent add to cart is worse than an error.
  */
-async function safe<T>(work: () => Promise<T>, fallback: T): Promise<T> {
-  if (!isStorefrontConfigured()) return fallback;
+async function safe<T>(label: string, work: () => Promise<T>, fallback: T): Promise<T> {
+  if (!isStorefrontConfigured()) {
+    console.warn(`[shopify] ${label}: Shopify is not configured, showing placeholders.`);
+    return fallback;
+  }
   try {
     return await work();
   } catch (error) {
-    console.error("[shopify]", error);
+    // One line that names the read and Shopify's own words, so a single
+    // `wrangler tail` shows what failed without digging.
+    const message = error instanceof Error ? error.message : String(error);
+    const detail = error instanceof ShopifyError && error.detail ? ` ${JSON.stringify(error.detail).slice(0, 400)}` : "";
+    console.error(`[shopify] ${label} failed: ${message}${detail}`);
     return fallback;
   }
 }
@@ -102,7 +111,7 @@ async function collectPages<T>(
 
 /** Every product published to the storefront's sales channel. */
 export const getAllProducts = cache(async (): Promise<ProductSummary[]> => {
-  return safe(async () => {
+  return safe("getAllProducts", async () => {
     const raw = await collectPages<RawSummary>(async (after) => {
       const data = await storefront<{ products: Page<RawSummary> }>({
         query: GET_PRODUCTS,
@@ -111,12 +120,19 @@ export const getAllProducts = cache(async (): Promise<ProductSummary[]> => {
       });
       return data.products;
     });
+    if (raw.length === 0) {
+      // Not an error to Shopify, but the usual reason for an empty site.
+      console.warn(
+        "[shopify] getAllProducts: the storefront token sees 0 products. " +
+          "Publish them to the Headless sales channel (SETUP.md step 1).",
+      );
+    }
     return raw.map(reshapeSummary);
   }, []);
 });
 
 export const getProduct = cache(async (handle: string): Promise<Product | null> => {
-  return safe(async () => {
+  return safe(`getProduct ${handle}`, async () => {
     const data = await storefront<{ product: RawProduct | null }>({
       query: GET_PRODUCT_BY_HANDLE,
       variables: { handle },
@@ -144,7 +160,7 @@ type RawCollection = {
  * storefront's sales channel.
  */
 export const getCollection = cache(async (handle: string): Promise<CollectionResult> => {
-  return safe(async () => {
+  return safe(`getCollection ${handle}`, async () => {
     // Held in an object because it is filled in from inside the page callback.
     const found: { meta: { title: string; description: string } | null } = { meta: null };
     const raw = await collectPages<RawSummary>(async (after) => {
@@ -187,7 +203,7 @@ function unwrapCart(payload: CartMutationPayload | undefined): Cart {
 }
 
 export async function getCart(cartId: string): Promise<Cart | null> {
-  return safe(async () => {
+  return safe("getCart", async () => {
     const data = await storefront<{ cart: RawCart | null }>({
       query: GET_CART,
       variables: { id: cartId },

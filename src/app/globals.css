@@ -564,3 +564,46 @@ body {
     radial-gradient(ellipse 100% 80% at 50% 120%, rgba(40, 26, 30, 0.85), transparent 70%),
     var(--color-veil);
 }
+
+/* --------------------------------------------------------------------------
+   Bottom sheet (size guide on the product page)
+   Slides up on phones, fades in as a dialog on wider screens.
+   -------------------------------------------------------------------------- */
+
+.sheet {
+  animation: sheet-up 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.25s ease;
+}
+
+.sheet-backdrop {
+  animation: fade-in 0.3s ease;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Add to bag: the toast rises in, the nav count pulses once. */
+.toast {
+  animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bag-pulse {
+  display: inline-block;
+  animation: bag-pulse 0.7s ease;
+}
+
+@keyframes bag-pulse {
+  30% {
+    transform: scale(1.18);
+    color: var(--color-accent);
+  }
+}

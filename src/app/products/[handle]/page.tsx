@@ -12,6 +12,7 @@ import { cleanDescriptionHtml, cleanDescriptionText, inCurrentDrop } from "@/lib
 export const revalidate = 300;
 
 type Params = { params: Promise<{ handle: string }> };
+type Props = Params & { searchParams: Promise<{ design?: string | string[] }> };
 
 // No generateStaticParams here, on purpose. The root layout reads the cart
 // cookie, so every page renders per request. Prebuilding product pages made
@@ -35,8 +36,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function ProductPage({ params }: Params) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const { handle } = await params;
+  const design = (await searchParams).design;
   const product = await getProduct(handle);
   if (!product) notFound();
 
@@ -58,7 +60,10 @@ export default async function ProductPage({ params }: Params) {
         <span>{product.title}</span>
       </nav>
 
-      <ProductProvider product={product}>
+      <ProductProvider
+        product={product}
+        initialDesign={typeof design === "string" ? design : undefined}
+      >
         <div className="grid gap-14 lg:grid-cols-2 lg:gap-20">
           <VariantGallery />
 
@@ -66,7 +71,7 @@ export default async function ProductPage({ params }: Params) {
             <p className="eyebrow">{eyebrow}</p>
             <h1 className="display mt-6 text-[clamp(1.4rem,4vw,2.2rem)]">{product.title}</h1>
 
-            <AddToCart sizeGuideHref={chartHref} />
+            <AddToCart garment={garment} />
 
             {/* The fit note sits right by the size picker on purpose. Only
                 garments with a written note make a fit claim; the rest get
