@@ -12,7 +12,7 @@ export default function DropLedger() {
   const next = DROPS.next;
 
   return (
-    <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-[18px] gap-y-3 border-y border-[color:var(--hairline-soft)] bg-ink px-[clamp(20px,4vw,48px)] py-[15px] text-center md:justify-between">
+    <div className="ledger relative z-10 flex flex-wrap items-center justify-center gap-x-[18px] gap-y-3 border-y border-[color:var(--hairline-soft)] bg-ink px-[clamp(20px,4vw,48px)] py-[15px] text-center md:justify-between">
       <Link href={`/collections/${DROPS.current.handle}`} className={`${ITEM} group py-1`}>
         Drop {DROPS.current.number}{" "}
         <span className="text-accent transition-transform duration-500 group-hover:translate-x-1">

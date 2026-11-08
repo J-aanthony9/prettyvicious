@@ -8,6 +8,7 @@ import { formatMoney } from "@/lib/money";
 import { COMMERCE, DROPS } from "@/lib/brand";
 import { optionLabel } from "@/lib/product";
 import type { Money } from "@/lib/shopify/types";
+import HolidayNote from "@/components/HolidayNote";
 
 export const dynamic = "force-dynamic";
 
@@ -159,6 +160,7 @@ export default async function CartPage() {
         <p className="dim mt-4 text-[14px] leading-[1.8]">
           {freeShippingNote(cart!.cost.subtotalAmount)} ✦
         </p>
+        <HolidayNote className="mt-3" />
         <p className="mt-2 text-[13px] text-[color:var(--bone-faint)]">
           Shipping and taxes calculated at checkout. We ship within the{" "}
           {COMMERCE.shipsTo} only.

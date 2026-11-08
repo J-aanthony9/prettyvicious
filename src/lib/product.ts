@@ -169,20 +169,88 @@ export function productImages(product: Product): ShopifyImage[] {
   });
 }
 
+/* Front and back.
+   Tapstitch lists a piece as: the front mockup (attached to every variant
+   of its design), then the back mockup (attached to no variant), then the
+   other designs' fronts. So the back is found by its alt text when someone
+   has written one ("..., back"), and otherwise as the first image that no
+   variant uses. A product whose images are not attached to variants at all
+   is left alone, since there is no telling its pictures apart. */
+
+const BACK_ALT = /\bback\b/i;
+const FRONT_ALT = /\bfront\b/i;
+
+type ImageSource = Pick<ProductSummary, "featuredImage" | "cardImages" | "swatchVariants"> & {
+  images?: ShopifyImage[];
+  variants?: Array<Pick<ProductVariant, "image">>;
+};
+
+/** The back print, when one can be told apart from the fronts. */
+export function backImage(product: ImageSource): ShopifyImage | null {
+  // Only a full product carries `images` and `variants` as lists.
+  const fullImages = Array.isArray(product.images) ? product.images : [];
+  const fullVariants = Array.isArray(product.variants) ? product.variants : [];
+  const images = (fullImages.length ? fullImages : product.cardImages).filter(
+    (image) => !CHART_IMAGE.test(imagePath(image.url)),
+  );
+  const byAlt = images.find((image) => image.altText && BACK_ALT.test(image.altText));
+  if (byAlt) return byAlt;
+  if (images.some((image) => image.altText && FRONT_ALT.test(image.altText))) {
+    // Alt text is in use and none says back: trust it, there is no back.
+    return null;
+  }
+  const attached = new Set(
+    [...product.swatchVariants, ...fullVariants]
+      .map((variant) => variant.image?.url)
+      .filter(Boolean) as string[],
+  );
+  if (!attached.size) return null;
+  return (
+    images.find((image) => !attached.has(image.url) && image.url !== product.featuredImage?.url) ??
+    null
+  );
+}
+
+/**
+ * Lead with the back for pieces in the current drop when the drop says so
+ * (DROPS.current.leadWithBack). Returns the back to lead with, or null.
+ */
+export function leadBack(product: ImageSource & Pick<ProductSummary, "collections">): ShopifyImage | null {
+  if (!DROPS.current.leadWithBack || !inCurrentDrop(product)) return null;
+  return backImage(product);
+}
+
 /**
  * The gallery for the chosen variant. When variants carry different images
  * (one per design or colour), the chosen one leads and the other variants'
  * images step aside, so picking "Lashes Never Die" never shows another
  * design's front. Images attached to no variant (a back view, say) stay.
+ * When the drop leads with the back, the back goes first.
  */
 export function galleryFor(product: Product, variant: ProductVariant | null): ShopifyImage[] {
   const all = productImages(product);
   const variantUrls = new Set(
     product.variants.map((candidate) => candidate.image?.url).filter(Boolean) as string[],
   );
-  if (variantUrls.size <= 1 || !variant?.image) return all;
-  const shared = all.filter((image) => !variantUrls.has(image.url));
-  return [variant.image, ...shared];
+  const back = leadBack(product);
+  let ordered = all;
+  if (variantUrls.size > 1 && variant?.image) {
+    ordered = [variant.image, ...all.filter((image) => !variantUrls.has(image.url))];
+  }
+  // The back is the hero of this drop: it goes first, the front second.
+  if (back) ordered = [back, ...ordered.filter((image) => image.url !== back.url)];
+  return ordered;
+}
+
+/** "Back" or "Front" for the gallery's labels, or null when it cannot tell. */
+export function imageSide(product: Product, image: ShopifyImage): "Back" | "Front" | null {
+  const back = backImage(product);
+  if (!back) return null;
+  if (image.url === back.url) return "Back";
+  const attached = product.variants.some((variant) => variant.image?.url === image.url);
+  if (attached || image.url === product.featuredImage?.url) return "Front";
+  if (image.altText && FRONT_ALT.test(image.altText)) return "Front";
+  return null;
 }
 
 /* -------------------------------------------------------------------------

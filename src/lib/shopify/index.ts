@@ -20,8 +20,9 @@ type Page<T> = Connection<T> & {
   pageInfo: { hasNextPage: boolean; endCursor: string | null };
 };
 
-type RawSummary = Omit<ProductSummary, "collections" | "swatchVariants"> & {
+type RawSummary = Omit<ProductSummary, "collections" | "swatchVariants" | "cardImages"> & {
   collections: Connection<CollectionRef>;
+  cardImages: Connection<ProductSummary["cardImages"][number]>;
   swatchVariants: Connection<ProductSummary["swatchVariants"][number]>;
 };
 
@@ -40,6 +41,7 @@ function reshapeSummary(raw: RawSummary): ProductSummary {
     ...raw,
     productType: raw.productType ?? "",
     collections: raw.collections?.nodes ?? [],
+    cardImages: raw.cardImages?.nodes ?? [],
     swatchVariants: raw.swatchVariants?.nodes ?? [],
   };
 }

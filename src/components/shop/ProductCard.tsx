@@ -1,12 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
-import { cardNote, cardSwatches, hasPriceRange, inCurrentDrop } from "@/lib/product";
+import { cardNote, cardSwatches, hasPriceRange, inCurrentDrop, leadBack } from "@/lib/product";
 import { DROPS } from "@/lib/brand";
 import type { ProductSummary } from "@/lib/shopify/types";
 
 export default function ProductCard({ product }: { product: ProductSummary }) {
-  const image = product.featuredImage;
+  // This drop's hero is the back print. When the card can find it, the back
+  // leads and the front shows on hover (mice only; on a phone the swatches
+  // and the product page carry the front).
+  const back = leadBack(product);
+  const front = product.featuredImage;
+  const image = back ?? front;
+  const sizes = "(min-width: 900px) 33vw, (min-width: 560px) 50vw, 100vw";
   const soldOut = !product.availableForSale;
   // The badge names the drop only for pieces that are actually in it, so a
   // product from any other collection never claims to be part of the drop.
@@ -23,14 +29,30 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
           {image ? (
             <Image
               src={image.url}
-              alt={image.altText || product.title}
+              alt={back ? `${product.title}, back` : image.altText || product.title}
               fill
-              sizes="(min-width: 900px) 33vw, (min-width: 560px) 50vw, 100vw"
+              sizes={sizes}
               className="object-cover"
             />
           ) : (
             <span className="text-[22px] text-accent">✦</span>
           )}
+          {back && front ? (
+            <>
+              <Image
+                src={front.url}
+                alt=""
+                fill
+                sizes={sizes}
+                loading="lazy"
+                className="object-cover opacity-0 transition-opacity duration-500 [@media(hover:hover)]:group-hover:opacity-100"
+              />
+              <span className="pointer-events-none absolute bottom-3 right-3 rounded-sm bg-ink/75 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-bone">
+                <span className="[@media(hover:hover)]:group-hover:hidden">Back</span>
+                <span className="hidden [@media(hover:hover)]:group-hover:inline">Front</span>
+              </span>
+            </>
+          ) : null}
 
           {badge ? (
             <span className="absolute left-3 top-3 rounded-sm bg-accent px-[9px] py-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-[#171012]">

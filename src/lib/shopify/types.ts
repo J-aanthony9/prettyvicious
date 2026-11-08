@@ -48,6 +48,8 @@ export type ProductSummary = {
   availableForSale: boolean;
   tags: string[];
   featuredImage: ShopifyImage | null;
+  /** The first few product images, enough to find the back print. */
+  cardImages: ShopifyImage[];
   options: ProductOption[];
   collections: CollectionRef[];
   /** Options and image of each variant, for swatches on cards. */

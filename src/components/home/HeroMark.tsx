@@ -1,4 +1,5 @@
-import { SEASON } from "@/lib/brand";
+import { FROST_BACKGROUND, SEASON } from "@/lib/brand";
+import { crackWeb, frostCorner } from "@/components/home/frost";
 import { BAT_PATH } from "@/components/bat-path";
 import { BatHalf } from "@/components/BatEngraving";
 
@@ -45,6 +46,49 @@ function Bats() {
   );
 }
 
+/**
+ * Naughty List, option one: engraved frost feathering in from all four
+ * corners, as on a window pane. Each corner grows from its own seed so the
+ * mirroring never shows.
+ */
+const CORNERS = [
+  { corner: "tl", path: frostCorner(11) },
+  { corner: "tr", path: frostCorner(23) },
+  { corner: "bl", path: frostCorner(37) },
+  { corner: "br", path: frostCorner(41) },
+] as const;
+
+function Frost() {
+  return (
+    <>
+      {CORNERS.map(({ corner, path }) => (
+        <svg
+          key={corner}
+          className={`hero-frost hero-frost-${corner}`}
+          viewBox="0 0 300 300"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path d={path} stroke="#DCE6EE" strokeWidth={0.6} strokeLinecap="round" />
+        </svg>
+      ))}
+    </>
+  );
+}
+
+/** Naughty List, option two: a faint web of cracked ice behind the mark. */
+const CRACKS = crackWeb();
+
+function Cracks() {
+  return (
+    <svg className="hero-mark" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+      <path d={CRACKS} stroke="#DCE6EE" strokeWidth={0.6} strokeLinecap="round" />
+      <circle cx="200" cy="200" r="192" stroke="#DCE6EE" strokeWidth={0.6} strokeDasharray="1 10" opacity=".6" />
+    </svg>
+  );
+}
+
 export default function HeroMark() {
+  if (SEASON === "naughty-list") return FROST_BACKGROUND === "cracks" ? <Cracks /> : <Frost />;
   return SEASON === "all-hallows" ? <Bats /> : <Star />;
 }

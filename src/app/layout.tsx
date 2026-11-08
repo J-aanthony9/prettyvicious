@@ -6,8 +6,14 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { readCart } from "@/lib/cart-session";
-import { BRAND, INTRO, SEASON } from "@/lib/brand";
+import { BRAND, ICE_INTRO, INTRO, SEASON } from "@/lib/brand";
 import WelcomeVeil from "@/components/WelcomeVeil";
+import IceIntroGate from "@/components/intro/IceIntroGate";
+
+/** The All Hallows bat welcome only runs in its own season. */
+const BAT_WELCOME = INTRO.enabled && SEASON === "all-hallows";
+/** The Naughty List ice intro: client only, homepage only, once a session. */
+const ICE = ICE_INTRO && SEASON === "naughty-list";
 import Script from "next/script";
 
 const cormorant = Cormorant_Garamond({
@@ -100,7 +106,7 @@ export default async function RootLayout({
         {/* Decides before first paint whether the welcome plays, so the page
             never shows first and then gets covered. Homepage only, once per
             drop, never with reduced motion. See WelcomeVeil.tsx. */}
-        {INTRO.enabled ? (
+        {BAT_WELCOME ? (
           <script
             dangerouslySetInnerHTML={{
               __html: `try{if(location.pathname==="/"&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!localStorage.getItem(${JSON.stringify(INTRO.storageKey)}))document.documentElement.setAttribute("data-intro","")}catch(e){}`,
@@ -113,7 +119,8 @@ export default async function RootLayout({
         </noscript>
       </head>
       <body>
-        <WelcomeVeil />
+        {BAT_WELCOME ? <WelcomeVeil /> : null}
+        {ICE ? <IceIntroGate /> : null}
         <Atmosphere />
         <a
           href="#main"

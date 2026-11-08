@@ -168,6 +168,45 @@ body {
   background: radial-gradient(ellipse at center, rgba(200, 206, 216, 0.032), transparent 62%);
 }
 
+/* Naughty List: the blooms go cold. Rose turns to frost blue, plum to
+   blue-black, bone to the light off snow. */
+[data-season="naughty-list"] .fog-a {
+  background: radial-gradient(ellipse at center, rgba(150, 172, 192, 0.05), transparent 62%);
+}
+
+[data-season="naughty-list"] .fog-b {
+  background: radial-gradient(ellipse at center, rgba(34, 46, 60, 0.13), transparent 62%);
+}
+
+[data-season="naughty-list"] .fog-c {
+  background: radial-gradient(ellipse at center, rgba(214, 226, 238, 0.035), transparent 62%);
+}
+
+/* Snowfall (Naughty List). Each flake falls the height of the viewport
+   with a slight sway, very slowly. Transform only, so it stays on the
+   compositor. */
+.flake {
+  position: absolute;
+  top: -12vh;
+  color: #dce6ee;
+  opacity: 0.32;
+  line-height: 1;
+  pointer-events: none;
+  animation: snow-fall 40s linear infinite;
+}
+
+@keyframes snow-fall {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(14px, 62vh, 0);
+  }
+  100% {
+    transform: translate3d(-6px, 128vh, 0);
+  }
+}
+
 /* --------------------------------------------------------------------------
    Atmosphere: star motes
    -------------------------------------------------------------------------- */
@@ -367,6 +406,12 @@ body {
   .mote {
     animation: none;
     opacity: 0.3;
+  }
+
+  /* No falling: each flake rests where it was placed. */
+  .flake {
+    animation: none !important;
+    top: var(--rest);
   }
 
   .fog {
@@ -773,5 +818,199 @@ html[data-intro] .veil.veil-leaving {
   to {
     opacity: 0;
     visibility: hidden;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Naughty List hero and frost
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* A deeper winter red, used sparingly (the Christmas notice). Dusty
+     burgundy stays the main accent. */
+  --color-winter: #8e2f3b;
+  --frost: rgba(220, 230, 238, 0.42);
+}
+
+.hero-frozen {
+  width: clamp(140px, 40vw, 230px);
+  height: auto;
+  filter: drop-shadow(0 0 28px rgba(190, 210, 228, 0.16)) drop-shadow(0 18px 40px rgba(0, 0, 0, 0.6));
+  animation: frozen-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes frozen-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+/* Engraved frost feathering in from the corners, at the same quiet opacity
+   as the other hero marks. */
+.hero-frost {
+  position: absolute;
+  width: min(74vw, 520px);
+  height: auto;
+  aspect-ratio: 1;
+  opacity: 0.13;
+  pointer-events: none;
+  animation: frost-creep 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-frost-tl {
+  top: 0;
+  left: 0;
+}
+
+.hero-frost-tr {
+  top: 0;
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.hero-frost-bl {
+  bottom: 0;
+  left: 0;
+  transform: scaleY(-1);
+}
+
+.hero-frost-br {
+  right: 0;
+  bottom: 0;
+  transform: scale(-1, -1);
+}
+
+@keyframes frost-creep {
+  from {
+    opacity: 0;
+    clip-path: circle(0% at 0 0);
+  }
+  to {
+    opacity: 0.13;
+    clip-path: circle(150% at 0 0);
+  }
+}
+
+/* A hint of frost on the dividers and the ledger strip. */
+[data-season="naughty-list"] .rule {
+  background: linear-gradient(90deg, transparent, var(--hairline) 18%, var(--frost) 50%, var(--hairline) 82%, transparent);
+  box-shadow: 0 0 10px rgba(220, 230, 238, 0.08);
+}
+
+[data-season="naughty-list"] .ledger {
+  border-image: linear-gradient(90deg, var(--hairline-soft), rgba(220, 230, 238, 0.22), var(--hairline-soft)) 1;
+}
+
+/* ---------- Ice intro (components/intro/IceIntro.tsx) ---------- */
+/* Fixed over everything, client rendered only, so it never shifts layout
+   and never exists without JavaScript. */
+.ice {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  touch-action: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: opacity 280ms ease-out;
+}
+
+.ice-fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Wiped glass is clear but wet, a shade darker than the room behind it.
+   This sits under the fog canvas and shows wherever the fog is wiped, so the
+   writing reads the same over light and dark parts of the page. It darkens
+   in with the fog, and lifts the moment the glass breaks. */
+.ice-wet {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 8, 12, 0.66);
+  animation: ice-wet-in 600ms ease-out both;
+  transition: opacity 240ms ease-out;
+}
+
+.ice-wet-still {
+  animation: none;
+}
+
+.ice-broken .ice-wet {
+  opacity: 0;
+}
+
+.ice-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ice-prompt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--ice-prompt-top, 62%);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #0b0f14;
+  text-shadow: 0 0 14px rgba(206, 214, 222, 0.8);
+  animation: ice-prompt-in 500ms ease-out both;
+  pointer-events: none;
+}
+
+.ice-prompt-pulse {
+  animation:
+    ice-prompt-in 500ms ease-out both,
+    ice-pulse 2.2s ease-in-out 500ms infinite;
+}
+
+.ice-skip {
+  position: absolute;
+  right: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  padding: 14px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(16, 21, 27, 0.72);
+  cursor: pointer;
+}
+
+.ice-skip:focus-visible {
+  outline: 1px solid #10151b;
+  outline-offset: -4px;
+}
+
+/* The hero's own frozen-in animation waits until the glass is gone. */
+html[data-ice="on"] .hero-frozen,
+html[data-ice="on"] .hero-frost {
+  animation-play-state: paused;
+}
+
+@keyframes ice-prompt-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes ice-wet-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ice-pulse {
+  50% {
+    opacity: 0.45;
   }
 }
