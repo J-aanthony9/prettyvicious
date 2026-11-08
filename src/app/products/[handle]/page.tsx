@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import VariantGallery from "@/components/shop/VariantGallery";
 import AddToCart from "@/components/shop/AddToCart";
+import HolidayNote from "@/components/HolidayNote";
 import { ProductProvider } from "@/components/shop/ProductContext";
 import { getProduct } from "@/lib/shopify";
-import { BRAND, COMMERCE, DROPS, FIT_NOTES, PRODUCT_BLURB } from "@/lib/brand";
+import { BRAND, COMMERCE, DROPS, FIT_NOTES, PRODUCT_BLURB, RETIRED } from "@/lib/brand";
 import { GARMENTS, garmentFor, sizeGuideHref } from "@/lib/garments";
 import { cleanDescriptionHtml, cleanDescriptionText, inCurrentDrop } from "@/lib/product";
 
@@ -40,7 +41,14 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const { handle } = await params;
   const design = (await searchParams).design;
   const product = await getProduct(handle);
-  if (!product) notFound();
+  if (!product) {
+    // A retired drop's product that has left the storefront: send the shared
+    // link to the current drop instead of a dead end.
+    if ((RETIRED.products as readonly string[]).includes(handle)) {
+      redirect(`/collections/${DROPS.current.handle}`);
+    }
+    notFound();
+  }
 
   const garment = garmentFor(product);
   const fitNote = garment ? FIT_NOTES[garment] : null;
@@ -72,6 +80,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
             <h1 className="display mt-6 text-[clamp(1.4rem,4vw,2.2rem)]">{product.title}</h1>
 
             <AddToCart garment={garment} />
+            <HolidayNote className="mt-5" />
 
             {/* The fit note sits right by the size picker on purpose. Only
                 garments with a written note make a fit claim; the rest get

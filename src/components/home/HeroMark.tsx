@@ -1,4 +1,5 @@
-import { SEASON } from "@/lib/brand";
+import { FROST_BACKGROUND, SEASON } from "@/lib/brand";
+import { crackWeb } from "@/components/home/frost";
 import { BAT_PATH } from "@/components/bat-path";
 import { BatHalf } from "@/components/BatEngraving";
 
@@ -45,6 +46,49 @@ function Bats() {
   );
 }
 
+/**
+ * Naughty List, option one: engraved frost feathering in from all four
+ * corners, as on a window pane. Each corner grows from its own seed so the
+ * mirroring never shows. The drawings are static files (public/frost, made
+ * by scripts/build-frost.mjs) so their long paths stay out of the HTML, and
+ * they are drawn as CSS masks, so the browser never mistakes decoration for
+ * the page's main content when it measures load speed.
+ */
+const CORNERS = [
+  { corner: "tl", seed: 11 },
+  { corner: "tr", seed: 23 },
+  { corner: "bl", seed: 37 },
+  { corner: "br", seed: 41 },
+] as const;
+
+function Frost() {
+  return (
+    <>
+      {CORNERS.map(({ corner, seed }) => (
+        <div
+          key={corner}
+          aria-hidden="true"
+          className={`hero-frost frost-mask hero-frost-${corner}`}
+          style={{ "--frost-src": `url(/frost/frost-${seed}.svg)` } as React.CSSProperties}
+        />
+      ))}
+    </>
+  );
+}
+
+/** Naughty List, option two: a faint web of cracked ice behind the mark. */
+const CRACKS = crackWeb();
+
+function Cracks() {
+  return (
+    <svg className="hero-mark" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+      <path d={CRACKS} stroke="#DCE6EE" strokeWidth={0.6} strokeLinecap="round" />
+      <circle cx="200" cy="200" r="192" stroke="#DCE6EE" strokeWidth={0.6} strokeDasharray="1 10" opacity=".6" />
+    </svg>
+  );
+}
+
 export default function HeroMark() {
+  if (SEASON === "naughty-list") return FROST_BACKGROUND === "cracks" ? <Cracks /> : <Frost />;
   return SEASON === "all-hallows" ? <Bats /> : <Star />;
 }

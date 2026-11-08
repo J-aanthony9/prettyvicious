@@ -24,17 +24,38 @@ const FRAME = "bg-white";
 export default function Gallery({
   images,
   title,
+  start = 0,
+  labels = {},
 }: {
   images: ShopifyImage[];
   title: string;
+  /** The image to open on. */
+  start?: number;
+  /** "Front" or "Back" by image URL, shown on the image when known. */
+  labels?: Record<string, "Front" | "Back">;
 }) {
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(start);
   const [open, setOpen] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const count = images.length;
   const current = images[active];
 
   useScrollLock(open);
+
+  // Open the phone track on the starting image, without a visible scroll.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (start > 0 && track) track.scrollTo({ left: start * track.clientWidth, behavior: "instant" });
+    // Only on mount: the gallery is remounted whenever its images change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const tag = (url: string) =>
+    labels[url] ? (
+      <span className="pointer-events-none absolute left-3 top-3 rounded-sm bg-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-bone">
+        {labels[url]}
+      </span>
+    ) : null;
 
   const step = useCallback(
     (delta: number) => setActive((index) => (index + delta + count) % count),
@@ -105,6 +126,7 @@ export default function Gallery({
                 sizes="100vw"
                 className="object-contain"
               />
+              {tag(image.url)}
             </button>
           ))}
         </div>
@@ -116,7 +138,7 @@ export default function Gallery({
                 type="button"
                 role="tab"
                 aria-selected={index === active}
-                aria-label={`Image ${index + 1} of ${count}`}
+                aria-label={labels[image.url] ?? `Image ${index + 1} of ${count}`}
                 onClick={() => scrollTrackTo(index)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   index === active ? "w-6 bg-accent" : "w-1.5 bg-[color:var(--hairline)]"
@@ -146,6 +168,7 @@ export default function Gallery({
           <span className="pointer-events-none absolute bottom-3 right-3 rounded-sm bg-ink/80 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-bone opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
             Click to zoom
           </span>
+          {tag(current.url)}
         </button>
 
         {count > 1 ? (
@@ -155,7 +178,7 @@ export default function Gallery({
                 key={image.url}
                 type="button"
                 onClick={() => setActive(index)}
-                aria-label={image.altText || `View image ${index + 1}`}
+                aria-label={labels[image.url] ? `${labels[image.url]} view` : image.altText || `View image ${index + 1}`}
                 aria-current={index === active}
                 className={`relative aspect-square overflow-hidden border transition-colors duration-400 ${FRAME} ${
                   index === active
@@ -164,6 +187,11 @@ export default function Gallery({
                 }`}
               >
                 <Image src={image.url} alt="" fill sizes="120px" className="object-contain" />
+                {labels[image.url] ? (
+                  <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-ink/75 py-0.5 text-center text-[9px] font-semibold uppercase tracking-[0.2em] text-bone">
+                    {labels[image.url]}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -181,6 +209,7 @@ export default function Gallery({
         >
           <div className="flex items-center justify-between px-5 py-4">
             <span className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--bone-dim)]">
+              {labels[current.url] ? `${labels[current.url]} · ` : ""}
               {active + 1} / {count}
             </span>
             <button

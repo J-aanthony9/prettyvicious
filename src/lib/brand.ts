@@ -43,24 +43,32 @@ export const ANNOUNCEMENT = `Free U.S. shipping on orders over $${FREE_SHIPPING_
  */
 export const DROPS = {
   current: {
-    number: "002",
-    title: "All Hallows",
-    handle: "all-hallows",
+    number: "003",
+    title: "Naughty List",
+    handle: "naughty-list",
     /** Homepage drop section heading. */
-    heading: "To Die For",
+    heading: "Never Nice",
     /** Homepage drop section line. {count} becomes the piece count, spelled out. */
-    sub: "{count} pieces for the haunting season. Printed dark.",
-    /** Hero line, after the positioning sentence. */
-    heroLine: "Drop 002 is All Hallows. Booked to death, still to die for.",
+    sub: "{count} pieces, frozen in. Printed dark.",
+    /** Hero line, after the positioning sentence (seasons without their own hero). */
+    heroLine: "Drop 003 is Naughty List, for the ones who were never trying to be nice.",
+    /** The Naughty List hero: "Drop 003" over the drop name, then this. */
+    status: "Out now",
+    /**
+     * Lead product cards with the back print when one can be found. This
+     * drop's pieces carry a small front graphic and a large back graphic,
+     * and the back is the hero.
+     */
+    leadWithBack: true,
   },
   /** Teased in the ledger strip. Null shows "Under wraps". */
   next: null as { number: string; title: string } | null,
 } as const;
 
 /**
- * The first-visit welcome on the homepage (components/WelcomeVeil.tsx).
- * Plays once per visitor per drop: the storage key carries the drop number,
- * so the next drop greets everyone again. Set enabled to false to turn it off.
+ * The All Hallows first-visit welcome (components/WelcomeVeil.tsx): the bat
+ * draws in and the drop name bleeds in. Kept for next Halloween; it only
+ * runs while SEASON is "all-hallows". Plays once per visitor per drop.
  */
 export const INTRO = {
   enabled: true,
@@ -70,27 +78,81 @@ export const INTRO = {
 } as const;
 
 /**
- * Old URLs that may already be shared. Each one redirects to the current
- * drop's collection page (see next.config.ts). Add a retired drop's handles
- * here when it is replaced.
+ * Old URLs that may already be shared. Each one sends visitors to the
+ * current drop's collection page. Add a retired drop's handles here when it
+ * is replaced.
+ *
+ * Collections always redirect (next.config.ts). Products redirect only once
+ * the product is gone from the storefront (unpublished or deleted), so a
+ * piece that is still live never turns into a dead link from Shop all.
  */
 export const RETIRED = {
-  collections: ["drop-001"],
+  collections: ["drop-001", "all-hallows"],
   products: [
+    // Drop 001
     "the-lash-artist-tee",
     "the-nail-tech-tee",
     "the-hair-stylist-tee",
     "the-esthetician-tee",
+    // Drop 002, All Hallows
+    "ghost-tees",
+    "nails-never-die-snow-washed-oversized-ghost-tee",
+    "booked-to-death-snow-washed-oversized-tee",
+    "booked-to-death-essential-tee",
+    "pretty-vicious-snow-washed-oversized-ghost-crew",
+    "never-dies-snow-washed-oversized-tee",
+    "pretty-vicious-oversized-ghost-crew",
+    "booked-to-death-oversized-crew",
+    "never-die-oversized-crew-1",
   ],
 } as const;
 
 /**
- * Seasonal look. "all-hallows" swaps the hero star for engraved bats, lets a
- * couple of bats into the drifting motes and cools the fog a touch. Set it
- * back to "default" after Halloween and everything returns to the core look.
+ * Seasonal look, one switch.
+ *   "naughty-list"  Frozen PV centerpiece, engraved frost, slow snowfall,
+ *                   colder fog, frost on the dividers, and the ice intro.
+ *   "all-hallows"   Engraved bats, bat motes, cooler fog, the bat welcome.
+ *                   Kept for next year; not reachable while unselected.
+ *   "default"       The core look: the star mandala and star motes.
  */
-export type Season = "default" | "all-hallows";
-export const SEASON: Season = "all-hallows";
+export type Season = "default" | "all-hallows" | "naughty-list";
+export const SEASON: Season = "naughty-list";
+
+/**
+ * Naughty List hero background, behind the frozen PV. Two options:
+ *   "frost"  engraved frost creeping in from the edges
+ *   "cracks" a faint web of cracked ice radiating from the centre
+ */
+export const FROST_BACKGROUND: "frost" | "cracks" = "frost";
+
+/**
+ * The homepage ice intro (components/intro): fog creeps over the glass,
+ * "Pretty Vicious" is written into it with a kiss pressed underneath, and
+ * three taps break it (crack, more cracks, shatter). First homepage
+ * visit per browser session only, Naughty List season only. Set to false to
+ * turn it off instantly.
+ */
+export const ICE_INTRO = true;
+
+export const ICE_INTRO_COPY = {
+  /** "script" is fingertip handwriting, "blackletter" is the wordmark revealed by a brush. */
+  lettering: "script" as "script" | "blackletter",
+  promptTouch: "Tap to break the ice",
+  promptPointer: "Click to break the ice",
+  /** After the first tap cracks it. */
+  promptSecond: "Again",
+  /** After the second tap, before the third breaks it. */
+  promptThird: "Once more",
+} as const;
+
+/**
+ * Christmas order-by date (the store's own time zone). Before the end of
+ * this day the site says to order by it; from the next day until Christmas
+ * it says orders will arrive after Christmas; from Dec 26 it goes quiet and
+ * the normal free shipping banner returns. Never promises delivery.
+ */
+export const CHRISTMAS_ORDER_BY = "2026-12-08";
+export const STORE_TIME_ZONE = "America/Chicago";
 
 /** Product page blurb, sits near add to cart. */
 export const PRODUCT_BLURB =
@@ -124,10 +186,30 @@ export const ORIGIN = {
   signature: "Meghan Michelle",
 } as const;
 
-export const CLUB = {
-  line: "Stay connected to everything Pretty Vicious. First looks, new drops, and all the exclusives.",
-  success: "You're in. Watch your inbox, it gets dark in there. ✦",
+/**
+ * The email signup (homepage, #club). Same Klaviyo list all year; only the
+ * words change with the season. Footer and nav keep "Join the club".
+ */
+const CLUB_COPY = {
+  default: {
+    eyebrow: "The Club",
+    heading: "Join the Beauty Professionals Club",
+    line: "Stay connected to everything Pretty Vicious. First looks, new drops, and all the exclusives.",
+    button: "Join the club",
+    pending: "Joining",
+    success: "You're in. Watch your inbox, it gets dark in there. ✦",
+  },
+  "naughty-list": {
+    eyebrow: "The List",
+    heading: "Get on the Naughty List",
+    line: "First looks, new drops, and the exclusives, before anyone nice hears about them.",
+    button: "Get on the list",
+    pending: "Adding you",
+    success: "You're on the list. Watch your inbox, it gets cold in there. ✦",
+  },
 } as const;
+
+export const CLUB = SEASON === "naughty-list" ? CLUB_COPY["naughty-list"] : CLUB_COPY.default;
 
 export const PERKS = [
   {

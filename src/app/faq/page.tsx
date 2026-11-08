@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import { BRAND, COMMERCE } from "@/lib/brand";
+import { HOLIDAY_FAQ, currentHolidayPhase } from "@/lib/holiday";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -43,9 +44,13 @@ const FAQS = [
 ];
 
 export default function FaqPage() {
+  // The Christmas entry sits right after "How long until it arrives?" until
+  // Christmas is over.
+  const faqs =
+    currentHolidayPhase() === "off" ? FAQS : [FAQS[0], FAQS[1], HOLIDAY_FAQ, ...FAQS.slice(2)];
   return (
     <PageShell eyebrow="Help" title="Questions">
-      {FAQS.map((item) => (
+      {faqs.map((item) => (
         <div key={item.q}>
           <h2>{item.q}</h2>
           <p className="mt-3">{item.a}</p>

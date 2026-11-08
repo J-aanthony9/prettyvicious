@@ -22,6 +22,12 @@ export const PRODUCT_SUMMARY_FRAGMENT = /* GraphQL */ `
     featuredImage {
       ...ImageParts
     }
+    # A few images per card, so the back print can lead (lib/product.ts).
+    cardImages: images(first: 8) {
+      nodes {
+        ...ImageParts
+      }
+    }
     options {
       id
       name

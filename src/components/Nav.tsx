@@ -37,7 +37,7 @@ export default function Nav({ cartCount }: { cartCount: number }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 grid h-16 grid-cols-[1fr_auto_1fr] items-center border-b border-[color:var(--hairline-soft)] bg-[rgba(12,10,11,0.82)] px-[clamp(20px,4vw,48px)] backdrop-blur-[14px]">
+      <header className="site-header sticky top-0 z-50 grid h-16 grid-cols-[1fr_auto_1fr] items-center border-b border-[color:var(--hairline-soft)] bg-[rgba(12,10,11,0.82)] px-[clamp(20px,4vw,48px)] backdrop-blur-[14px]">
         <div className="hidden gap-7 md:flex">
           {LINKS.slice(0, 2).map((link) => (
             <Link key={link.href} href={link.href} className={NAV_ITEM}>

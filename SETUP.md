@@ -181,10 +181,35 @@ These live in Shopify, not in this codebase. The site cannot fix them.
   on the product's Variants section.
 - **The current drop's collection.** The featured drop is a Shopify
   collection whose handle matches `DROPS.current.handle` in
-  `src/lib/brand.ts` (right now `all-hallows`, the ALL HALLOWS collection).
+  `src/lib/brand.ts` (right now `naughty-list`, the NAUGHTY LIST collection).
   The handle is under the collection's Search engine listing. Publish the
   collection to Headless. Whatever is in it, in the collection's own sort
   order, is the drop on the homepage and on its collection page.
+- **Launching Naughty List (Drop 003).** Before deploying this drop:
+  1. Create the NAUGHTY LIST collection with the handle `naughty-list`, add
+     the pieces, and publish the collection and every product in it to
+     Headless (Tapstitch only publishes to Online Store).
+  2. Keep each listing in Tapstitch's order: the front mockup first
+     (attached to its variants), then the back mockup (attached to no
+     variant). The site leads cards and product pages with the back. To be
+     certain, give the back image alt text ending in ", back" and the
+     fronts alt text ending in ", front".
+  3. Unpublish the All Hallows products from Headless. Their old URLs then
+     redirect to Naughty List, and /collections/all-hallows always does.
+  4. Run `npm run catalog:check` and check the homepage locally.
+- **Christmas order-by date.** `CHRISTMAS_ORDER_BY` in `src/lib/brand.ts`
+  (December 8, in the store's Central time zone). Until the end of that day
+  the banner, product pages, bag, FAQ and shipping policy say "Order by
+  December 8 for Christmas delivery". From December 9 to 25 they say orders
+  will arrive after Christmas. From December 26 the normal banner returns.
+  The site never says "guaranteed". To preview a phase locally, run
+  `PV_NOW=2026-12-10 npm run dev`.
+- **Ice intro.** `ICE_INTRO` in `src/lib/brand.ts` turns the homepage ice
+  intro on or off. It plays once per browser session on the homepage only.
+  Preview it any time at `/?intro=script` or `/?intro=blackletter`.
+- **Homepage snow.** One light flurry over the hero, the first time the
+  homepage is opened in a browser session (after the ice intro, when it
+  plays). Never on other pages, never with reduced motion.
 - **Policies.** Settings > Policies. The copy for the refund and shipping
   policies is in `src/app/policies/`, and matches what the site shows.
   Paste the same text into Shopify so checkout and site agree. The shipping
