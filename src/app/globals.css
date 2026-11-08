@@ -1247,25 +1247,65 @@ body:has(.hero) .frost-edge-t {
   letter-spacing: 0;
 }
 
-/* The frozen PV, hovering: the block drifts up and down a few pixels with
-   a slight sway, and its shadow on the ground below tightens and fades as
-   it rises. Transform and opacity only, so it never repaints. */
+/* The frozen PV, holographic. An iridescent sheen drifts slowly across
+   the ice and a soft glare wanders over it on a different beat, both
+   clipped to the PV by the image's own transparency. Each moves an
+   oversized gradient by transform, so nothing repaints while it shimmers. */
 .frozen-pv {
   width: clamp(150px, 44vw, 240px);
   aspect-ratio: 320 / 387;
 }
 
-.frozen-pv-float {
-  position: absolute;
-  inset: 0;
-  animation: pv-float 6.5s ease-in-out 1.4s infinite;
-}
-
 .frozen-pv-face {
+  position: relative;
   display: block;
   width: 100%;
   height: auto;
   filter: drop-shadow(0 0 26px rgba(190, 210, 228, 0.16));
+}
+
+.frozen-pv-holo,
+.frozen-pv-glare {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: url(/brand/frozen-pv-520.webp) center / 100% 100% no-repeat;
+  mask: url(/brand/frozen-pv-520.webp) center / 100% 100% no-repeat;
+}
+
+.frozen-pv-holo {
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+
+.frozen-pv-holo::before {
+  content: "";
+  position: absolute;
+  inset: -70%;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 18%,
+    rgb(150, 214, 255) 30%,
+    rgb(204, 170, 255) 40%,
+    rgb(255, 178, 218) 50%,
+    rgb(160, 255, 222) 60%,
+    rgb(150, 214, 255) 70%,
+    rgba(255, 255, 255, 0) 82%
+  );
+  animation: pv-holo 11s ease-in-out infinite alternate;
+}
+
+.frozen-pv-glare {
+  mix-blend-mode: screen;
+}
+
+.frozen-pv-glare::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 22%);
+  animation: pv-glare 14s ease-in-out infinite alternate;
 }
 
 .frozen-pv-shadow {
@@ -1276,39 +1316,34 @@ body:has(.hero) .frost-edge-t {
   height: 12%;
   border-radius: 50%;
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
-  animation: pv-shadow 6.5s ease-in-out 1.4s infinite;
 }
 
-html[data-ice="on"] .frozen-pv-float,
-html[data-ice="on"] .frozen-pv-shadow {
+html[data-ice="on"] .frozen-pv-holo::before,
+html[data-ice="on"] .frozen-pv-glare::before {
   animation-play-state: paused;
 }
 
-@keyframes pv-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-0.6deg);
+@keyframes pv-holo {
+  from {
+    transform: translate(-24%, -12%);
   }
-  50% {
-    transform: translateY(-7px) rotate(0.6deg);
+  to {
+    transform: translate(24%, 12%);
   }
 }
 
-@keyframes pv-shadow {
-  0%,
-  100% {
-    transform: scaleX(1);
-    opacity: 1;
+@keyframes pv-glare {
+  from {
+    transform: translate(-16%, 14%);
   }
-  50% {
-    transform: scaleX(0.86);
-    opacity: 0.7;
+  to {
+    transform: translate(16%, -14%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frozen-pv-float,
-  .frozen-pv-shadow {
+  .frozen-pv-holo::before,
+  .frozen-pv-glare::before {
     animation: none;
   }
 }
