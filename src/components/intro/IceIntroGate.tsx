@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ICE_INTRO_COPY } from "@/lib/brand";
+import { markIceIntro } from "@/lib/ice-signal";
 
 /** The effect itself, fetched only when it is actually going to play. */
 const IceIntro = dynamic(() => import("@/components/intro/IceIntro"), { ssr: false });
@@ -56,6 +57,10 @@ export default function IceIntroGate() {
       }
     }
 
+    // From here it may well play: anything waiting on it (the homepage
+    // snow) holds off until it has played or decided not to.
+    markIceIntro(true);
+
     // Someone who is already scrolling or tapping keeps the page.
     let busy = false;
     const markBusy = () => {
@@ -75,7 +80,10 @@ export default function IceIntroGate() {
       // Marked here, not on mount, so a remount (React's dev double run, or
       // a fast refresh) cannot use up the session before anything decides.
       markSeen();
-      if (busy || window.scrollY > 40) return;
+      if (busy || window.scrollY > 40) {
+        markIceIntro(false);
+        return;
+      }
       setPlay(preview ?? ICE_INTRO_COPY.lettering);
     };
     const idle = window.requestIdleCallback
@@ -92,5 +100,13 @@ export default function IceIntroGate() {
   }, []);
 
   if (!play) return null;
-  return <IceIntro lettering={play} onDone={() => setPlay(null)} />;
+  return (
+    <IceIntro
+      lettering={play}
+      onDone={() => {
+        setPlay(null);
+        markIceIntro(false);
+      }}
+    />
+  );
 }

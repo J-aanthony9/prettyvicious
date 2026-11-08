@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { SEASON } from "@/lib/brand";
 import { BAT_PATH } from "@/components/bat-path";
+import { ICE_DONE_EVENT, iceIntroActive } from "@/lib/ice-signal";
 
 const MOTES = [
   { left: "12%", top: "18%", delay: "0s", duration: "22s" },
@@ -17,19 +18,19 @@ const MOTES = [
 const BATS = SEASON === "all-hallows";
 
 /**
- * Naughty List: snow at the top of every page that thins out as you scroll
- * away. On the homepage it is heaviest over the hero and has stopped by the
- * time the hero has scrolled off; elsewhere it stops within the first
- * screen. Each flake has its own cut-off (--k), so it does not fade as one
- * sheet: fewer and fewer flakes fall until there are none. Three kinds of
- * flake: fine six-armed crystals, small soft dots, and a few big out of
- * focus ones close to the glass. A seeded sequence keeps server and
- * browser identical. `top` is where each rests when motion is reduced.
+ * Naughty List: one flurry of snow over the homepage hero, the first time
+ * the homepage is opened in a browser session, and never anywhere else.
+ * About 18 flakes each fall once, starting over the first few seconds, and
+ * it is over in under half a minute. When the ice intro plays, the flurry
+ * waits and begins as the glass breaks. Scrolling away from the hero also
+ * thins it out early: each flake has its own cut-off (--k), so fewer and
+ * fewer fall rather than all fading at once. Three kinds of flake: fine
+ * six-armed crystals, small soft dots, a few big out of focus ones.
  */
 const SNOW = SEASON === "naughty-list";
+const SNOW_COOKIE = "pv-snow";
 type FlakeSpec = {
   left: string;
-  top: string;
   size: number;
   duration: number;
   delay: number;
@@ -43,7 +44,7 @@ const FLAKES: FlakeSpec[] = (() => {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  const count = 30;
+  const count = 18;
   // Cut-offs spread evenly from 0.12 to 1, then shuffled across the flakes.
   const cutoffs = Array.from({ length: count }, (_, i) => 0.12 + (0.88 * (i + 1)) / count);
   for (let i = count - 1; i > 0; i -= 1) {
@@ -55,19 +56,20 @@ const FLAKES: FlakeSpec[] = (() => {
     const kind: FlakeSpec["kind"] = roll < 0.45 ? "crystal" : roll < 0.88 ? "dot" : "soft";
     const size =
       kind === "crystal" ? 6 + Math.round(rand() * 5) : kind === "dot" ? 3 + Math.round(rand() * 3) : 11 + Math.round(rand() * 6);
-    const duration = kind === "soft" ? 24 + rand() * 10 : kind === "dot" ? 15 + rand() * 9 : 18 + rand() * 12;
+    const duration = kind === "soft" ? 17 + rand() * 4 : kind === "dot" ? 12 + rand() * 5 : 14 + rand() * 5;
     return {
       left: `${((i * 37) % 100) + rand() * 3}%`,
-      top: `${Math.round(rand() * 90)}%`,
       size,
-      duration: Math.round(duration),
-      delay: -Math.round(rand() * duration),
+      duration: Math.round(duration * 10) / 10,
+      delay: Math.round(rand() * 70) / 10,
       kind,
       k: Number(k.toFixed(3)),
       o: kind === "soft" ? 0.14 : kind === "dot" ? 0.5 : 0.42,
     };
   });
 })();
+/** When the last flake has landed. */
+const FLURRY_MS = Math.max(...FLAKES.map((f) => f.delay + f.duration)) * 1000 + 500;
 
 function Flake({ size }: { size: number }) {
   return (
@@ -81,7 +83,7 @@ function Flake({ size }: { size: number }) {
 }
 
 /**
- * Film grain, parallax fog and a few drifting motes.
+ * Film grain, parallax fog, and the season's motes or snow.
  *
  * The fog layers read a single --sy custom property and each scales it by a
  * different factor in CSS, so one rAF-throttled write moves all three.
@@ -89,6 +91,49 @@ function Flake({ size }: { size: number }) {
  */
 export default function Atmosphere() {
   const pathname = usePathname();
+  const [snowing, setSnowing] = useState(false);
+  // Decided once for the life of the page, so a re-run of the effect (or
+  // React's dev double run) can never spend the session's flurry twice.
+  const snowDecided = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (!SNOW) return;
+    if (pathname !== "/") {
+      // Left the homepage: no snow for the rest of the visit.
+      snowDecided.current = false;
+      setSnowing(false);
+      return;
+    }
+    if (snowDecided.current === null) {
+      const seen = document.cookie.split("; ").includes(`${SNOW_COOKIE}=1`);
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      snowDecided.current = !seen && !reduced;
+      // A session cookie (no expiry): shared by every tab, gone when the
+      // browser closes.
+      if (snowDecided.current) document.cookie = `${SNOW_COOKIE}=1; path=/; SameSite=Lax`;
+    }
+    if (!snowDecided.current) return;
+
+    let stop = 0;
+    const start = () => {
+      window.removeEventListener(ICE_DONE_EVENT, start);
+      setSnowing(true);
+      stop = window.setTimeout(() => {
+        snowDecided.current = false;
+        setSnowing(false);
+      }, FLURRY_MS);
+    };
+    // Give the ice intro a moment to say whether it is about to play.
+    const wait = window.setTimeout(() => {
+      if (iceIntroActive()) window.addEventListener(ICE_DONE_EVENT, start);
+      else start();
+    }, 60);
+    return () => {
+      window.clearTimeout(wait);
+      window.clearTimeout(stop);
+      window.removeEventListener(ICE_DONE_EVENT, start);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -144,28 +189,6 @@ export default function Atmosphere() {
         <div className="fog fog-a" />
         <div className="fog fog-b" />
         <div className="fog fog-c" />
-        {SNOW
-          ? FLAKES.map((flake, index) => (
-              <span
-                key={index}
-                className={`flake flake-${flake.kind}`}
-                style={
-                  {
-                    left: flake.left,
-                    "--rest": flake.top,
-                    "--k": flake.k,
-                    "--o": flake.o,
-                    width: flake.kind === "crystal" ? undefined : flake.size,
-                    height: flake.kind === "crystal" ? undefined : flake.size,
-                    animationDuration: `${flake.duration}s`,
-                    animationDelay: `${flake.delay}s`,
-                  } as React.CSSProperties
-                }
-              >
-                {flake.kind === "crystal" ? <Flake size={flake.size} /> : null}
-              </span>
-            ))
-          : null}
         {SNOW ? null : MOTES.map((mote, index) => (
           <span
             key={index}
@@ -187,6 +210,31 @@ export default function Atmosphere() {
           </span>
         ))}
       </div>
+      {/* Snow sits above the page (below the header), since the hero has a
+          solid background that would hide anything behind it. */}
+      {snowing ? (
+        <div className="snow-field" aria-hidden="true">
+          {FLAKES.map((flake, index) => (
+              <span
+                key={index}
+                className={`flake flake-${flake.kind}`}
+                style={
+                  {
+                    left: flake.left,
+                    "--k": flake.k,
+                    "--o": flake.o,
+                    width: flake.kind === "crystal" ? undefined : flake.size,
+                    height: flake.kind === "crystal" ? undefined : flake.size,
+                    animationDuration: `${flake.duration}s`,
+                    animationDelay: `${flake.delay}s`,
+                  } as React.CSSProperties
+                }
+              >
+                {flake.kind === "crystal" ? <Flake size={flake.size} /> : null}
+              </span>
+            ))}
+        </div>
+      ) : null}
       <div className="grain" aria-hidden="true" />
     </>
   );

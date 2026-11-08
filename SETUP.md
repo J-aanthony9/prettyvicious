@@ -207,10 +207,9 @@ These live in Shopify, not in this codebase. The site cannot fix them.
 - **Ice intro.** `ICE_INTRO` in `src/lib/brand.ts` turns the homepage ice
   intro on or off. It plays once per browser session on the homepage only.
   Preview it any time at `/?intro=script` or `/?intro=blackletter`.
-- **Holographic frozen PV.** The homepage PV tilts with the phone (or the
-  mouse). iPhones only share tilt after asking: the tap that breaks the ice
-  asks, and tapping the PV asks too. Until then, and on any phone that
-  says no, it sways gently on its own.
+- **Homepage snow.** One light flurry over the hero, the first time the
+  homepage is opened in a browser session (after the ice intro, when it
+  plays). Never on other pages, never with reduced motion.
 - **Policies.** Settings > Policies. The copy for the refund and shipping
   policies is in `src/app/policies/`, and matches what the site shows.
   Paste the same text into Shopify so checkout and site agree. The shipping

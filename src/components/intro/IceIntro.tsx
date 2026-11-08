@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ICE_INTRO_COPY } from "@/lib/brand";
 import { frostCorner } from "@/components/home/frost";
-import { requestMotion } from "@/lib/motion";
 import {
   SCRIPT_BOTTOM,
   SCRIPT_LETTERS,
@@ -982,9 +981,6 @@ export default function IceIntro({
         buildCrack(x, y, Math.max(w, h) * 0.6, 13, [0.2, 0.42, 0.66], 280);
         kick();
       } else {
-        // The tap that breaks the glass also asks an iPhone for its tilt,
-        // so the frozen PV underneath can move with the phone.
-        void requestMotion();
         shatter(x, y);
       }
     };

@@ -182,19 +182,30 @@ body {
   background: radial-gradient(ellipse at center, rgba(214, 226, 238, 0.035), transparent 62%);
 }
 
-/* Snowfall (Naughty List). Each flake falls the height of the viewport
-   with a slight sway. Transform only, so it stays on the compositor. Its
-   opacity is its own strength (--o) times how much snow is left: --snow
-   runs 0 to 1 as the hero scrolls away, and each flake goes once --snow
-   passes its own cut-off (--k). */
+/* Snowfall (Naughty List homepage, once a session). Each flake falls
+   once, the height of the viewport, with a slight sway: hidden above the
+   screen until its delay comes round, and kept below it once it lands.
+   Transform only, so it stays on the compositor. Its opacity is its own
+   strength (--o) times how much snow is left: --snow runs 0 to 1 as the
+   hero scrolls away, and each flake goes once --snow passes its cut-off
+   (--k). */
+.snow-field {
+  position: fixed;
+  inset: -20% 0;
+  z-index: 40;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .flake {
   position: absolute;
-  top: -12vh;
+  /* The snow field starts 20vh above the screen: this is just above its top edge. */
+  top: 14vh;
   color: #dce6ee;
   opacity: calc(var(--o, 0.4) * clamp(0, (var(--k, 1) - var(--snow, 0)) * 6, 1));
   line-height: 1;
   pointer-events: none;
-  animation: snow-fall 40s linear infinite;
+  animation: snow-fall 15s linear 1 both;
   transition: opacity 0.6s ease;
 }
 
@@ -214,10 +225,10 @@ body {
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(14px, 62vh, 0);
+    transform: translate3d(14px, 74vh, 0);
   }
   100% {
-    transform: translate3d(-6px, 128vh, 0);
+    transform: translate3d(-6px, 150vh, 0);
   }
 }
 
@@ -422,10 +433,9 @@ body {
     opacity: 0.3;
   }
 
-  /* No falling: each flake rests where it was placed. */
+  /* No snow at all with reduced motion (Atmosphere.tsx never starts it). */
   .flake {
-    animation: none !important;
-    top: var(--rest);
+    display: none;
   }
 
   .fog {
@@ -1237,125 +1247,101 @@ body:has(.hero) .frost-edge-t {
   letter-spacing: 0;
 }
 
-/* The frozen PV hologram. --tx and --ty run -1 to 1 (set from the phone's
-   tilt or the mouse). Registered so the idle sway can animate them. */
-@property --tx {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-
-@property --ty {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-
+/* The frozen PV, hovering: the block drifts up and down a few pixels with
+   a slight sway, and its shadow on the ground below tightens and fades as
+   it rises. Transform and opacity only, so it never repaints. */
 .frozen-pv {
   width: clamp(150px, 44vw, 240px);
   aspect-ratio: 320 / 387;
-  perspective: 560px;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.frozen-pv[data-idle] {
-  animation:
-    frozen-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both,
-    pv-sway 9s ease-in-out 1.4s infinite;
-}
-
-html[data-ice="on"] .frozen-pv {
-  animation-play-state: paused;
-}
-
-@keyframes pv-sway {
-  0%,
-  100% {
-    --tx: -0.35;
-    --ty: 0.15;
-  }
-  50% {
-    --tx: 0.35;
-    --ty: -0.15;
-  }
-}
-
-.frozen-pv-tilt {
+.frozen-pv-float {
   position: absolute;
   inset: 0;
-  transform-style: preserve-3d;
-  transform: rotateX(calc(var(--ty) * -20deg)) rotateY(calc(var(--tx) * 26deg));
-  will-change: transform;
-}
-
-.frozen-pv-tilt > * {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  animation: pv-float 6.5s ease-in-out 1.4s infinite;
 }
 
 .frozen-pv-face {
-  transform: translateZ(14px);
+  display: block;
+  width: 100%;
+  height: auto;
   filter: drop-shadow(0 0 26px rgba(190, 210, 228, 0.16));
-}
-
-/* Darker copies behind the face: the thickness of the ice when it turns. */
-.frozen-pv-depth {
-  transform: translateZ(calc(14px - var(--d) * 4px));
-  filter: brightness(calc(0.62 - var(--d) * 0.1)) saturate(0.5) hue-rotate(-12deg);
-  opacity: 0.9;
-}
-
-/* The iridescent sheen, clipped to the ice by the image's own alpha. */
-.frozen-pv-holo,
-.frozen-pv-glare {
-  transform: translateZ(14.5px);
-  -webkit-mask: url(/brand/frozen-pv-520.webp) center / 100% 100% no-repeat;
-  mask: url(/brand/frozen-pv-520.webp) center / 100% 100% no-repeat;
-  pointer-events: none;
-}
-
-.frozen-pv-holo {
-  background: linear-gradient(
-    115deg,
-    rgba(255, 255, 255, 0) 18%,
-    rgb(150, 214, 255) 30%,
-    rgb(204, 170, 255) 40%,
-    rgb(255, 178, 218) 50%,
-    rgb(160, 255, 222) 60%,
-    rgb(150, 214, 255) 70%,
-    rgba(255, 255, 255, 0) 82%
-  );
-  background-size: 300% 300%;
-  background-position: calc(50% + var(--tx) * 55%) calc(50% + var(--ty) * 55%);
-  mix-blend-mode: multiply;
-  opacity: 0.6;
-}
-
-.frozen-pv-glare {
-  background: radial-gradient(
-    circle at calc(50% + var(--tx) * 40%) calc(38% + var(--ty) * 40%),
-    rgba(255, 255, 255, 0.55),
-    rgba(255, 255, 255, 0) 40%
-  );
-  mix-blend-mode: screen;
 }
 
 .frozen-pv-shadow {
   position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: -8%;
-  height: 14%;
+  left: 14%;
+  right: 14%;
+  bottom: -9%;
+  height: 12%;
   border-radius: 50%;
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
-  transform: translateX(calc(var(--tx) * -10px));
+  animation: pv-shadow 6.5s ease-in-out 1.4s infinite;
+}
+
+html[data-ice="on"] .frozen-pv-float,
+html[data-ice="on"] .frozen-pv-shadow {
+  animation-play-state: paused;
+}
+
+@keyframes pv-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.6deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(0.6deg);
+  }
+}
+
+@keyframes pv-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(0.86);
+    opacity: 0.7;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frozen-pv,
-  .frozen-pv[data-idle] {
+  .frozen-pv-float,
+  .frozen-pv-shadow {
     animation: none;
   }
+}
+
+/* ---------- "Get on the Naughty List" signup (ClubSignup.tsx) ---------- */
+
+.club-bg {
+  overflow: hidden;
+}
+
+.club-frost {
+  position: absolute;
+  width: min(60vw, 380px);
+  aspect-ratio: 1;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.club-frost-tl {
+  top: 0;
+  left: 0;
+}
+
+.club-frost-br {
+  right: 0;
+  bottom: 0;
+  transform: scale(-1, -1);
+}
+
+/* The heading frosts over toward its foot, like the hero's drop name. */
+.club-ice {
+  background: linear-gradient(180deg, #f0e9dc 40%, #c3d3e0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

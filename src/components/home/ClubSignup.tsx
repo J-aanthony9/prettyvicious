@@ -4,13 +4,15 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { joinClubAction } from "@/lib/actions";
 import { EMPTY_ACTION_STATE } from "@/lib/action-state";
-import { CLUB } from "@/lib/brand";
+import { CLUB, SEASON } from "@/lib/brand";
+
+const FROZEN = SEASON === "naughty-list";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <button type="submit" className="btn btn-solid shrink-0" disabled={pending}>
-      {pending ? "Joining" : "Join the club"}
+      {pending ? CLUB.pending : CLUB.button}
     </button>
   );
 }
@@ -23,12 +25,29 @@ export default function ClubSignup() {
       id="club"
       className="club-bg relative z-10 scroll-mt-20 border-t border-[color:var(--hairline-soft)] py-[clamp(72px,10vw,128px)] text-center"
     >
-      <div className="mx-auto max-w-[1200px] px-[clamp(20px,4vw,48px)]">
+      {/* Naughty List: frost creeping in from two corners of the section. */}
+      {FROZEN ? (
+        <>
+          <div
+            aria-hidden="true"
+            className="club-frost frost-mask club-frost-tl"
+            style={{ "--frost-src": "url(/frost/frost-23.svg)" } as React.CSSProperties}
+          />
+          <div
+            aria-hidden="true"
+            className="club-frost frost-mask club-frost-br"
+            style={{ "--frost-src": "url(/frost/frost-41.svg)" } as React.CSSProperties}
+          />
+        </>
+      ) : null}
+      <div className="relative mx-auto max-w-[1200px] px-[clamp(20px,4vw,48px)]">
         <p className="gothic mb-4 text-[22px] tracking-[0.06em] text-accent">
-          The Club
+          {CLUB.eyebrow}
         </p>
-        <h2 className="mx-auto max-w-[640px] font-[family-name:var(--font-display)] text-[clamp(30px,4.6vw,50px)] font-medium uppercase leading-[1.12] tracking-[0.06em]">
-          Join the Beauty Professionals Club
+        <h2
+          className={`mx-auto max-w-[640px] font-[family-name:var(--font-display)] text-[clamp(30px,4.6vw,50px)] font-medium uppercase leading-[1.12] tracking-[0.06em] ${FROZEN ? "club-ice" : ""}`}
+        >
+          {CLUB.heading}
         </h2>
         <p className="mx-auto mb-[34px] mt-[18px] max-w-[460px] text-[15px] text-[color:var(--bone-dim)]">
           {CLUB.line}

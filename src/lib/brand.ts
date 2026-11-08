@@ -186,10 +186,30 @@ export const ORIGIN = {
   signature: "Meghan Michelle",
 } as const;
 
-export const CLUB = {
-  line: "Stay connected to everything Pretty Vicious. First looks, new drops, and all the exclusives.",
-  success: "You're in. Watch your inbox, it gets dark in there. ✦",
+/**
+ * The email signup (homepage, #club). Same Klaviyo list all year; only the
+ * words change with the season. Footer and nav keep "Join the club".
+ */
+const CLUB_COPY = {
+  default: {
+    eyebrow: "The Club",
+    heading: "Join the Beauty Professionals Club",
+    line: "Stay connected to everything Pretty Vicious. First looks, new drops, and all the exclusives.",
+    button: "Join the club",
+    pending: "Joining",
+    success: "You're in. Watch your inbox, it gets dark in there. ✦",
+  },
+  "naughty-list": {
+    eyebrow: "The List",
+    heading: "Get on the Naughty List",
+    line: "First looks, new drops, and the exclusives, before anyone nice hears about them.",
+    button: "Get on the list",
+    pending: "Adding you",
+    success: "You're on the list. Watch your inbox, it gets cold in there. ✦",
+  },
 } as const;
+
+export const CLUB = SEASON === "naughty-list" ? CLUB_COPY["naughty-list"] : CLUB_COPY.default;
 
 export const PERKS = [
   {
