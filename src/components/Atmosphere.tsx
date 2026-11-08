@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { SEASON } from "@/lib/brand";
 import { BAT_PATH } from "@/components/bat-path";
 
@@ -16,26 +17,57 @@ const MOTES = [
 const BATS = SEASON === "all-hallows";
 
 /**
- * Naughty List: a sparse, slow snowfall instead of the motes. Mostly tiny
- * six-armed flakes, a few stars. Negative delays mean the fall is already
- * under way when the page opens. `top` is where each one rests when motion
- * is reduced and nothing falls.
+ * Naughty List: snow at the top of every page that thins out as you scroll
+ * away. On the homepage it is heaviest over the hero and has stopped by the
+ * time the hero has scrolled off; elsewhere it stops within the first
+ * screen. Each flake has its own cut-off (--k), so it does not fade as one
+ * sheet: fewer and fewer flakes fall until there are none. Three kinds of
+ * flake: fine six-armed crystals, small soft dots, and a few big out of
+ * focus ones close to the glass. A seeded sequence keeps server and
+ * browser identical. `top` is where each rests when motion is reduced.
  */
 const SNOW = SEASON === "naughty-list";
-const FLAKES = [
-  { left: "6%", top: "14%", size: 9, duration: 34, delay: -4, star: false },
-  { left: "15%", top: "62%", size: 6, duration: 41, delay: -22, star: false },
-  { left: "24%", top: "30%", size: 8, duration: 37, delay: -13, star: true },
-  { left: "33%", top: "78%", size: 7, duration: 45, delay: -31, star: false },
-  { left: "42%", top: "8%", size: 10, duration: 39, delay: -9, star: false },
-  { left: "51%", top: "48%", size: 6, duration: 43, delay: -27, star: false },
-  { left: "60%", top: "22%", size: 8, duration: 36, delay: -18, star: true },
-  { left: "69%", top: "70%", size: 7, duration: 47, delay: -36, star: false },
-  { left: "77%", top: "38%", size: 9, duration: 40, delay: -6, star: false },
-  { left: "86%", top: "86%", size: 6, duration: 44, delay: -25, star: false },
-  { left: "93%", top: "18%", size: 8, duration: 38, delay: -15, star: true },
-  { left: "47%", top: "92%", size: 7, duration: 42, delay: -40, star: false },
-];
+type FlakeSpec = {
+  left: string;
+  top: string;
+  size: number;
+  duration: number;
+  delay: number;
+  kind: "crystal" | "dot" | "soft";
+  k: number;
+  o: number;
+};
+const FLAKES: FlakeSpec[] = (() => {
+  let seed = 17;
+  const rand = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  const count = 30;
+  // Cut-offs spread evenly from 0.12 to 1, then shuffled across the flakes.
+  const cutoffs = Array.from({ length: count }, (_, i) => 0.12 + (0.88 * (i + 1)) / count);
+  for (let i = count - 1; i > 0; i -= 1) {
+    const j = Math.floor(rand() * (i + 1));
+    [cutoffs[i], cutoffs[j]] = [cutoffs[j], cutoffs[i]];
+  }
+  return cutoffs.map((k, i) => {
+    const roll = rand();
+    const kind: FlakeSpec["kind"] = roll < 0.45 ? "crystal" : roll < 0.88 ? "dot" : "soft";
+    const size =
+      kind === "crystal" ? 6 + Math.round(rand() * 5) : kind === "dot" ? 3 + Math.round(rand() * 3) : 11 + Math.round(rand() * 6);
+    const duration = kind === "soft" ? 24 + rand() * 10 : kind === "dot" ? 15 + rand() * 9 : 18 + rand() * 12;
+    return {
+      left: `${((i * 37) % 100) + rand() * 3}%`,
+      top: `${Math.round(rand() * 90)}%`,
+      size,
+      duration: Math.round(duration),
+      delay: -Math.round(rand() * duration),
+      kind,
+      k: Number(k.toFixed(3)),
+      o: kind === "soft" ? 0.14 : kind === "dot" ? 0.5 : 0.42,
+    };
+  });
+})();
 
 function Flake({ size }: { size: number }) {
   return (
@@ -56,32 +88,55 @@ function Flake({ size }: { size: number }) {
  * Nothing runs at all when the visitor prefers reduced motion.
  */
 export default function Atmosphere() {
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reduced.matches) return;
+  const pathname = usePathname();
 
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const root = document.documentElement;
     let frame = 0;
+    let snowEnd = window.innerHeight;
+    let lastSnow = -1;
+
+    // Where the snow stops: the foot of the homepage hero, or one screen.
+    const measure = () => {
+      const hero = document.querySelector(".hero");
+      snowEnd = hero ? hero.getBoundingClientRect().bottom + window.scrollY : window.innerHeight;
+    };
 
     const apply = () => {
       frame = 0;
-      document.documentElement.style.setProperty(
-        "--sy",
-        `${window.scrollY.toFixed(1)}px`,
-      );
+      const y = window.scrollY;
+      // The fog drifts with scroll, so it stays still for reduced motion.
+      if (!reduced) root.style.setProperty("--sy", `${y.toFixed(1)}px`);
+      if (SNOW) {
+        const snow = Math.round(Math.min(1, Math.max(0, y / (snowEnd * 0.85))) * 100) / 100;
+        if (snow !== lastSnow) {
+          lastSnow = snow;
+          root.style.setProperty("--snow", String(snow));
+        }
+      }
     };
 
     const onScroll = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(apply);
     };
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
 
+    measure();
     apply();
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, []);
+    // Measured again on every page, since the hero is only on the homepage.
+  }, [pathname]);
 
   return (
     <>
@@ -93,17 +148,21 @@ export default function Atmosphere() {
           ? FLAKES.map((flake, index) => (
               <span
                 key={index}
-                className="flake"
+                className={`flake flake-${flake.kind}`}
                 style={
                   {
                     left: flake.left,
                     "--rest": flake.top,
+                    "--k": flake.k,
+                    "--o": flake.o,
+                    width: flake.kind === "crystal" ? undefined : flake.size,
+                    height: flake.kind === "crystal" ? undefined : flake.size,
                     animationDuration: `${flake.duration}s`,
                     animationDelay: `${flake.delay}s`,
                   } as React.CSSProperties
                 }
               >
-                {flake.star ? <span style={{ fontSize: flake.size }}>✦</span> : <Flake size={flake.size} />}
+                {flake.kind === "crystal" ? <Flake size={flake.size} /> : null}
               </span>
             ))
           : null}

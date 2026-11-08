@@ -183,16 +183,30 @@ body {
 }
 
 /* Snowfall (Naughty List). Each flake falls the height of the viewport
-   with a slight sway, very slowly. Transform only, so it stays on the
-   compositor. */
+   with a slight sway. Transform only, so it stays on the compositor. Its
+   opacity is its own strength (--o) times how much snow is left: --snow
+   runs 0 to 1 as the hero scrolls away, and each flake goes once --snow
+   passes its own cut-off (--k). */
 .flake {
   position: absolute;
   top: -12vh;
   color: #dce6ee;
-  opacity: 0.32;
+  opacity: calc(var(--o, 0.4) * clamp(0, (var(--k, 1) - var(--snow, 0)) * 6, 1));
   line-height: 1;
   pointer-events: none;
   animation: snow-fall 40s linear infinite;
+  transition: opacity 0.6s ease;
+}
+
+.flake-dot,
+.flake-soft {
+  display: block;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238, 244, 250, 0.95) 0%, rgba(238, 244, 250, 0) 70%);
+}
+
+.flake-soft {
+  background: radial-gradient(circle, rgba(238, 244, 250, 0.7) 0%, rgba(238, 244, 250, 0) 72%);
 }
 
 @keyframes snow-fall {
@@ -833,16 +847,13 @@ html[data-intro] .veil.veil-leaving {
 }
 
 .hero-frozen {
-  width: clamp(140px, 40vw, 230px);
-  height: auto;
-  filter: drop-shadow(0 0 28px rgba(190, 210, 228, 0.16)) drop-shadow(0 18px 40px rgba(0, 0, 0, 0.6));
   animation: frozen-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Transform only, no fade: a fade-in makes the PV count as loading late. */
 @keyframes frozen-in {
   from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.985);
+    transform: translateY(10px) scale(0.97);
   }
 }
 
@@ -1191,4 +1202,160 @@ body:has(.hero) .frost-edge-t {
 
 [data-season="naughty-list"] .field:focus {
   box-shadow: 0 0 0 3px rgba(190, 212, 230, 0.08);
+}
+
+/* ---------- Naughty List hero (Hero.tsx, FrozenPV.tsx) ---------- */
+
+.hero-drop-title {
+  font-family: var(--font-gothic);
+  font-weight: 400;
+  font-size: clamp(3.4rem, 15vw, 8.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+}
+
+.hero-drop-title .distress {
+  background: linear-gradient(180deg, #f0e9dc 35%, #c3d3e0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9em;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.42em;
+  color: var(--color-bone);
+}
+
+.hero-status span {
+  color: var(--color-accent);
+  letter-spacing: 0;
+}
+
+/* The frozen PV hologram. --tx and --ty run -1 to 1 (set from the phone's
+   tilt or the mouse). Registered so the idle sway can animate them. */
+@property --tx {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --ty {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.frozen-pv {
+  width: clamp(150px, 44vw, 240px);
+  aspect-ratio: 320 / 387;
+  perspective: 560px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.frozen-pv[data-idle] {
+  animation:
+    frozen-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both,
+    pv-sway 9s ease-in-out 1.4s infinite;
+}
+
+html[data-ice="on"] .frozen-pv {
+  animation-play-state: paused;
+}
+
+@keyframes pv-sway {
+  0%,
+  100% {
+    --tx: -0.35;
+    --ty: 0.15;
+  }
+  50% {
+    --tx: 0.35;
+    --ty: -0.15;
+  }
+}
+
+.frozen-pv-tilt {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(var(--ty) * -20deg)) rotateY(calc(var(--tx) * 26deg));
+  will-change: transform;
+}
+
+.frozen-pv-tilt > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.frozen-pv-face {
+  transform: translateZ(14px);
+  filter: drop-shadow(0 0 26px rgba(190, 210, 228, 0.16));
+}
+
+/* Darker copies behind the face: the thickness of the ice when it turns. */
+.frozen-pv-depth {
+  transform: translateZ(calc(14px - var(--d) * 4px));
+  filter: brightness(calc(0.62 - var(--d) * 0.1)) saturate(0.5) hue-rotate(-12deg);
+  opacity: 0.9;
+}
+
+/* The iridescent sheen, clipped to the ice by the image's own alpha. */
+.frozen-pv-holo,
+.frozen-pv-glare {
+  transform: translateZ(14.5px);
+  -webkit-mask: url(/brand/frozen-pv-520.webp) center / 100% 100% no-repeat;
+  mask: url(/brand/frozen-pv-520.webp) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.frozen-pv-holo {
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 18%,
+    rgb(150, 214, 255) 30%,
+    rgb(204, 170, 255) 40%,
+    rgb(255, 178, 218) 50%,
+    rgb(160, 255, 222) 60%,
+    rgb(150, 214, 255) 70%,
+    rgba(255, 255, 255, 0) 82%
+  );
+  background-size: 300% 300%;
+  background-position: calc(50% + var(--tx) * 55%) calc(50% + var(--ty) * 55%);
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+
+.frozen-pv-glare {
+  background: radial-gradient(
+    circle at calc(50% + var(--tx) * 40%) calc(38% + var(--ty) * 40%),
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0) 40%
+  );
+  mix-blend-mode: screen;
+}
+
+.frozen-pv-shadow {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -8%;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
+  transform: translateX(calc(var(--tx) * -10px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frozen-pv,
+  .frozen-pv[data-idle] {
+    animation: none;
+  }
 }

@@ -50,8 +50,10 @@ export const DROPS = {
     heading: "Never Nice",
     /** Homepage drop section line. {count} becomes the piece count, spelled out. */
     sub: "{count} pieces, frozen in. Printed dark.",
-    /** Hero line, after the positioning sentence. */
+    /** Hero line, after the positioning sentence (seasons without their own hero). */
     heroLine: "Drop 003 is Naughty List, for the ones who were never trying to be nice.",
+    /** The Naughty List hero: "Drop 003" over the drop name, then this. */
+    status: "Out now",
     /**
      * Lead product cards with the back print when one can be found. This
      * drop's pieces carry a small front graphic and a large back graphic,

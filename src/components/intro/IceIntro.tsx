@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ICE_INTRO_COPY } from "@/lib/brand";
 import { frostCorner } from "@/components/home/frost";
+import { requestMotion } from "@/lib/motion";
 import {
   SCRIPT_BOTTOM,
   SCRIPT_LETTERS,
@@ -14,12 +15,13 @@ import {
  * The ice intro: looking at the site through a frozen window.
  *
  *   fog       0.0 to 0.6s   frost and fog creep in from the edges
- *   writing   0.6 to 2.0s   "Pretty Vicious" traced into the fog, stroke by
+ *   writing   0.6 to 2.9s   "Pretty Vicious" traced into the fog, stroke by
  *                           stroke, each stroke wiping the glass clear, with
  *                           a couple of drips running down after
- *   kiss      ~2.1s         a lipstick kiss pressed into the glass, at an
- *                           angle, under the end of "Vicious"
- *   prompt    from ~2.0s    "Tap to break the ice", gently pulsing
+ *   kiss      ~3.1s         a kiss pressed into the fog, at an angle, under
+ *                           the end of "Vicious": breath clouds the glass,
+ *                           then the lips press in, slightly parted
+ *   prompt    from ~2.9s    "Tap to break the ice", gently pulsing
  *   taps      1st tap       cracks spread from the tap
  *             2nd tap       a bigger web of cracks
  *             3rd tap       the glass breaks into shards that fall and fade
@@ -35,7 +37,9 @@ import {
  */
 
 const FOG_MS = 600;
-const WRITE_MS = 1400;
+const WRITE_MS = 2300;
+/** How long the kiss takes to press in. */
+const KISS_MS = 950;
 const CRACK_MS = 200;
 const FALL_MS = 1150;
 const FADE_MS = 280;
@@ -144,31 +148,35 @@ function placeKiss(right: number, baseline: number, wordWidth: number) {
 }
 
 /*
- * The kiss print, drawn once at its final size. Two lobes (the upper lip
- * with its bow, the fuller lower lip), a bare line where the lips meet,
- * fine creases running across them, a few skipped specks, and the print
- * fading toward the corners, the way a real kiss on glass prints.
- * Returns the print's shape (to wipe the fog) and the lipstick (to lay on).
+ * The kiss, as it prints on a fogged window: lips slightly parted in a
+ * kiss, so there is a small opening in the middle and a fine line where
+ * the lips meet either side of it, fine creases across each lip (where the
+ * skin folds, the glass stays fogged), a few skipped specks, and lighter
+ * pressure toward the corners. Drawn once at its final
+ * size as a mask of where the fog is wiped.
  */
 function buildKiss(width: number, dpr: number) {
   const u = width / 100;
-  const W = 116 * u;
-  const H = 66 * u;
+  const W = 108 * u;
+  const H = 64 * u;
   const mask = makeCanvas(W * dpr, H * dpr);
   const g = mask.getContext("2d")!;
   g.scale(dpr, dpr);
-  g.translate(W / 2, H * 0.42);
+  g.translate(W / 2, H * 0.44);
   g.scale(u, u);
 
+  // Upper lip: the bow on top, its lower edge lifting into the opening.
   const upper = new Path2D(
-    "M-50 2 C-40 -6 -28 -22 -14 -23 C-8 -23.5 -3 -18 0 -15 C3 -18 8 -23.5 14 -23 " +
-      "C28 -22 40 -6 50 2 C36 0 22 -2.5 7 -1.8 C3 -0.6 -3 -0.4 -6 -1.6 C-20 -2.8 -36 0 -50 2 Z",
+    "M-46 3 C-40 -6 -28 -20 -13 -22 C-7 -23 -3 -18.5 0 -16 C3 -18.5 7 -23 13 -22 " +
+      "C28 -20 40 -6 46 3 C36 1.6 22 0.2 9 -0.4 C6 -5.6 -6 -5.6 -9 -0.4 C-22 0.2 -36 1.6 -46 3 Z",
   );
+  // Lower lip: fuller, its top edge dipping under the opening.
   const lower = new Path2D(
-    "M-47 4.5 C-34 2 -18 1.6 0 2 C18 1.4 34 2.4 47 4.5 C40 20 22 30 0 30 C-22 30 -40 20 -47 4.5 Z",
+    "M-45 4.6 C-32 3 -20 2.2 -9 1.8 C-6 7.4 6 7.4 9 1.8 C20 2.2 32 3 45 4.6 " +
+      "C38 21 22 30 0 30 C-22 30 -38 21 -44 6 Z",
   );
   g.shadowColor = "#000";
-  g.shadowBlur = 1.4 * dpr;
+  g.shadowBlur = 2 * dpr;
   g.fillStyle = "#000";
   g.fill(upper);
   g.fill(lower);
@@ -179,55 +187,43 @@ function buildKiss(width: number, dpr: number) {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  // Creases: where the lips fold, the print skips.
   g.globalCompositeOperation = "destination-out";
   g.lineCap = "round";
+  // Lip creases: fine lines across each lip, fanning out slightly from the
+  // middle, where the skin folds and the glass stays fogged.
   for (const [from, to, spread] of [
-    [-2, -27, 0.1],
-    [4.5, 32, 0.14],
+    [-1.5, -26, 0.12],
+    [4, 31, 0.16],
   ] as const) {
-    for (let x = -47; x <= 47; x += 1.1 + rand() * 1.4) {
-      const start = from + (to - from) * rand() * 0.3;
-      const end = from + (to - from) * (0.45 + rand() * 0.6);
-      const lean = x * spread + (rand() - 0.5) * 2.4;
-      g.strokeStyle = `rgba(0,0,0,${0.6 + rand() * 0.4})`;
-      g.lineWidth = 0.5 + rand() * 0.9;
+    for (let x = -44; x <= 44; x += 1.9 + rand() * 1.6) {
+      if (Math.abs(x) < 7 && rand() < 0.6) continue; // keep the opening clean
+      const start = from + (to - from) * (0.12 + rand() * 0.2);
+      const end = from + (to - from) * (0.5 + rand() * 0.45);
+      const lean = x * spread + (rand() - 0.5) * 2;
+      g.strokeStyle = `rgba(0,0,0,${0.35 + rand() * 0.4})`;
+      g.lineWidth = 0.4 + rand() * 0.6;
       g.beginPath();
       g.moveTo(x, start);
       g.quadraticCurveTo(x + lean * 0.4, (start + end) / 2, x + lean, end);
       g.stroke();
     }
   }
-  for (let i = 0; i < 240; i += 1) {
-    g.fillStyle = `rgba(0,0,0,${0.5 + rand() * 0.5})`;
+  for (let i = 0; i < 140; i += 1) {
+    g.fillStyle = `rgba(0,0,0,${0.3 + rand() * 0.5})`;
     g.beginPath();
-    g.arc((rand() - 0.5) * 100, -24 + rand() * 55, 0.3 + rand() * 1.1, 0, Math.PI * 2);
+    g.arc((rand() - 0.5) * 96, -24 + rand() * 55, 0.3 + rand() * 1.1, 0, Math.PI * 2);
     g.fill();
   }
   // Lighter pressure at the corners of the mouth.
-  const corners = g.createLinearGradient(-52, 0, 52, 0);
-  corners.addColorStop(0, "rgba(0,0,0,0.75)");
-  corners.addColorStop(0.24, "rgba(0,0,0,0.1)");
+  const corners = g.createLinearGradient(-50, 0, 50, 0);
+  corners.addColorStop(0, "rgba(0,0,0,0.8)");
+  corners.addColorStop(0.24, "rgba(0,0,0,0.12)");
   corners.addColorStop(0.5, "rgba(0,0,0,0)");
-  corners.addColorStop(0.76, "rgba(0,0,0,0.1)");
-  corners.addColorStop(1, "rgba(0,0,0,0.75)");
+  corners.addColorStop(0.76, "rgba(0,0,0,0.12)");
+  corners.addColorStop(1, "rgba(0,0,0,0.8)");
   g.fillStyle = corners;
   g.fillRect(-60, -30, 120, 64);
-
-  // The lipstick: the same print, in a deep winter red.
-  const pigment = makeCanvas(mask.width, mask.height);
-  const pg = pigment.getContext("2d")!;
-  pg.drawImage(mask, 0, 0);
-  pg.globalCompositeOperation = "source-in";
-  const red = pg.createRadialGradient(
-    pigment.width / 2, pigment.height * 0.45, 0,
-    pigment.width / 2, pigment.height * 0.45, pigment.width * 0.55,
-  );
-  red.addColorStop(0, "#8f2335");
-  red.addColorStop(1, "#5c1221");
-  pg.fillStyle = red;
-  pg.fillRect(0, 0, pigment.width, pigment.height);
-  return { mask, pigment, width: W, height: H, anchorY: H * 0.42 };
+  return { mask, width: W, height: H, anchorY: H * 0.44 };
 }
 
 function scriptPlan(w: number, h: number): Plan {
@@ -391,9 +387,11 @@ export default function IceIntro({
     let carried = 0;
     let segmentCount = 0;
     const drips: Array<{ x: number; y: number; start: number; length: number }> = [];
-    // The kiss is pressed a beat after the last letter.
+    // The kiss is pressed a beat after the last letter, over KISS_MS.
     let kissAt = 0;
     let kissed = false;
+    let kissBox: { x: number; y: number; size: number; under: HTMLCanvasElement } | null = null;
+    let kissPrint: ReturnType<typeof buildKiss> | null = null;
 
     root.style.setProperty("--ice-prompt-top", `${Math.round(plan.bottom + 14)}px`);
 
@@ -453,26 +451,69 @@ export default function IceIntro({
         }
       }
       ctx.shadowBlur = 0;
-      if (!kissAt && strokeIndex >= plan.strokes.length) kissAt = now + 170;
+      if (!kissAt && strokeIndex >= plan.strokes.length) kissAt = now + 220;
     };
 
-    /** The kiss: the print wipes the fog, and the lipstick stays on the glass. */
+    /*
+     * The kiss, pressed in like a real one: first a breath clouds the glass
+     * around where the lips will land, then the lips press in, the print
+     * growing from faint to firm. The print stays a little frosted rather
+     * than wiped perfectly clear, so it reads as lips on fog, not a hole.
+     * Each frame restores the glass under the kiss and redraws it at the
+     * new strength, so the fade is exact.
+     */
+    const kissFrame = (t: number) => {
+      const k = plan.kiss;
+      if (!kissPrint) kissPrint = buildKiss(k.width, dpr);
+      if (!kissBox) {
+        const size = k.width * 2.2;
+        const x = Math.max(0, Math.floor((k.x - size / 2) * dpr));
+        const y = Math.max(0, Math.floor((k.y - size / 2) * dpr));
+        const under = makeCanvas(size * dpr, size * dpr);
+        under.getContext("2d")!.drawImage(canvas, x, y, under.width, under.height, 0, 0, under.width, under.height);
+        kissBox = { x, y, size, under };
+      }
+      const box = kissBox;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over";
+      ctx.clearRect(box.x, box.y, box.under.width, box.under.height);
+      ctx.drawImage(box.under, box.x, box.y);
+
+      // Breath builds, then settles back a little as the lips press.
+      const breath = t < 0.45 ? t / 0.45 : 1 - ((t - 0.45) / 0.55) * 0.45;
+      const press = ease(Math.max(0, Math.min(1, (t - 0.15) / 0.85)));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.translate(k.x, k.y);
+      ctx.rotate(k.angle);
+      // Breath: the glass fogs up thicker round the mouth, then settles.
+      ctx.save();
+      ctx.scale(1, 0.72);
+      const haze = ctx.createRadialGradient(0, 0, k.width * 0.1, 0, 0, k.width * 0.95);
+      haze.addColorStop(0, `rgba(232, 236, 240, ${0.26 * breath})`);
+      haze.addColorStop(1, "rgba(232, 236, 240, 0)");
+      ctx.fillStyle = haze;
+      ctx.beginPath();
+      ctx.arc(0, 0, k.width * 0.95, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      if (press > 0) {
+        const print = kissPrint;
+        const scale = 0.94 + 0.06 * press;
+        ctx.scale(scale, scale);
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.globalAlpha = 0.74 * press;
+        ctx.drawImage(print.mask, -print.width / 2, -print.anchorY, print.width, print.height);
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over";
+    };
+
+    /** Presses the kiss to its finished state at once. */
     const pressKiss = () => {
       if (kissed) return;
       kissed = true;
-      const print = buildKiss(plan.kiss.width, dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.translate(plan.kiss.x, plan.kiss.y);
-      ctx.rotate(plan.kiss.angle);
-      const x = -print.width / 2;
-      const y = -print.anchorY;
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.drawImage(print.mask, x, y, print.width, print.height);
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 0.9;
-      ctx.drawImage(print.pigment, x, y, print.width, print.height);
-      ctx.globalAlpha = 1;
+      kissFrame(1);
     };
 
     /* ----- Cracks (the first two taps) -----
@@ -693,7 +734,11 @@ export default function IceIntro({
       // Prompt: let the drips finish, press the kiss, grow any cracks, then
       // stop drawing altogether until the next tap.
       drawDrips(now);
-      if (kissAt && now >= kissAt) pressKiss();
+      if (kissAt && now >= kissAt && !kissed) {
+        const t = Math.min(1, (now - kissAt) / KISS_MS);
+        kissFrame(t);
+        if (t >= 1) kissed = true;
+      }
       const growing = drawCracks(now);
       return growing || !kissed || drips.some((d) => now - d.start <= 900);
     };
@@ -921,6 +966,8 @@ export default function IceIntro({
         completeWriting(now);
         setP("prompt");
       }
+      // A kiss still pressing in finishes now, so it never redraws over a crack.
+      pressKiss();
       hitCount += 1;
       setHits(hitCount);
       window.clearTimeout(safety);
@@ -935,6 +982,9 @@ export default function IceIntro({
         buildCrack(x, y, Math.max(w, h) * 0.6, 13, [0.2, 0.42, 0.66], 280);
         kick();
       } else {
+        // The tap that breaks the glass also asks an iPhone for its tilt,
+        // so the frozen PV underneath can move with the phone.
+        void requestMotion();
         shatter(x, y);
       }
     };
