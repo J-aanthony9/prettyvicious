@@ -9,6 +9,7 @@ import { readCart } from "@/lib/cart-session";
 import { BRAND, ICE_INTRO, INTRO, SEASON } from "@/lib/brand";
 import WelcomeVeil from "@/components/WelcomeVeil";
 import IceIntroGate from "@/components/intro/IceIntroGate";
+import FrostEdges from "@/components/FrostEdges";
 
 /** The All Hallows bat welcome only runs in its own season. */
 const BAT_WELCOME = INTRO.enabled && SEASON === "all-hallows";
@@ -122,6 +123,7 @@ export default async function RootLayout({
         {BAT_WELCOME ? <WelcomeVeil /> : null}
         {ICE ? <IceIntroGate /> : null}
         <Atmosphere />
+        {SEASON === "naughty-list" ? <FrostEdges /> : null}
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:bg-veil focus:px-4 focus:py-2 focus:text-xs"

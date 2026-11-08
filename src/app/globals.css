@@ -851,7 +851,6 @@ html[data-intro] .veil.veil-leaving {
 .hero-frost {
   position: absolute;
   width: min(74vw, 520px);
-  height: auto;
   aspect-ratio: 1;
   opacity: 0.13;
   pointer-events: none;
@@ -1013,4 +1012,183 @@ html[data-ice="on"] .hero-frost {
   50% {
     opacity: 0.45;
   }
+}
+
+/* ==========================================================================
+   Naughty List: the whole site, frozen
+   The palette goes cold (blue-black ink, frosted panels, icy hairlines),
+   glass surfaces frost over, and frost gathers at the bottom of the screen.
+   Burgundy stays the accent, so warmth only ever comes from the brand.
+   All of it keyed off html[data-season], so the season flag undoes it.
+   ========================================================================== */
+
+[data-season="naughty-list"] {
+  --color-ink: #0a0c10;
+  --color-veil: #10141a;
+  --color-veil-deep: #151a21;
+  --color-wine: #121821;
+  --hairline: rgba(206, 222, 236, 0.15);
+  --hairline-soft: rgba(206, 222, 236, 0.08);
+  --ice: rgba(206, 222, 236, 0.22);
+}
+
+/* An engraved frost drawing (public/frost) used as a mask over frost white.
+   A mask, not an image, so it is never taken for the page's main content. */
+.frost-mask {
+  background-color: #dce6ee;
+  -webkit-mask: var(--frost-src) center / contain no-repeat;
+  mask: var(--frost-src) center / contain no-repeat;
+}
+
+/* Frost settled in the bottom corners of the screen (FrostEdges.tsx). */
+.frost-edges {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  box-shadow: inset 0 0 120px rgba(160, 192, 222, 0.07);
+}
+
+.frost-edge {
+  position: absolute;
+  bottom: 0;
+  width: min(46vw, 340px);
+  aspect-ratio: 1;
+  opacity: 0.12;
+}
+
+.frost-edge-t {
+  top: 0;
+  bottom: auto;
+  width: min(36vw, 260px);
+  opacity: 0.08;
+}
+
+.frost-edge-tr {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+/* The homepage hero draws its own frost at the top. */
+body:has(.hero) .frost-edge-t {
+  display: none;
+}
+
+.frost-edge-bl {
+  left: 0;
+  transform: scaleY(-1);
+}
+
+.frost-edge-br {
+  right: 0;
+  transform: scale(-1, -1);
+}
+
+/* The header is a pane of frosted glass with a cold edge of light. */
+[data-season="naughty-list"] .site-header {
+  background: linear-gradient(180deg, rgba(18, 24, 32, 0.84), rgba(10, 13, 18, 0.78));
+  border-bottom-color: transparent;
+  box-shadow: inset 0 -1px 0 var(--hairline);
+}
+
+[data-season="naughty-list"] .site-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ice) 30%, rgba(230, 238, 245, 0.4) 50%, var(--ice) 70%, transparent);
+  pointer-events: none;
+}
+
+/* Panels (fit note, size guide note, bag toast, size sheet) are frosted. */
+[data-season="naughty-list"] .bg-veil,
+[data-season="naughty-list"] .bg-veil-deep {
+  background-image: linear-gradient(160deg, rgba(196, 214, 230, 0.075), rgba(196, 214, 230, 0.015) 55%);
+  box-shadow: inset 0 1px 0 rgba(220, 232, 242, 0.08);
+}
+
+/* The hero's "Dark": bone up top, going to ice at the foot of the letters.
+   (No glow filter: it made the word load measurably later.) */
+[data-season="naughty-list"] .hero-dark .distress {
+  background: linear-gradient(180deg, #f0e9dc 35%, #c3d3e0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Section lighting goes cold. A burgundy glow stays at the foot of each. */
+[data-season="naughty-list"] .hero {
+  background:
+    radial-gradient(ellipse 55% 30% at 50% -12%, rgba(214, 228, 240, 0.06), transparent 60%),
+    radial-gradient(ellipse 90% 60% at 50% 112%, rgba(107, 69, 79, 0.26), transparent 62%),
+    radial-gradient(ellipse 70% 55% at 50% -12%, rgba(24, 34, 46, 0.9), transparent 70%),
+    var(--color-ink);
+}
+
+[data-season="naughty-list"] .drop-bg {
+  background:
+    linear-gradient(var(--hairline-soft), transparent 1px) top / 100% 1px no-repeat,
+    radial-gradient(ellipse 110% 70% at 50% 112%, rgba(22, 32, 44, 0.6), transparent 70%);
+}
+
+[data-season="naughty-list"] .quote-bg {
+  background:
+    radial-gradient(ellipse 32% 44% at 16% 18%, rgba(206, 222, 236, 0.06), transparent 70%),
+    radial-gradient(ellipse 28% 40% at 85% 80%, rgba(166, 110, 122, 0.05), transparent 70%),
+    var(--color-veil);
+}
+
+[data-season="naughty-list"] .club-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% -10%, rgba(206, 222, 236, 0.06), transparent 65%),
+    radial-gradient(ellipse 80% 100% at 50% 130%, rgba(107, 69, 79, 0.3), transparent 65%),
+    var(--color-wine);
+}
+
+[data-season="naughty-list"] .footer-bg {
+  background:
+    radial-gradient(ellipse 90% 75% at 50% 120%, rgba(107, 69, 79, 0.2), transparent 65%),
+    var(--color-ink);
+  border-image: linear-gradient(90deg, var(--hairline-soft), var(--ice), var(--hairline-soft)) 1;
+}
+
+/* Product cards: an icy rim, and on hover a cold glint crosses the glass. */
+[data-season="naughty-list"] .card-face {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(214, 228, 240, 0.06), transparent 65%),
+    radial-gradient(ellipse 100% 80% at 50% 120%, rgba(20, 28, 38, 0.85), transparent 70%),
+    var(--color-veil);
+  box-shadow: inset 0 0 0 1px rgba(214, 228, 240, 0.06), 0 0 24px rgba(170, 200, 228, 0.04);
+}
+
+[data-season="naughty-list"] .card-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(235, 243, 250, 0.22) 50%, transparent 62%);
+  transform: translateX(-110%);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  [data-season="naughty-list"] .group:hover .card-face::after {
+    transform: translateX(110%);
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* Buttons and fields pick up the cold edge. */
+[data-season="naughty-list"] .btn-solid {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 22px rgba(190, 212, 230, 0.08);
+}
+
+[data-season="naughty-list"] .field {
+  background: rgba(10, 14, 20, 0.6);
+}
+
+[data-season="naughty-list"] .field:focus {
+  box-shadow: 0 0 0 3px rgba(190, 212, 230, 0.08);
 }

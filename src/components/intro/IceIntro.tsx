@@ -17,12 +17,15 @@ import {
  *   writing   0.6 to 2.0s   "Pretty Vicious" traced into the fog, stroke by
  *                           stroke, each stroke wiping the glass clear, with
  *                           a couple of drips running down after
+ *   kiss      ~2.1s         a lipstick kiss pressed into the glass, at an
+ *                           angle, under the end of "Vicious"
  *   prompt    from ~2.0s    "Tap to break the ice", gently pulsing
- *   shatter   ~1.3s         cracks run out from the tap, the glass breaks
- *                           into shards that fall and fade
+ *   taps      1st tap       cracks spread from the tap
+ *             2nd tap       a bigger web of cracks
+ *             3rd tap       the glass breaks into shards that fall and fade
  *
- * A tap at any point goes straight to the shatter. Escape or Skip just
- * fades it. A swipe or wheel (someone trying to scroll) fades it too, so it
+ * A tap while it is still writing finishes the writing and counts as the
+ * first tap. Escape or Skip just fades it. A swipe or wheel (someone trying to scroll) fades it too, so it
  * is never a wall. Reduced motion gets a still, already-written pane that
  * fades on tap.
  *
@@ -130,7 +133,102 @@ type Plan = {
   /** The lowest point of the writing, drips included: the prompt sits below it. */
   bottom: number;
   drips: Array<{ letter: number; at: Point }>;
+  /** Where the kiss is pressed: its centre, width and tilt. */
+  kiss: { x: number; y: number; width: number; angle: number };
 };
+
+/** The kiss, tilted, tucked under the end of the word. */
+function placeKiss(right: number, baseline: number, wordWidth: number) {
+  const width = Math.min(Math.max(wordWidth * 0.2, 54), 118);
+  return { x: right - width * 0.45, y: baseline + width * 0.44, width, angle: -0.4 };
+}
+
+/*
+ * The kiss print, drawn once at its final size. Two lobes (the upper lip
+ * with its bow, the fuller lower lip), a bare line where the lips meet,
+ * fine creases running across them, a few skipped specks, and the print
+ * fading toward the corners, the way a real kiss on glass prints.
+ * Returns the print's shape (to wipe the fog) and the lipstick (to lay on).
+ */
+function buildKiss(width: number, dpr: number) {
+  const u = width / 100;
+  const W = 116 * u;
+  const H = 66 * u;
+  const mask = makeCanvas(W * dpr, H * dpr);
+  const g = mask.getContext("2d")!;
+  g.scale(dpr, dpr);
+  g.translate(W / 2, H * 0.42);
+  g.scale(u, u);
+
+  const upper = new Path2D(
+    "M-50 2 C-40 -6 -28 -22 -14 -23 C-8 -23.5 -3 -18 0 -15 C3 -18 8 -23.5 14 -23 " +
+      "C28 -22 40 -6 50 2 C36 0 22 -2.5 7 -1.8 C3 -0.6 -3 -0.4 -6 -1.6 C-20 -2.8 -36 0 -50 2 Z",
+  );
+  const lower = new Path2D(
+    "M-47 4.5 C-34 2 -18 1.6 0 2 C18 1.4 34 2.4 47 4.5 C40 20 22 30 0 30 C-22 30 -40 20 -47 4.5 Z",
+  );
+  g.shadowColor = "#000";
+  g.shadowBlur = 1.4 * dpr;
+  g.fillStyle = "#000";
+  g.fill(upper);
+  g.fill(lower);
+  g.shadowBlur = 0;
+
+  let seed = 21;
+  const rand = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  // Creases: where the lips fold, the print skips.
+  g.globalCompositeOperation = "destination-out";
+  g.lineCap = "round";
+  for (const [from, to, spread] of [
+    [-2, -27, 0.1],
+    [4.5, 32, 0.14],
+  ] as const) {
+    for (let x = -47; x <= 47; x += 1.1 + rand() * 1.4) {
+      const start = from + (to - from) * rand() * 0.3;
+      const end = from + (to - from) * (0.45 + rand() * 0.6);
+      const lean = x * spread + (rand() - 0.5) * 2.4;
+      g.strokeStyle = `rgba(0,0,0,${0.6 + rand() * 0.4})`;
+      g.lineWidth = 0.5 + rand() * 0.9;
+      g.beginPath();
+      g.moveTo(x, start);
+      g.quadraticCurveTo(x + lean * 0.4, (start + end) / 2, x + lean, end);
+      g.stroke();
+    }
+  }
+  for (let i = 0; i < 240; i += 1) {
+    g.fillStyle = `rgba(0,0,0,${0.5 + rand() * 0.5})`;
+    g.beginPath();
+    g.arc((rand() - 0.5) * 100, -24 + rand() * 55, 0.3 + rand() * 1.1, 0, Math.PI * 2);
+    g.fill();
+  }
+  // Lighter pressure at the corners of the mouth.
+  const corners = g.createLinearGradient(-52, 0, 52, 0);
+  corners.addColorStop(0, "rgba(0,0,0,0.75)");
+  corners.addColorStop(0.24, "rgba(0,0,0,0.1)");
+  corners.addColorStop(0.5, "rgba(0,0,0,0)");
+  corners.addColorStop(0.76, "rgba(0,0,0,0.1)");
+  corners.addColorStop(1, "rgba(0,0,0,0.75)");
+  g.fillStyle = corners;
+  g.fillRect(-60, -30, 120, 64);
+
+  // The lipstick: the same print, in a deep winter red.
+  const pigment = makeCanvas(mask.width, mask.height);
+  const pg = pigment.getContext("2d")!;
+  pg.drawImage(mask, 0, 0);
+  pg.globalCompositeOperation = "source-in";
+  const red = pg.createRadialGradient(
+    pigment.width / 2, pigment.height * 0.45, 0,
+    pigment.width / 2, pigment.height * 0.45, pigment.width * 0.55,
+  );
+  red.addColorStop(0, "#8f2335");
+  red.addColorStop(1, "#5c1221");
+  pg.fillStyle = red;
+  pg.fillRect(0, 0, pigment.width, pigment.height);
+  return { mask, pigment, width: W, height: H, anchorY: H * 0.42 };
+}
 
 function scriptPlan(w: number, h: number): Plan {
   const width = Math.min(w * 0.86, 760);
@@ -153,11 +251,14 @@ function scriptPlan(w: number, h: number): Plan {
     }
     lowest.push(low);
   });
-  // Two drips: off the second t and the o, which sit on the baseline.
-  const drips = [4, 10].map((letter) => ({ letter, at: lowest[letter] }));
+  // Two drips: off the second t and the c, which sit on the baseline, well
+  // clear of the kiss.
+  const drips = [4, 8].map((letter) => ({ letter, at: lowest[letter] }));
   const penWidth = Math.max(5, scale * 3.1);
-  const bottom = oy + SCRIPT_BOTTOM * scale + penWidth * 6;
-  return { strokes, total, width: penWidth, drips, bottom };
+  const right = Math.max(...strokes.filter((s) => s.letter === 12).flatMap((s) => s.points.map((p) => p[0])));
+  const kiss = placeKiss(right, Math.max(lowest[11][1], lowest[12][1]), width);
+  const bottom = Math.max(oy + SCRIPT_BOTTOM * scale + penWidth * 6, kiss.y + kiss.width * 0.42);
+  return { strokes, total, width: penWidth, drips, bottom, kiss };
 }
 
 /**
@@ -206,13 +307,17 @@ function blackletterPlan(w: number, h: number, dpr: number) {
           [x - advance * 0.02, bottom],
         ];
         strokes.push({ points, letter: index });
-        total += bottom - top;
+        for (let i = 1; i < points.length; i += 1) {
+          total += Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]);
+        }
       }
     }
     cursor += advance;
   });
   const width = Math.max(10, size * 0.42);
-  return { plan: { strokes, total, width, drips: [], bottom: bottom + 8 } as Plan, letters };
+  const kiss = placeKiss(x0 + textWidth, baseline, textWidth);
+  const planBottom = Math.max(bottom + 8, kiss.y + kiss.width * 0.42);
+  return { plan: { strokes, total, width, drips: [], bottom: planBottom, kiss } as Plan, letters };
 }
 
 export default function IceIntro({
@@ -227,6 +332,7 @@ export default function IceIntro({
   const breakRef = useRef<(x?: number, y?: number) => void>(() => {});
   const skipRef = useRef<() => void>(() => {});
   const [phase, setPhase] = useState<Phase>("fog");
+  const [hits, setHits] = useState(0);
   const [still] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -285,6 +391,9 @@ export default function IceIntro({
     let carried = 0;
     let segmentCount = 0;
     const drips: Array<{ x: number; y: number; start: number; length: number }> = [];
+    // The kiss is pressed a beat after the last letter.
+    let kissAt = 0;
+    let kissed = false;
 
     root.style.setProperty("--ice-prompt-top", `${Math.round(plan.bottom + 14)}px`);
 
@@ -344,6 +453,123 @@ export default function IceIntro({
         }
       }
       ctx.shadowBlur = 0;
+      if (!kissAt && strokeIndex >= plan.strokes.length) kissAt = now + 170;
+    };
+
+    /** The kiss: the print wipes the fog, and the lipstick stays on the glass. */
+    const pressKiss = () => {
+      if (kissed) return;
+      kissed = true;
+      const print = buildKiss(plan.kiss.width, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.translate(plan.kiss.x, plan.kiss.y);
+      ctx.rotate(plan.kiss.angle);
+      const x = -print.width / 2;
+      const y = -print.anchorY;
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.drawImage(print.mask, x, y, print.width, print.height);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(print.pigment, x, y, print.width, print.height);
+      ctx.globalAlpha = 1;
+    };
+
+    /* ----- Cracks (the first two taps) -----
+     * Each crack is a web of jagged rays from the tap, with a few forks and
+     * some ring segments joining the rays. Its segments are sorted by how
+     * far they start from the tap, so it is drawn growing outward, a few
+     * segments per frame, on top of the glass, never redrawing the pane. */
+    type Crack = { segs: number[][]; drawn: number; start: number; ms: number; radius: number; x: number; y: number };
+    const cracks: Crack[] = [];
+    let crackSeed = 7;
+    const crand = () => {
+      crackSeed = (crackSeed * 16807) % 2147483647;
+      return crackSeed / 2147483647;
+    };
+
+    const buildCrack = (cx: number, cy: number, radius: number, rays: number, rings: number[], ms: number) => {
+      const segs: number[][] = [];
+      const steps = 12;
+      const spokes: Point[][] = [];
+      const offset = crand() * Math.PI * 2;
+      for (let i = 0; i < rays; i += 1) {
+        let a = offset + (i / rays) * Math.PI * 2 + (crand() - 0.5) * 0.5;
+        const reach = radius * (0.55 + crand() * 0.45);
+        let px = cx;
+        let py = cy;
+        const spoke: Point[] = [[px, py]];
+        for (let k = 1; k <= steps; k += 1) {
+          a += (crand() - 0.5) * 0.28;
+          const r = (reach * k) / steps;
+          const nx = cx + Math.cos(a) * r;
+          const ny = cy + Math.sin(a) * r;
+          segs.push([px, py, nx, ny, Math.hypot(px - cx, py - cy)]);
+          // Now and then a short fork splits off.
+          if (k > 2 && crand() < 0.16) {
+            const fa = a + (crand() < 0.5 ? -1 : 1) * (0.4 + crand() * 0.4);
+            const fl = reach * (0.08 + crand() * 0.14);
+            segs.push([nx, ny, nx + Math.cos(fa) * fl, ny + Math.sin(fa) * fl, r]);
+          }
+          px = nx;
+          py = ny;
+          spoke.push([px, py]);
+        }
+        spokes.push(spoke);
+      }
+      for (const ring of rings) {
+        const k = Math.max(1, Math.round(ring * steps));
+        for (let i = 0; i < rays; i += 1) {
+          if (crand() < 0.4) continue;
+          const a = spokes[i][Math.min(k, spokes[i].length - 1)];
+          const b = spokes[(i + 1) % rays][Math.min(k, spokes[(i + 1) % rays].length - 1)];
+          segs.push([a[0], a[1], b[0], b[1], Math.hypot(a[0] - cx, a[1] - cy)]);
+        }
+      }
+      segs.sort((m, n) => m[4] - n[4]);
+      cracks.push({ segs, drawn: 0, start: performance.now(), ms, radius, x: cx, y: cy });
+    };
+
+    /** Draws whatever new crack segments have been reached. True while any is still growing. */
+    const drawCracks = (now: number) => {
+      let growing = false;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = 1;
+      ctx.lineCap = "round";
+      for (const crack of cracks) {
+        if (crack.drawn >= crack.segs.length) continue;
+        if (crack.drawn === 0) {
+          // The point of impact: a small bruise of crushed, whiter ice.
+          const bruise = ctx.createRadialGradient(crack.x, crack.y, 0, crack.x, crack.y, 10);
+          bruise.addColorStop(0, "rgba(255,255,255,0.7)");
+          bruise.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.fillStyle = bruise;
+          ctx.fillRect(crack.x - 10, crack.y - 10, 20, 20);
+        }
+        const t = Math.min(1, (now - crack.start) / crack.ms);
+        const reach = ease(t) * crack.radius + 1;
+        while (crack.drawn < crack.segs.length && (t >= 1 || crack.segs[crack.drawn][4] <= reach)) {
+          const [x0, y0, x1, y1, d] = crack.segs[crack.drawn];
+          const weight = Math.max(0.5, 1.5 - d / crack.radius);
+          // A dark edge and a bright edge: a break catches light on one side.
+          ctx.strokeStyle = "rgba(18, 26, 36, 0.35)";
+          ctx.lineWidth = weight + 0.6;
+          ctx.beginPath();
+          ctx.moveTo(x0 + 0.7, y0 + 0.7);
+          ctx.lineTo(x1 + 0.7, y1 + 0.7);
+          ctx.stroke();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+          ctx.lineWidth = weight;
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x1, y1);
+          ctx.stroke();
+          crack.drawn += 1;
+        }
+        if (crack.drawn < crack.segs.length) growing = true;
+      }
+      return growing;
     };
 
     // Condensation running down from a letter: a fine, slightly wandering
@@ -437,12 +663,14 @@ export default function IceIntro({
     // Finish the writing at once (a tap that cannot wait).
     const completeWriting = (now: number) => {
       if (current === "fog") paintFog(1);
-      advancePen(plan.total, now);
+      advancePen(Number.POSITIVE_INFINITY, now);
       for (const d of drips) d.start = now - 900;
       drawDrips(now);
+      pressKiss();
     };
 
-    const frame = (now: number) => {
+    /** One frame. Returns whether anything is still moving. */
+    const frame = (now: number): boolean => {
       const elapsed = now - start;
       if (current === "fog") {
         paintFog(Math.min(1, elapsed / FOG_MS));
@@ -450,29 +678,52 @@ export default function IceIntro({
           setP("writing");
           start = now;
         }
-      } else if (current === "writing") {
+        return true;
+      }
+      if (current === "writing") {
         const t = Math.min(1, elapsed / WRITE_MS);
-        advancePen(plan.total * t, now);
+        advancePen(t >= 1 ? Number.POSITIVE_INFINITY : plan.total * t, now);
         drawDrips(now);
         if (t >= 1) {
           setP("prompt");
           start = now;
         }
-      } else if (current === "prompt") {
-        // Let the last drips finish running, then stop drawing altogether.
-        drawDrips(now);
-        if (drips.every((d) => now - d.start > 900)) return;
+        return true;
       }
-      raf = requestAnimationFrame(frame);
+      // Prompt: let the drips finish, press the kiss, grow any cracks, then
+      // stop drawing altogether until the next tap.
+      drawDrips(now);
+      if (kissAt && now >= kissAt) pressKiss();
+      const growing = drawCracks(now);
+      return growing || !kissed || drips.some((d) => now - d.start <= 900);
+    };
+
+    let running = false;
+    const loop = (now: number) => {
+      running = false;
+      if (finished || current === "shatter" || current === "fading") return;
+      if (frame(now)) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+      }
+    };
+    const kick = () => {
+      if (running || finished) return;
+      running = true;
+      raf = requestAnimationFrame(loop);
     };
 
     /* ----- Shatter ----- */
     const shatter = (tapX: number, tapY: number) => {
       cancelAnimationFrame(raf);
+      running = false;
       const now = performance.now();
       if (current === "fog" || current === "writing") completeWriting(now);
+      // Finish any crack still growing, so it is part of the broken pane.
+      for (const crack of cracks) crack.start = now - crack.ms;
+      drawCracks(now);
       setP("shatter");
-      navigator.vibrate?.(28);
+      navigator.vibrate?.([30, 30, 60]);
       delete document.documentElement.dataset.ice;
 
       // Freeze the pane as it is, then cut it up.
@@ -647,13 +898,45 @@ export default function IceIntro({
       if (Math.abs(window.innerWidth - w) > 1) fadeOut();
     };
 
-    breakRef.current = (x = w / 2, y = h * WORD_Y) => {
+    // Three taps: a crack, a bigger web of cracks, then it breaks. Keyboard
+    // presses land near the middle of the word, nudged so each is new ice.
+    let hitCount = 0;
+    const NUDGE: Point[] = [
+      [0, 0],
+      [34, -12],
+      [-22, 10],
+    ];
+    breakRef.current = (tapX?: number, tapY?: number) => {
       if (current === "shatter" || current === "fading" || finished) return;
       if (still) {
         fadeOut();
         return;
       }
-      shatter(x, y);
+      const x = tapX ?? w / 2 + NUDGE[hitCount][0];
+      const y = tapY ?? h * WORD_Y + NUDGE[hitCount][1];
+      const now = performance.now();
+      if (current === "fog" || current === "writing") {
+        cancelAnimationFrame(raf);
+        running = false;
+        completeWriting(now);
+        setP("prompt");
+      }
+      hitCount += 1;
+      setHits(hitCount);
+      window.clearTimeout(safety);
+      safety = window.setTimeout(fadeOut, 15000);
+      const short = Math.min(w, h);
+      if (hitCount === 1) {
+        navigator.vibrate?.(14);
+        buildCrack(x, y, short * 0.34, 9, [0.35, 0.7], 190);
+        kick();
+      } else if (hitCount === 2) {
+        navigator.vibrate?.([16, 40, 22]);
+        buildCrack(x, y, Math.max(w, h) * 0.6, 13, [0.2, 0.42, 0.66], 280);
+        kick();
+      } else {
+        shatter(x, y);
+      }
     };
     skipRef.current = fadeOut;
 
@@ -675,16 +958,17 @@ export default function IceIntro({
 
     // A safety net: whatever happens, the pane is gone within 15 seconds of
     // no input, and never strands the page.
-    const safety = window.setTimeout(fadeOut, 15000);
+    let safety = window.setTimeout(fadeOut, 15000);
 
     if (still) {
       // Reduced motion: no creeping fog, no writing, no shatter. The pane is
       // simply there, already written, and fades when tapped.
       paintFog(1);
-      advancePen(plan.total, performance.now());
+      advancePen(Number.POSITIVE_INFINITY, performance.now());
+      pressKiss();
       setP("prompt");
     } else {
-      raf = requestAnimationFrame(frame);
+      kick();
     }
 
     return () => {
@@ -697,21 +981,30 @@ export default function IceIntro({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const prompt = touch ? ICE_INTRO_COPY.promptTouch : ICE_INTRO_COPY.promptPointer;
+  const prompt =
+    hits === 0
+      ? touch
+        ? ICE_INTRO_COPY.promptTouch
+        : ICE_INTRO_COPY.promptPointer
+      : hits === 1
+        ? ICE_INTRO_COPY.promptSecond
+        : ICE_INTRO_COPY.promptThird;
 
   return (
     <div
       ref={rootRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Welcome to Pretty Vicious. Tap, click or press Enter to enter the site."
+      aria-label="Welcome to Pretty Vicious. Tap, click or press Enter three times to break the ice, or press Escape to skip."
       tabIndex={-1}
       className={`ice ${phase === "fading" ? "ice-fading" : ""}`}
     >
       <div className={`ice-wet ${still ? "ice-wet-still" : ""}`} aria-hidden="true" />
       <canvas ref={canvasRef} className="ice-canvas" aria-hidden="true" />
       {phase === "prompt" ? (
-        <p className={`ice-prompt ${still ? "" : "ice-prompt-pulse"}`}>{prompt}</p>
+        <p key={hits} className={`ice-prompt ${still ? "" : "ice-prompt-pulse"}`} aria-live="polite">
+          {prompt}
+        </p>
       ) : null}
       {phase !== "shatter" && phase !== "fading" ? (
         <button type="button" data-ice-skip className="ice-skip" onClick={() => skipRef.current()}>

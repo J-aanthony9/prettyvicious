@@ -1,5 +1,5 @@
 import { FROST_BACKGROUND, SEASON } from "@/lib/brand";
-import { crackWeb, frostCorner } from "@/components/home/frost";
+import { crackWeb } from "@/components/home/frost";
 import { BAT_PATH } from "@/components/bat-path";
 import { BatHalf } from "@/components/BatEngraving";
 
@@ -49,28 +49,28 @@ function Bats() {
 /**
  * Naughty List, option one: engraved frost feathering in from all four
  * corners, as on a window pane. Each corner grows from its own seed so the
- * mirroring never shows.
+ * mirroring never shows. The drawings are static files (public/frost, made
+ * by scripts/build-frost.mjs) so their long paths stay out of the HTML, and
+ * they are drawn as CSS masks, so the browser never mistakes decoration for
+ * the page's main content when it measures load speed.
  */
 const CORNERS = [
-  { corner: "tl", path: frostCorner(11) },
-  { corner: "tr", path: frostCorner(23) },
-  { corner: "bl", path: frostCorner(37) },
-  { corner: "br", path: frostCorner(41) },
+  { corner: "tl", seed: 11 },
+  { corner: "tr", seed: 23 },
+  { corner: "bl", seed: 37 },
+  { corner: "br", seed: 41 },
 ] as const;
 
 function Frost() {
   return (
     <>
-      {CORNERS.map(({ corner, path }) => (
-        <svg
+      {CORNERS.map(({ corner, seed }) => (
+        <div
           key={corner}
-          className={`hero-frost hero-frost-${corner}`}
-          viewBox="0 0 300 300"
-          fill="none"
           aria-hidden="true"
-        >
-          <path d={path} stroke="#DCE6EE" strokeWidth={0.6} strokeLinecap="round" />
-        </svg>
+          className={`hero-frost frost-mask hero-frost-${corner}`}
+          style={{ "--frost-src": `url(/frost/frost-${seed}.svg)` } as React.CSSProperties}
+        />
       ))}
     </>
   );

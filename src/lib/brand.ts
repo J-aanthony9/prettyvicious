@@ -125,7 +125,8 @@ export const FROST_BACKGROUND: "frost" | "cracks" = "frost";
 
 /**
  * The homepage ice intro (components/intro): fog creeps over the glass,
- * "Pretty Vicious" is written into it, and a tap shatters it. First homepage
+ * "Pretty Vicious" is written into it with a kiss pressed underneath, and
+ * three taps break it (crack, more cracks, shatter). First homepage
  * visit per browser session only, Naughty List season only. Set to false to
  * turn it off instantly.
  */
@@ -136,6 +137,10 @@ export const ICE_INTRO_COPY = {
   lettering: "script" as "script" | "blackletter",
   promptTouch: "Tap to break the ice",
   promptPointer: "Click to break the ice",
+  /** After the first tap cracks it. */
+  promptSecond: "Again",
+  /** After the second tap, before the third breaks it. */
+  promptThird: "Once more",
 } as const;
 
 /**
