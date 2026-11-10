@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ICE_INTRO_COPY } from "@/lib/brand";
-import { iceCoverUp, liftCover, markIceIntro } from "@/lib/ice-signal";
+import { iceCoverUp, liftCover, loadIceImages, markIceIntro, type IceImages } from "@/lib/ice-signal";
 
 /** The effect itself, fetched only when it is actually going to play. */
 const IceIntro = dynamic(() => import("@/components/intro/IceIntro"), { ssr: false });
@@ -37,6 +37,7 @@ type Lettering = "script" | "blackletter";
  */
 export default function IceIntroGate() {
   const [play, setPlay] = useState<Lettering | null>(null);
+  const [images, setImages] = useState<IceImages>({ fog: null, frost: null });
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -95,7 +96,13 @@ export default function IceIntroGate() {
         liftCover();
         return;
       }
-      setPlay(preview ?? ICE_INTRO_COPY.lettering);
+      // The glass textures first (already fetching since the first paint
+      // when the page is covered), but never more than a moment's wait.
+      void loadIceImages().then((loaded) => {
+        if (cancelled) return;
+        setImages(loaded);
+        setPlay(preview ?? ICE_INTRO_COPY.lettering);
+      });
     };
     // Covered: start now, the page is waiting on it. Otherwise wait for the
     // page to settle so the effect never competes with its first paint.
@@ -106,7 +113,9 @@ export default function IceIntroGate() {
         ? window.requestIdleCallback(begin, { timeout: 600 })
         : window.setTimeout(begin, 200);
 
+    let cancelled = false;
     return () => {
+      cancelled = true;
       if (!covered && window.cancelIdleCallback && typeof idle === "number") window.cancelIdleCallback(idle);
       window.clearTimeout(idle as number);
       window.removeEventListener("scroll", markBusy);
@@ -119,6 +128,7 @@ export default function IceIntroGate() {
   return (
     <IceIntro
       lettering={play}
+      images={images}
       onDone={() => {
         setPlay(null);
         liftCover();

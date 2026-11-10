@@ -207,6 +207,13 @@ These live in Shopify, not in this codebase. The site cannot fix them.
 - **Ice intro.** `ICE_INTRO` in `src/lib/brand.ts` turns the homepage ice
   intro on or off. It plays once per browser session on the homepage only.
   Preview it any time at `/?intro=script` or `/?intro=blackletter`.
+- **Ice photographs.** The intro's fog, the black ice under it, its frost,
+  and the homepage hero wall are photographs in `public/brand/ice/`
+  (`fog.webp`, `depth.webp`, `frost-corner.webp`, `wall.webp`). To swap
+  one, replace the file and keep the name. The fog tiles, so it must be a
+  seamless texture; the frost must grow from the bottom-left corner on a
+  transparent background. `FROST_BACKGROUND` in `src/lib/brand.ts` can put
+  the drawn frost or cracks back behind the hero instead of the wall.
 - **Homepage snow.** One light flurry over the hero, the first time the
   homepage is opened in a browser session (after the ice intro, when it
   plays). Never on other pages, never with reduced motion.

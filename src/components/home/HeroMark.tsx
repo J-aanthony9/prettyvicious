@@ -89,6 +89,10 @@ function Cracks() {
 }
 
 export default function HeroMark() {
-  if (SEASON === "naughty-list") return FROST_BACKGROUND === "cracks" ? <Cracks /> : <Frost />;
+  if (SEASON === "naughty-list") {
+    // The wall photograph is the section's own background (Hero.tsx).
+    if (FROST_BACKGROUND === "wall") return null;
+    return FROST_BACKGROUND === "cracks" ? <Cracks /> : <Frost />;
+  }
   return SEASON === "all-hallows" ? <Bats /> : <Star />;
 }

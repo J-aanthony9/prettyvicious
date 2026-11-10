@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BRAND, DROPS, SEASON } from "@/lib/brand";
+import { preload } from "react-dom";
+import { BRAND, DROPS, FROST_BACKGROUND, SEASON } from "@/lib/brand";
 import HeroMark from "@/components/home/HeroMark";
 import FrozenPV from "@/components/home/FrozenPV";
 
@@ -50,8 +51,17 @@ export default function Hero() {
  * the one button that matters.
  */
 function DropHero() {
+  const wall = FROST_BACKGROUND === "wall";
+  // The wall is the first thing painted behind the PV, so fetch it with the
+  // page rather than when the stylesheet gets round to it.
+  if (wall) {
+    preload("/brand/ice/wall.webp", { as: "image", fetchPriority: "high" });
+  }
   return (
-    <section aria-label="Drop 003, Naughty List, out now" className="hero relative flex min-h-[86vh] flex-col items-center justify-center overflow-hidden px-[clamp(20px,4vw,48px)] pb-[96px] pt-20 text-center">
+    <section
+      aria-label="Drop 003, Naughty List, out now"
+      className={`hero relative flex min-h-[86vh] flex-col items-center justify-center overflow-hidden px-[clamp(20px,4vw,48px)] pb-[96px] pt-20 text-center ${wall ? "hero-wall" : ""}`}
+    >
       <HeroMark />
       <FrozenPV />
 
