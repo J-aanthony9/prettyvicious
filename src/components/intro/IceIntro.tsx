@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ICE_INTRO_COPY } from "@/lib/brand";
 import { frostCorner } from "@/components/home/frost";
+import { liftCover } from "@/lib/ice-signal";
 import {
   SCRIPT_BOTTOM,
   SCRIPT_LETTERS,
@@ -13,7 +14,7 @@ import {
 /*
  * The ice intro: looking at the site through a frozen window.
  *
- *   fog       0.0 to 0.6s   frost and fog creep in from the edges
+ *   fog       0.0 to 0.85s  fog blooms over the dark glass, edges first
  *   writing   0.6 to 2.9s   "Pretty Vicious" traced into the fog, stroke by
  *                           stroke, each stroke wiping the glass clear, with
  *                           a couple of drips running down after
@@ -35,7 +36,7 @@ import {
  * is a handful of image draws.
  */
 
-const FOG_MS = 600;
+const FOG_MS = 850;
 const WRITE_MS = 2300;
 /** How long the kiss takes to press in. */
 const KISS_MS = 950;
@@ -654,14 +655,18 @@ export default function IceIntro({
       ctx.globalAlpha = 1;
       ctx.drawImage(fog, 0, 0);
       if (creep < 1) {
-        // A clear centre that closes up as the fog arrives.
+        // Fog blooming over the glass: the edges condense first and the
+        // middle follows, all of it thickening together, so there is never
+        // a hole in the middle, just breath spreading across cold glass.
+        const t = ease(creep);
+        const edge = Math.min(1, t * 1.7);
+        const middle = Math.max(0, (t - 0.2) / 0.8);
         const cx = canvas.width / 2;
         const cy = canvas.height * 0.45;
         const far = Math.hypot(canvas.width, canvas.height) * 0.62;
-        const inner = far * (1 - ease(creep)) * 0.95;
-        const mask = ctx.createRadialGradient(cx, cy, inner, cx, cy, inner + far * 0.4);
-        mask.addColorStop(0, "rgba(0,0,0,0)");
-        mask.addColorStop(1, "rgba(0,0,0,1)");
+        const mask = ctx.createRadialGradient(cx, cy, 0, cx, cy, far);
+        mask.addColorStop(0, `rgba(0,0,0,${middle})`);
+        mask.addColorStop(1, `rgba(0,0,0,${edge})`);
         ctx.globalCompositeOperation = "destination-in";
         ctx.fillStyle = mask;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -695,6 +700,7 @@ export default function IceIntro({
     const fadeOut = () => {
       if (current === "fading" || finished) return;
       cancelAnimationFrame(raf);
+      liftCover();
       setP("fading");
       delete document.documentElement.dataset.ice;
       window.setTimeout(finish, FADE_MS);
@@ -703,6 +709,7 @@ export default function IceIntro({
     // Finish the writing at once (a tap that cannot wait).
     const completeWriting = (now: number) => {
       if (current === "fog") paintFog(1);
+      liftCover();
       advancePen(Number.POSITIVE_INFINITY, now);
       for (const d of drips) d.start = now - 900;
       drawDrips(now);
@@ -715,6 +722,9 @@ export default function IceIntro({
       if (current === "fog") {
         paintFog(Math.min(1, elapsed / FOG_MS));
         if (elapsed >= FOG_MS) {
+          // The glass is fully fogged: the page behind can take over from
+          // the cover now, seen only through what gets wiped clear.
+          liftCover();
           setP("writing");
           start = now;
         }
@@ -1012,6 +1022,7 @@ export default function IceIntro({
       paintFog(1);
       advancePen(Number.POSITIVE_INFINITY, performance.now());
       pressKiss();
+      liftCover();
       setP("prompt");
     } else {
       kick();
