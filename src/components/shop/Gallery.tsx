@@ -6,6 +6,7 @@ import type { ShopifyImage } from "@/lib/shopify/types";
 import { useScrollLock } from "@/lib/use-scroll-lock";
 import Portal from "@/components/Portal";
 import ZoomImage from "@/components/shop/ZoomImage";
+import { ARCHES, ArchRim } from "@/components/Arch";
 
 /**
  * Product images, never cropped.
@@ -20,6 +21,8 @@ import ZoomImage from "@/components/shop/ZoomImage";
  * one image with thumbnails. Both open the same lightbox.
  */
 const FRAME = "bg-white";
+/** The main image frames: a gothic arch in the Naughty List season. */
+const MAIN = ARCHES ? `${FRAME} arch` : FRAME;
 
 export default function Gallery({
   images,
@@ -52,7 +55,9 @@ export default function Gallery({
 
   const tag = (url: string) =>
     labels[url] ? (
-      <span className="pointer-events-none absolute left-3 top-3 rounded-sm bg-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-bone">
+      <span
+        className={`pointer-events-none absolute left-3 z-[3] rounded-sm bg-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-bone ${ARCHES ? "bottom-3" : "top-3"}`}
+      >
         {labels[url]}
       </span>
     ) : null;
@@ -115,7 +120,7 @@ export default function Gallery({
                 setActive(index);
                 setOpen(true);
               }}
-              className={`relative aspect-[4/5] w-full shrink-0 snap-center border border-[color:var(--hairline)] ${FRAME}`}
+              className={`relative aspect-[4/5] w-full shrink-0 snap-center border border-[color:var(--hairline)] ${MAIN}`}
               aria-label={`Open ${image.altText || title} full size`}
             >
               <Image
@@ -127,6 +132,7 @@ export default function Gallery({
                 className="object-contain"
               />
               {tag(image.url)}
+              {ARCHES ? <ArchRim /> : null}
             </button>
           ))}
         </div>
@@ -154,7 +160,7 @@ export default function Gallery({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className={`group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden border border-[color:var(--hairline)] ${FRAME}`}
+          className={`group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden border border-[color:var(--hairline)] ${MAIN}`}
           aria-label={`Open ${alt} full size`}
         >
           <Image
@@ -165,10 +171,11 @@ export default function Gallery({
             sizes="50vw"
             className="object-contain"
           />
-          <span className="pointer-events-none absolute bottom-3 right-3 rounded-sm bg-ink/80 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-bone opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+          <span className="pointer-events-none absolute bottom-3 right-3 z-[3] rounded-sm bg-ink/80 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-bone opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
             Click to zoom
           </span>
           {tag(current.url)}
+          {ARCHES ? <ArchRim /> : null}
         </button>
 
         {count > 1 ? (
