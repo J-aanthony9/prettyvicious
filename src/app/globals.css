@@ -1008,24 +1008,37 @@ html[data-ice-cover][data-ice="on"] body::after {
   pointer-events: none;
 }
 
-/* Wiped glass is clear but wet, a shade darker than the room behind it.
-   This sits under the fog canvas and shows wherever the fog is wiped, so the
-   writing reads the same over light and dark parts of the page. It darkens
-   in with the fog, and lifts the moment the glass breaks. */
+/* The depth of the ice, under the fog. At first it is dark all the way
+   down: the site is hidden, and the writing, the kiss and the cracks show
+   only darkness through them. Each tap breaks through a layer: the dark
+   thins (data-layer 1, then 2) and the fog with it, so the hero starts to
+   glow through the cracks and the glass, until the third tap shatters what
+   is left. It is the same colour as the first-paint cover, so the cover
+   hands over to it without a change. */
 .ice-wet {
   position: absolute;
   inset: 0;
-  background: rgba(6, 8, 12, 0.66);
+  background: radial-gradient(ellipse 90% 70% at 50% 45%, #121820, #0a0c10 72%);
+  opacity: 0.96;
   animation: ice-wet-in 600ms ease-out both;
-  transition: opacity 240ms ease-out;
+  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ice-wet-still {
   animation: none;
 }
 
+.ice[data-layer="1"] .ice-wet {
+  opacity: 0.72;
+}
+
+.ice[data-layer="2"] .ice-wet {
+  opacity: 0.38;
+}
+
 .ice-broken .ice-wet {
   opacity: 0;
+  transition-duration: 0.24s;
 }
 
 .ice-canvas {
@@ -1033,6 +1046,16 @@ html[data-ice-cover][data-ice="on"] body::after {
   inset: 0;
   width: 100%;
   height: 100%;
+  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The fog thins with each layer broken, too. */
+.ice[data-layer="1"] .ice-canvas {
+  opacity: 0.93;
+}
+
+.ice[data-layer="2"] .ice-canvas {
+  opacity: 0.8;
 }
 
 .ice-prompt {
@@ -1444,50 +1467,4 @@ html[data-ice="on"] .frozen-pv-glare::before {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-/* ---------- Gothic arch frames (components/Arch.tsx) ---------- */
-
-/* Cut a 4:5 frame to a pointed cathedral arch. */
-.arch {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 125' preserveAspectRatio='none'%3E%3Cpath d='M0 125V64A66 66 0 0 1 50 0A66 66 0 0 1 100 64V125Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 125' preserveAspectRatio='none'%3E%3Cpath d='M0 125V64A66 66 0 0 1 50 0A66 66 0 0 1 100 64V125Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-  border-color: transparent !important;
-  border-radius: 0 0 3px 3px !important;
-}
-
-.arch-rim {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  fill: none;
-  pointer-events: none;
-}
-
-/* A steel-ice edge: drawn twice the width, half of it falls outside the cut. */
-.arch-rim-outer {
-  stroke: #8fa3b6;
-  stroke-width: 3px;
-}
-
-.arch-rim-inner {
-  stroke: #b9c8d6;
-  stroke-width: 1px;
-  opacity: 0.75;
-}
-
-.arch-rim-star {
-  fill: #8fa3b6;
-}
-
-/* The mask clips the usual focus outline, so keyboard focus lights the rim. */
-.arch:focus-visible {
-  outline: none;
-}
-
-.arch:focus-visible .arch-rim-outer {
-  stroke: var(--color-accent);
-  stroke-width: 6px;
 }

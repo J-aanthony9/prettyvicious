@@ -3,7 +3,6 @@ import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import { cardNote, cardSwatches, hasPriceRange, inCurrentDrop, leadBack } from "@/lib/product";
 import { DROPS } from "@/lib/brand";
-import { ARCHES, ArchRim } from "@/components/Arch";
 import type { ProductSummary } from "@/lib/shopify/types";
 
 export default function ProductCard({ product }: { product: ProductSummary }) {
@@ -26,9 +25,7 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
   return (
     <div className="group">
       <Link href={href} className="block overflow-hidden rounded active:opacity-90">
-        <div
-          className={`card-face relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded border border-[color:var(--hairline-soft)] transition-transform duration-[350ms] group-hover:-translate-y-[5px] ${ARCHES ? "arch" : ""}`}
-        >
+        <div className="card-face relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded border border-[color:var(--hairline-soft)] transition-transform duration-[350ms] group-hover:-translate-y-[5px]">
           {image ? (
             <Image
               src={image.url}
@@ -50,22 +47,18 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
                 loading="lazy"
                 className="object-cover opacity-0 transition-opacity duration-500 [@media(hover:hover)]:group-hover:opacity-100"
               />
-              <span className="pointer-events-none absolute bottom-3 right-3 z-[3] rounded-sm bg-ink/75 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-bone">
+              <span className="pointer-events-none absolute bottom-3 right-3 rounded-sm bg-ink/75 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-bone">
                 <span className="[@media(hover:hover)]:group-hover:hidden">Back</span>
                 <span className="hidden [@media(hover:hover)]:group-hover:inline">Front</span>
               </span>
             </>
           ) : null}
 
-          {/* In an arch the top corners are cut away, so the badge sits low. */}
           {badge ? (
-            <span
-              className={`absolute left-3 z-[3] rounded-sm bg-accent px-[9px] py-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-[#171012] ${ARCHES ? "bottom-3" : "top-3"}`}
-            >
+            <span className="absolute left-3 top-3 rounded-sm bg-accent px-[9px] py-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-[#171012]">
               {badge}
             </span>
           ) : null}
-          {ARCHES ? <ArchRim /> : null}
         </div>
 
         <div className="flex items-baseline justify-between gap-3 px-1 pt-3.5">

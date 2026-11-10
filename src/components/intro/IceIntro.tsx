@@ -22,8 +22,9 @@ import {
  *                           the end of "Vicious": breath clouds the glass,
  *                           then the lips press in, slightly parted
  *   prompt    from ~2.9s    "Tap to break the ice", gently pulsing
- *   taps      1st tap       cracks spread from the tap
- *             2nd tap       a bigger web of cracks
+ *   taps      1st tap       cracks spread from the tap, and the dark under
+ *                           the ice thins: the hero starts to show through
+ *             2nd tap       a bigger web of cracks, thinner still
  *             3rd tap       the glass breaks into shards that fall and fade
  *
  * A tap while it is still writing finishes the writing and counts as the
@@ -1055,6 +1056,8 @@ export default function IceIntro({
       aria-label="Welcome to Pretty Vicious. Tap, click or press Enter three times to break the ice, or press Escape to skip."
       tabIndex={-1}
       className={`ice ${phase === "fading" ? "ice-fading" : ""}`}
+      // How many layers of ice the taps have broken through (see .ice-wet).
+      data-layer={Math.min(hits, 2)}
     >
       <div className={`ice-wet ${still ? "ice-wet-still" : ""}`} aria-hidden="true" />
       <canvas ref={canvasRef} className="ice-canvas" aria-hidden="true" />
