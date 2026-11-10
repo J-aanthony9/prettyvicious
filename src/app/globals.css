@@ -925,52 +925,27 @@ html[data-intro] .veil.veil-leaving {
 /* ---------- Ice intro (components/intro/IceIntro.tsx) ---------- */
 
 /* The cover: on a visit where the intro will play, an inline script in
-   layout.tsx marks <html> before the first paint, and this dark pane hides
-   the page from the very first frame. The intro's fog blooms over it, and
-   the cover is lifted once the glass is fully fogged. If the intro never
-   arrives, it lifts itself after a few seconds, and it never holds once
-   the intro is running. */
-html[data-ice-cover] body::before,
-html[data-ice-cover] body::after {
+   layout.tsx marks <html> before the first paint, and this pane of black
+   ice (public/brand/ice/depth.webp, the same ice that sits under the fog)
+   hides the page from the very first frame. The intro's fog blooms over it,
+   and the cover is lifted once the glass is fully fogged, with nothing to
+   see change, since the ice under the fog is the same picture. If the intro
+   never arrives, it lifts itself after a few seconds, and it never holds
+   once the intro is running. */
+html[data-ice-cover] body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 99;
   pointer-events: none;
-}
-
-/* Dark, cold glass. */
-html[data-ice-cover] body::before {
-  background: radial-gradient(ellipse 90% 70% at 50% 45%, #121820, #0a0c10 72%);
-  animation: ice-cover-lift 0.35s ease-out 4s forwards;
-}
-
-/* Frost already forming in the corners while the effect loads: the same
-   drawings, in the same places, as the fog that takes over from it. */
-html[data-ice-cover] body::after {
-  --corner: calc(min(100vw, 100dvh) * 0.62);
   background:
-    url(/frost/cover-tl.svg) left top / var(--corner) var(--corner) no-repeat,
-    url(/frost/cover-tr.svg) right top / var(--corner) var(--corner) no-repeat,
-    url(/frost/cover-bl.svg) left bottom / var(--corner) var(--corner) no-repeat,
-    url(/frost/cover-br.svg) right bottom / var(--corner) var(--corner) no-repeat;
-  animation:
-    ice-cover-frost 1.1s ease-out 0.1s both,
-    ice-cover-lift 0.35s ease-out 4s forwards;
+    url(/brand/ice/depth.webp) center / cover no-repeat,
+    radial-gradient(ellipse 90% 70% at 50% 45%, #121820, #0a0c10 72%);
+  animation: ice-cover-lift 0.35s ease-out 4s forwards;
 }
 
 html[data-ice-cover][data-ice="on"] body::before {
   animation: none;
-}
-
-html[data-ice-cover][data-ice="on"] body::after {
-  animation: ice-cover-frost 1.1s ease-out 0.1s both;
-}
-
-@keyframes ice-cover-frost {
-  from {
-    opacity: 0;
-  }
 }
 
 @keyframes ice-cover-lift {
@@ -980,14 +955,6 @@ html[data-ice-cover][data-ice="on"] body::after {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html[data-ice-cover] body::after {
-    animation: ice-cover-lift 0.35s ease-out 4s forwards;
-  }
-  html[data-ice-cover][data-ice="on"] body::after {
-    animation: none;
-  }
-}
 /* Fixed over everything, client rendered only, so it never shifts layout
    and never exists without JavaScript. */
 .ice {
@@ -1013,12 +980,15 @@ html[data-ice-cover][data-ice="on"] body::after {
    only darkness through them. Each tap breaks through a layer: the dark
    thins (data-layer 1, then 2) and the fog with it, so the hero starts to
    glow through the cracks and the glass, until the third tap shatters what
-   is left. It is the same colour as the first-paint cover, so the cover
-   hands over to it without a change. */
+   is left. It is black ice (public/brand/ice/depth.webp), bubbles and old
+   fractures and all, the same picture as the first-paint cover, so the
+   cover hands over to it without a change. */
 .ice-wet {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 90% 70% at 50% 45%, #121820, #0a0c10 72%);
+  background:
+    url(/brand/ice/depth.webp) center / cover no-repeat,
+    radial-gradient(ellipse 90% 70% at 50% 45%, #121820, #0a0c10 72%);
   opacity: 0.96;
   animation: ice-wet-in 600ms ease-out both;
   transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1467,4 +1437,28 @@ html[data-ice="on"] .frozen-pv-glare::before {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* ---------- Naughty List hero: the frozen wall (Hero.tsx) ---------- */
+/* Dark stone with frost creeping over its edges, darkened a touch in the
+   middle so the PV and the type stand off it, and fading into the page at
+   the foot. Painted on a layer behind the hero rather than the hero itself:
+   it is scenery, and this keeps the browser from timing the page's load by
+   it instead of by the PV. Preloaded in Hero.tsx. */
+[data-season="naughty-list"] .hero-wall {
+  isolation: isolate;
+}
+
+[data-season="naughty-list"] .hero-wall::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(10, 12, 16, 0.55), transparent 75%),
+    linear-gradient(to bottom, transparent 72%, var(--color-ink) 100%),
+    radial-gradient(ellipse 90% 60% at 50% 112%, rgba(107, 69, 79, 0.22), transparent 62%),
+    url(/brand/ice/wall.webp) center / cover no-repeat,
+    var(--color-ink);
 }

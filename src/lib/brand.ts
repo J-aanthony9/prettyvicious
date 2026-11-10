@@ -119,11 +119,13 @@ export type Season = "default" | "all-hallows" | "naughty-list";
 export const SEASON: Season = "naughty-list";
 
 /**
- * Naughty List hero background, behind the frozen PV. Two options:
+ * Naughty List hero background, behind the frozen PV. Three options:
+ *   "wall"   a dark frozen stone wall, frost creeping over its edges
+ *            (photograph, public/brand/ice/wall.webp)
  *   "frost"  engraved frost creeping in from the edges
  *   "cracks" a faint web of cracked ice radiating from the centre
  */
-export const FROST_BACKGROUND: "frost" | "cracks" = "frost";
+export const FROST_BACKGROUND: "wall" | "frost" | "cracks" = "wall";
 
 /**
  * The homepage ice intro (components/intro): fog creeps over the glass,
