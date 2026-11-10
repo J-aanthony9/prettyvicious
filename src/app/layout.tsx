@@ -40,8 +40,11 @@ const manrope = Manrope({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://shopprettyvicious.com";
 
-/** The 1200x630 share card. Regenerate with scripts/make-og.mjs. */
-const SHARE_IMAGE = "/og.png";
+/**
+ * The 1200x630 share card: the season's own while it runs. Regenerate with
+ * scripts/make-og.mjs (SEASON=naughty-list for the Naughty List card).
+ */
+const SHARE_IMAGE = SEASON === "naughty-list" ? "/og-naughty-list.jpg" : "/og.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
