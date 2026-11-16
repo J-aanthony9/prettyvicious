@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ICE_INTRO_COPY } from "@/lib/brand";
 import { frostCorner } from "@/components/home/frost";
+import { liftCover, type IceImages } from "@/lib/ice-signal";
 import {
   SCRIPT_BOTTOM,
   SCRIPT_LETTERS,
@@ -13,7 +14,7 @@ import {
 /*
  * The ice intro: looking at the site through a frozen window.
  *
- *   fog       0.0 to 0.6s   frost and fog creep in from the edges
+ *   fog       0.0 to 0.85s  fog blooms over the dark glass, edges first
  *   writing   0.6 to 2.9s   "Pretty Vicious" traced into the fog, stroke by
  *                           stroke, each stroke wiping the glass clear, with
  *                           a couple of drips running down after
@@ -21,8 +22,9 @@ import {
  *                           the end of "Vicious": breath clouds the glass,
  *                           then the lips press in, slightly parted
  *   prompt    from ~2.9s    "Tap to break the ice", gently pulsing
- *   taps      1st tap       cracks spread from the tap
- *             2nd tap       a bigger web of cracks
+ *   taps      1st tap       cracks spread from the tap, and the dark under
+ *                           the ice thins: the hero starts to show through
+ *             2nd tap       a bigger web of cracks, thinner still
  *             3rd tap       the glass breaks into shards that fall and fade
  *
  * A tap while it is still writing finishes the writing and counts as the
@@ -35,7 +37,7 @@ import {
  * is a handful of image draws.
  */
 
-const FOG_MS = 600;
+const FOG_MS = 850;
 const WRITE_MS = 2300;
 /** How long the kiss takes to press in. */
 const KISS_MS = 950;
@@ -66,6 +68,57 @@ function makeCanvas(width: number, height: number) {
   const canvas = document.createElement("canvas");
   canvas.width = Math.max(1, Math.ceil(width));
   canvas.height = Math.max(1, Math.ceil(height));
+  return canvas;
+}
+
+/**
+ * Fogged glass from the photographs: the condensation texture tiled across
+ * the pane (beads of water and all), thickening toward the edges, with real
+ * frost growing in from two opposite corners. The frost photo grows from
+ * the bottom left; the top right is the same photo turned half way round.
+ */
+function buildPhotoFog(w: number, h: number, dpr: number, texture: HTMLImageElement, frost: HTMLImageElement | null) {
+  const canvas = makeCanvas(w * dpr, h * dpr);
+  const g = canvas.getContext("2d")!;
+  g.scale(dpr, dpr);
+
+  // The condensation, at a scale where the beads read as real drops on a
+  // phone held at arm's length.
+  const tile = 470;
+  const pattern = g.createPattern(texture, "repeat");
+  if (pattern) {
+    pattern.setTransform(new DOMMatrix().scale(tile / texture.width));
+    g.globalAlpha = 0.95;
+    g.fillStyle = pattern;
+    g.fillRect(0, 0, w, h);
+    g.globalAlpha = 1;
+  }
+
+  // Thicker, paler fog toward the edges, like breath gathering at the frame.
+  const edge = g.createRadialGradient(w / 2, h * 0.44, Math.min(w, h) * 0.25, w / 2, h * 0.44, Math.hypot(w, h) * 0.62);
+  edge.addColorStop(0, "rgba(232, 236, 240, 0)");
+  edge.addColorStop(1, "rgba(232, 236, 240, 0.32)");
+  g.fillStyle = edge;
+  g.fillRect(0, 0, w, h);
+
+  if (frost) {
+    // Two opposite corners only: mirrored into all four, the frost meets
+    // its own reflection along the edges and the symmetry gives it away.
+    const size = Math.min(w, h) * 0.95;
+    const corners: Array<[number, number, number, number]> = [
+      [0, h, 1, 1], // bottom left, as photographed
+      [w, 0, -1, -1], // top right, turned half way round
+    ];
+    g.globalAlpha = 0.9;
+    for (const [x, y, sx, sy] of corners) {
+      g.save();
+      g.translate(x, y);
+      g.scale(sx, sy);
+      g.drawImage(frost, 0, -size, size, size);
+      g.restore();
+    }
+    g.globalAlpha = 1;
+  }
   return canvas;
 }
 
@@ -317,9 +370,12 @@ function blackletterPlan(w: number, h: number, dpr: number) {
 
 export default function IceIntro({
   lettering,
+  images = { fog: null, frost: null },
   onDone,
 }: {
   lettering: "script" | "blackletter";
+  /** Photographic fog and frost (public/brand/ice); drawn by hand without them. */
+  images?: IceImages;
   onDone: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -352,7 +408,7 @@ export default function IceIntro({
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     const ctx = canvas.getContext("2d")!;
-    const fog = buildFog(w, h, dpr);
+    const fog = images.fog ? buildPhotoFog(w, h, dpr, images.fog, images.frost) : buildFog(w, h, dpr);
 
     /*
      * The writing is wiped straight out of the fog on this one canvas, a few
@@ -593,8 +649,8 @@ export default function IceIntro({
           const [x0, y0, x1, y1, d] = crack.segs[crack.drawn];
           const weight = Math.max(0.5, 1.5 - d / crack.radius);
           // A dark edge and a bright edge: a break catches light on one side.
-          ctx.strokeStyle = "rgba(18, 26, 36, 0.35)";
-          ctx.lineWidth = weight + 0.6;
+          ctx.strokeStyle = "rgba(14, 22, 32, 0.6)";
+          ctx.lineWidth = weight + 0.9;
           ctx.beginPath();
           ctx.moveTo(x0 + 0.7, y0 + 0.7);
           ctx.lineTo(x1 + 0.7, y1 + 0.7);
@@ -654,14 +710,18 @@ export default function IceIntro({
       ctx.globalAlpha = 1;
       ctx.drawImage(fog, 0, 0);
       if (creep < 1) {
-        // A clear centre that closes up as the fog arrives.
+        // Fog blooming over the glass: the edges condense first and the
+        // middle follows, all of it thickening together, so there is never
+        // a hole in the middle, just breath spreading across cold glass.
+        const t = ease(creep);
+        const edge = Math.min(1, t * 1.7);
+        const middle = Math.max(0, (t - 0.2) / 0.8);
         const cx = canvas.width / 2;
         const cy = canvas.height * 0.45;
         const far = Math.hypot(canvas.width, canvas.height) * 0.62;
-        const inner = far * (1 - ease(creep)) * 0.95;
-        const mask = ctx.createRadialGradient(cx, cy, inner, cx, cy, inner + far * 0.4);
-        mask.addColorStop(0, "rgba(0,0,0,0)");
-        mask.addColorStop(1, "rgba(0,0,0,1)");
+        const mask = ctx.createRadialGradient(cx, cy, 0, cx, cy, far);
+        mask.addColorStop(0, `rgba(0,0,0,${middle})`);
+        mask.addColorStop(1, `rgba(0,0,0,${edge})`);
         ctx.globalCompositeOperation = "destination-in";
         ctx.fillStyle = mask;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -695,6 +755,7 @@ export default function IceIntro({
     const fadeOut = () => {
       if (current === "fading" || finished) return;
       cancelAnimationFrame(raf);
+      liftCover();
       setP("fading");
       delete document.documentElement.dataset.ice;
       window.setTimeout(finish, FADE_MS);
@@ -703,6 +764,7 @@ export default function IceIntro({
     // Finish the writing at once (a tap that cannot wait).
     const completeWriting = (now: number) => {
       if (current === "fog") paintFog(1);
+      liftCover();
       advancePen(Number.POSITIVE_INFINITY, now);
       for (const d of drips) d.start = now - 900;
       drawDrips(now);
@@ -715,6 +777,9 @@ export default function IceIntro({
       if (current === "fog") {
         paintFog(Math.min(1, elapsed / FOG_MS));
         if (elapsed >= FOG_MS) {
+          // The glass is fully fogged: the page behind can take over from
+          // the cover now, seen only through what gets wiped clear.
+          liftCover();
           setP("writing");
           start = now;
         }
@@ -1012,6 +1077,7 @@ export default function IceIntro({
       paintFog(1);
       advancePen(Number.POSITIVE_INFINITY, performance.now());
       pressKiss();
+      liftCover();
       setP("prompt");
     } else {
       kick();
@@ -1044,6 +1110,8 @@ export default function IceIntro({
       aria-label="Welcome to Pretty Vicious. Tap, click or press Enter three times to break the ice, or press Escape to skip."
       tabIndex={-1}
       className={`ice ${phase === "fading" ? "ice-fading" : ""}`}
+      // How many layers of ice the taps have broken through (see .ice-wet).
+      data-layer={Math.min(hits, 2)}
     >
       <div className={`ice-wet ${still ? "ice-wet-still" : ""}`} aria-hidden="true" />
       <canvas ref={canvasRef} className="ice-canvas" aria-hidden="true" />

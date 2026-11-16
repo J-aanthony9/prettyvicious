@@ -3,10 +3,14 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ICE_INTRO_COPY } from "@/lib/brand";
-import { markIceIntro } from "@/lib/ice-signal";
+import { iceCoverUp, liftCover, loadIceImages, markIceIntro, type IceImages } from "@/lib/ice-signal";
 
 /** The effect itself, fetched only when it is actually going to play. */
 const IceIntro = dynamic(() => import("@/components/intro/IceIntro"), { ssr: false });
+
+// When the page is already covered for the intro, start fetching the effect
+// the moment this script runs, rather than after hydration.
+if (iceCoverUp()) void import("@/components/intro/IceIntro");
 
 const SESSION_KEY = "pv-ice-intro";
 
@@ -33,6 +37,7 @@ type Lettering = "script" | "blackletter";
  */
 export default function IceIntroGate() {
   const [play, setPlay] = useState<Lettering | null>(null);
+  const [images, setImages] = useState<IceImages>({ fog: null, frost: null });
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -48,11 +53,15 @@ export default function IceIntroGate() {
     };
 
     if (!preview) {
-      if (seen) return;
+      if (seen) {
+        liftCover();
+        return;
+      }
       // Landing anywhere else first, or coming back from checkout, uses up
       // the session's chance: the intro is for arriving, not for returning.
       if (url.pathname !== "/" || /shopify|checkout/i.test(document.referrer)) {
         markSeen();
+        liftCover();
         return;
       }
     }
@@ -80,18 +89,34 @@ export default function IceIntroGate() {
       // Marked here, not on mount, so a remount (React's dev double run, or
       // a fast refresh) cannot use up the session before anything decides.
       markSeen();
-      if (busy || window.scrollY > 40) {
+      // Under the cover nothing of the page has been seen, so there is no
+      // one mid-browse to interrupt; without it, a busy visitor keeps the page.
+      if (!covered && (busy || window.scrollY > 40)) {
         markIceIntro(false);
+        liftCover();
         return;
       }
-      setPlay(preview ?? ICE_INTRO_COPY.lettering);
+      // The glass textures first (already fetching since the first paint
+      // when the page is covered), but never more than a moment's wait.
+      void loadIceImages().then((loaded) => {
+        if (cancelled) return;
+        setImages(loaded);
+        setPlay(preview ?? ICE_INTRO_COPY.lettering);
+      });
     };
-    const idle = window.requestIdleCallback
-      ? window.requestIdleCallback(begin, { timeout: 600 })
-      : window.setTimeout(begin, 200);
+    // Covered: start now, the page is waiting on it. Otherwise wait for the
+    // page to settle so the effect never competes with its first paint.
+    const covered = iceCoverUp();
+    const idle = covered
+      ? window.setTimeout(begin, 0)
+      : window.requestIdleCallback
+        ? window.requestIdleCallback(begin, { timeout: 600 })
+        : window.setTimeout(begin, 200);
 
+    let cancelled = false;
     return () => {
-      if (window.cancelIdleCallback && typeof idle === "number") window.cancelIdleCallback(idle);
+      cancelled = true;
+      if (!covered && window.cancelIdleCallback && typeof idle === "number") window.cancelIdleCallback(idle);
       window.clearTimeout(idle as number);
       window.removeEventListener("scroll", markBusy);
       window.removeEventListener("pointerdown", markBusy);
@@ -103,8 +128,10 @@ export default function IceIntroGate() {
   return (
     <IceIntro
       lettering={play}
+      images={images}
       onDone={() => {
         setPlay(null);
+        liftCover();
         markIceIntro(false);
       }}
     />

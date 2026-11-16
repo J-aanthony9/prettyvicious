@@ -40,8 +40,11 @@ const manrope = Manrope({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://shopprettyvicious.com";
 
-/** The 1200x630 share card. Regenerate with scripts/make-og.mjs. */
-const SHARE_IMAGE = "/og.png";
+/**
+ * The 1200x630 share card: the season's own while it runs. Regenerate with
+ * scripts/make-og.mjs (SEASON=naughty-list for the Naughty List card).
+ */
+const SHARE_IMAGE = SEASON === "naughty-list" ? "/og-naughty-list.jpg" : "/og.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -99,7 +102,8 @@ export default async function RootLayout({
     <html
       lang="en"
       data-season={SEASON}
-      // The intro script below may add data-intro before React hydrates.
+      // The intro scripts below may add data-intro or data-ice-cover before
+      // React hydrates.
       suppressHydrationWarning
       className={`${cormorant.variable} ${pirata.variable} ${manrope.variable}`}
     >
@@ -111,6 +115,21 @@ export default async function RootLayout({
           <script
             dangerouslySetInnerHTML={{
               __html: `try{if(location.pathname==="/"&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!localStorage.getItem(${JSON.stringify(INTRO.storageKey)}))document.documentElement.setAttribute("data-intro","")}catch(e){}`,
+            }}
+          />
+        ) : null}
+        {/* The ice intro: decides before first paint whether it will play
+            (first homepage visit of the session, not back from checkout, or
+            a ?intro= preview), and if so covers the page at once, so the
+            homepage never flashes up and then gets fogged over. The intro
+            lifts the cover once its fog has formed; CSS lifts it anyway
+            after a few seconds if the intro never arrives. On those visits
+            only, it also starts fetching the intro's ice photographs. See
+            IceIntroGate.tsx. Without JavaScript nothing is covered. */}
+        {ICE ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `try{var q=new URLSearchParams(location.search).get("intro");if(q==="script"||q==="blackletter"||(location.pathname==="/"&&document.cookie.split("; ").indexOf("pv-ice-intro=1")<0&&!/shopify|checkout/i.test(document.referrer))){document.documentElement.setAttribute("data-ice-cover","");["/brand/ice/depth.webp","/brand/ice/fog.webp","/brand/ice/frost-corner.webp"].forEach(function(h){var l=document.createElement("link");l.rel="preload";l.as="image";l.href=h;document.head.appendChild(l)})}}catch(e){}`,
             }}
           />
         ) : null}

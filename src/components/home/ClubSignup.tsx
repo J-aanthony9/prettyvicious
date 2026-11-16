@@ -28,16 +28,8 @@ export default function ClubSignup() {
       {/* Naughty List: frost creeping in from two corners of the section. */}
       {FROZEN ? (
         <>
-          <div
-            aria-hidden="true"
-            className="club-frost frost-mask club-frost-tl"
-            style={{ "--frost-src": "url(/frost/frost-23.svg)" } as React.CSSProperties}
-          />
-          <div
-            aria-hidden="true"
-            className="club-frost frost-mask club-frost-br"
-            style={{ "--frost-src": "url(/frost/frost-41.svg)" } as React.CSSProperties}
-          />
+          <div aria-hidden="true" className="club-frost club-frost-tl" />
+          <div aria-hidden="true" className="club-frost club-frost-br" />
         </>
       ) : null}
       <div className="relative mx-auto max-w-[1200px] px-[clamp(20px,4vw,48px)]">
