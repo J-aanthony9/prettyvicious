@@ -41,7 +41,10 @@ export default function SizeGuideTabs({ initial }: { initial: GarmentKey }) {
         role="tablist"
         aria-label="Garment"
         onKeyDown={onKeyDown}
-        className="grid grid-cols-3 border border-[color:var(--hairline)]"
+        // Wraps to two rows on a phone (three, then two sharing the width),
+        // one row on wider screens. The 1px gaps over the hairline colour
+        // draw the dividers, so they stay right however the tabs wrap.
+        className="flex flex-wrap gap-px border border-[color:var(--hairline)] bg-[color:var(--hairline)]"
       >
         {GARMENT_ORDER.map((garment, index) => {
           const selected = garment === active;
@@ -58,9 +61,9 @@ export default function SizeGuideTabs({ initial }: { initial: GarmentKey }) {
               aria-controls="size-guide-panel"
               tabIndex={selected ? 0 : -1}
               onClick={() => select(garment)}
-              className={`min-h-[48px] px-2 py-3 text-[11px] font-semibold uppercase leading-[1.3] tracking-[0.14em] transition-colors duration-300 sm:tracking-[0.22em] ${
-                index > 0 ? "border-l border-[color:var(--hairline)]" : ""
-              } ${selected ? "bg-bone text-ink" : "text-[color:var(--bone-dim)] hover:text-bone"}`}
+              className={`min-h-[48px] flex-[1_1_30%] px-2 py-3 text-[11px] font-semibold uppercase leading-[1.3] tracking-[0.14em] transition-colors duration-300 sm:flex-1 sm:tracking-[0.2em] ${
+                selected ? "bg-bone text-ink" : "bg-ink text-[color:var(--bone-dim)] hover:text-bone"
+              }`}
             >
               {GARMENTS[garment].tab}
             </button>
@@ -111,7 +114,9 @@ export default function SizeGuideTabs({ initial }: { initial: GarmentKey }) {
             </p>
           </div>
           <MeasureDiagram
-            kind={active === "crewneck" ? "crewneck" : "tee"}
+            kind={
+              active === "crewneck" || active === "hoodie" || active === "zip-hoodie" ? active : "tee"
+            }
             className="mx-auto w-full max-w-[320px]"
           />
         </div>

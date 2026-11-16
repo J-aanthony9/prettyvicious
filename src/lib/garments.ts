@@ -9,12 +9,24 @@
  * can mislead.
  */
 
-export type GarmentKey = "oversized-tee" | "essential-tee" | "crewneck";
+export type GarmentKey = "hoodie" | "zip-hoodie" | "oversized-tee" | "essential-tee" | "crewneck";
 
 export const GARMENTS: Record<
   GarmentKey,
   { label: string; tab: string; plural: string; productType: string }
 > = {
+  hoodie: {
+    label: "Snow washed hoodie",
+    tab: "Hoodie",
+    plural: "Hoodies",
+    productType: "Hoodie",
+  },
+  "zip-hoodie": {
+    label: "Zip-up hoodie",
+    tab: "Zip hoodie",
+    plural: "Zip hoodies",
+    productType: "Zip Hoodie",
+  },
   "oversized-tee": {
     label: "Snow washed oversized tee",
     tab: "Oversized tee",
@@ -35,18 +47,24 @@ export const GARMENTS: Record<
   },
 };
 
-export const GARMENT_ORDER: GarmentKey[] = ["oversized-tee", "essential-tee", "crewneck"];
+/** Size guide tabs and shop filters, in this order. */
+export const GARMENT_ORDER: GarmentKey[] = ["hoodie", "zip-hoodie", "oversized-tee", "essential-tee", "crewneck"];
 
 export function isGarmentKey(value: unknown): value is GarmentKey {
   return typeof value === "string" && Object.hasOwn(GARMENTS, value);
 }
 
 /**
- * Order matters. "Snow washed" is checked before "crew" because a snow
- * washed tee can carry a design called "Ghost Crew" in its title.
+ * Order matters. Hoodies come first, because a hoodie can be snow washed
+ * too ("Naughty or Nice Snow Washed Hoodie"), and a zip-up before a plain
+ * hoodie. Then "snow washed" before "crew", because a snow washed tee can
+ * carry a design called "Ghost Crew" in its title.
  */
 function match(text: string): GarmentKey | null {
   const value = text.toLowerCase();
+  const hoodie = /hood/.test(value);
+  if (hoodie && /\bzip/.test(value)) return "zip-hoodie";
+  if (hoodie) return "hoodie";
   if (/snow[\s-]*wash/.test(value)) return "oversized-tee";
   if (/essential/.test(value)) return "essential-tee";
   if (/crew\s*neck|sweatshirt|\bcrew\b/.test(value)) return "crewneck";

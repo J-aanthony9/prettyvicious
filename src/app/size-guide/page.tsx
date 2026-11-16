@@ -8,7 +8,7 @@ import { GARMENT_ORDER, isGarmentKey } from "@/lib/garments";
 export const metadata: Metadata = {
   title: "Size guide",
   description:
-    "Flat, laid-flat measurements for every size of the oversized tee, the essential tee and the crewneck.",
+    "Flat, laid-flat measurements for every size of the hoodies, the oversized tee, the essential tee and the crewneck.",
 };
 
 type Props = { searchParams: Promise<{ garment?: string | string[] }> };
