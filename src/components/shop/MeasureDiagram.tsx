@@ -1,26 +1,32 @@
 /**
  * A garment laid flat, with the four measurements the chart uses drawn on
  * it. Numbered to match the "how to measure" list. Tees get short sleeves,
- * the crewneck gets long ones with ribbed cuffs and hem.
+ * the crewneck gets long ones with ribbed cuffs and hem, and the hoodies are
+ * the long-sleeved body with a hood (and a zip down the front for the
+ * zip-up). On a hoodie the length line sits off centre, clear of the zip.
  */
 export default function MeasureDiagram({
   kind = "tee",
   className = "",
 }: {
-  kind?: "tee" | "crewneck";
+  kind?: "tee" | "crewneck" | "hoodie" | "zip-hoodie";
   className?: string;
 }) {
   const line = "stroke-[color:var(--color-accent)]";
   const label = "fill-[color:var(--color-bone)] text-[13px] font-semibold";
   const outline = { fill: "none", stroke: "rgba(233,223,206,0.55)", strokeWidth: 1.5 };
-  const crew = kind === "crewneck";
+  const hooded = kind === "hoodie" || kind === "zip-hoodie";
+  // Long sleeves, ribbed cuffs and hem.
+  const crew = kind === "crewneck" || hooded;
+  const name = hooded ? (kind === "zip-hoodie" ? "zip-up hoodie" : "hoodie") : crew ? "crewneck" : "tee";
+  const lengthX = hooded ? 196 : 160;
 
   return (
     <svg
       viewBox="0 0 320 300"
       className={className}
       role="img"
-      aria-label={`Diagram of a ${crew ? "crewneck" : "tee"} laid flat showing where length, shoulder, chest and sleeve are measured`}
+      aria-label={`Diagram of a ${name} laid flat showing where length, shoulder, chest and sleeve are measured`}
     >
       {crew ? (
         <>
@@ -41,23 +47,40 @@ export default function MeasureDiagram({
           {...outline}
         />
       )}
-      {/* Collar */}
-      <path d="M118 36 C130 62 190 62 202 36" {...outline} />
+      {hooded ? (
+        <>
+          {/* Hood, laid back, and its opening */}
+          <path d="M118 36 C104 14 124 4 160 4 C196 4 216 14 202 36" {...outline} />
+          <path d="M126 40 C132 22 188 22 194 40" {...outline} strokeWidth={1} />
+          {/* Drawstrings */}
+          <path d="M146 54 L146 82 M174 54 L174 82" {...outline} strokeWidth={1} />
+          {/* Kangaroo pocket on the pullover, the zip on the zip-up */}
+          {kind === "zip-hoodie" ? (
+            <line x1="160" y1="52" x2="160" y2="262" {...outline} strokeWidth={1.2} strokeDasharray="1.5 2.5" />
+          ) : (
+            <path d="M112 248 L120 196 L200 196 L208 248" {...outline} strokeWidth={1} />
+          )}
+        </>
+      ) : (
+        /* Collar */
+        <path d="M118 36 C130 62 190 62 202 36" {...outline} />
+      )}
 
       {/* 1. Length: collar seam down to hem */}
-      <line x1="160" y1="56" x2="160" y2="262" className={line} strokeWidth="1.2" strokeDasharray="3 4" />
-      <circle cx="160" cy="280" r="9" fill="var(--color-accent)" />
-      <text x="160" y="284" textAnchor="middle" className={label}>1</text>
+      <line x1={lengthX} y1="56" x2={lengthX} y2="262" className={line} strokeWidth="1.2" strokeDasharray="3 4" />
+      <circle cx={lengthX} cy="280" r="9" fill="var(--color-accent)" />
+      <text x={lengthX} y="284" textAnchor="middle" className={label}>1</text>
 
-      {/* 2. Shoulder: seam to seam */}
+      {/* 2. Shoulder: seam to seam. On a hoodie the hood fills the top, so
+          the number sits out to the side. */}
       <line x1="58" y1="58" x2="262" y2="58" className={line} strokeWidth="1.2" strokeDasharray="3 4" />
-      <circle cx="160" cy="20" r="9" fill="var(--color-accent)" />
-      <text x="160" y="24" textAnchor="middle" className={label}>2</text>
+      <circle cx={hooded ? 40 : 160} cy={hooded ? 40 : 20} r="9" fill="var(--color-accent)" />
+      <text x={hooded ? 40 : 160} y={hooded ? 44 : 24} textAnchor="middle" className={label}>2</text>
 
       {/* 3. Chest: below the armpits */}
       <line x1="82" y1="140" x2="238" y2="140" className={line} strokeWidth="1.2" strokeDasharray="3 4" />
-      <circle cx="160" cy="158" r="9" fill="var(--color-accent)" />
-      <text x="160" y="162" textAnchor="middle" className={label}>3</text>
+      <circle cx={hooded ? 124 : 160} cy="158" r="9" fill="var(--color-accent)" />
+      <text x={hooded ? 124 : 160} y="162" textAnchor="middle" className={label}>3</text>
 
       {/* 4. Sleeve: armhole to cuff */}
       {crew ? (

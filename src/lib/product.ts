@@ -22,12 +22,16 @@ export function isDesignOption(option: ProductOption): boolean {
 }
 
 /**
- * What a shopper sees as the option's name. Tapstitch sometimes names the
- * design option after the product ("Essential Ghost Tees"), which reads as
- * a typo on the page, so that one becomes "Design".
+ * What a shopper sees as the option's name. Tapstitch names the design
+ * option after the product ("Essential Ghost Tees", "Santa's Favorite Snow
+ * Washed Hoodies") or "Category", which read as typos or jargon on the
+ * page, so all of those become "Design".
  */
 export function optionLabel(name: string, productTitle: string): string {
-  return name.trim().toLowerCase() === productTitle.trim().toLowerCase() ? "Design" : name;
+  const value = name.trim().toLowerCase();
+  if (value === productTitle.trim().toLowerCase() || value === "category") return "Design";
+  if (/\b(tee|tees|hoodie|hoodies|crew|crewneck|sweatshirt)\b/.test(value)) return "Design";
+  return name;
 }
 
 /**
@@ -221,17 +225,47 @@ export function leadBack(product: ImageSource & Pick<ProductSummary, "collection
 }
 
 /**
+ * Front and back in pairs. Tapstitch lists a piece with several designs or
+ * colours as front, back, front, back: each variant's front (attached to
+ * it) followed straight away by its own back (attached to nothing). When
+ * every front is followed by a loose image like that, the listing is
+ * paired, and each variant's back is the image right after its front.
+ */
+function pairs(product: Product): Map<string, ShopifyImage> | null {
+  const all = productImages(product);
+  const attached = new Set(product.variants.map((v) => v.image?.url).filter(Boolean) as string[]);
+  if (attached.size < 2) return null;
+  const map = new Map<string, ShopifyImage>();
+  for (const url of attached) {
+    const index = all.findIndex((image) => image.url === url);
+    const next = all[index + 1];
+    if (index < 0 || !next || attached.has(next.url)) return null;
+    map.set(url, next);
+  }
+  return map;
+}
+
+/**
  * The gallery for the chosen variant. When variants carry different images
  * (one per design or colour), the chosen one leads and the other variants'
  * images step aside, so picking "Lashes Never Die" never shows another
- * design's front. Images attached to no variant (a back view, say) stay.
- * When the drop leads with the back, the back goes first.
+ * design's front. On a paired listing that goes for backs too: the chosen
+ * front and its own back, nothing else. Otherwise images attached to no
+ * variant (a single shared back, say) stay. When the drop leads with the
+ * back, the back goes first.
  */
 export function galleryFor(product: Product, variant: ProductVariant | null): ShopifyImage[] {
   const all = productImages(product);
   const variantUrls = new Set(
     product.variants.map((candidate) => candidate.image?.url).filter(Boolean) as string[],
   );
+  const lead = DROPS.current.leadWithBack && inCurrentDrop(product);
+  const paired = pairs(product);
+  const front = variant?.image ?? product.featuredImage;
+  if (paired && front) {
+    const back = paired.get(front.url);
+    if (back) return lead ? [back, front] : [front, back];
+  }
   const back = leadBack(product);
   let ordered = all;
   if (variantUrls.size > 1 && variant?.image) {
@@ -244,10 +278,15 @@ export function galleryFor(product: Product, variant: ProductVariant | null): Sh
 
 /** "Back" or "Front" for the gallery's labels, or null when it cannot tell. */
 export function imageSide(product: Product, image: ShopifyImage): "Back" | "Front" | null {
+  const attached = product.variants.some((variant) => variant.image?.url === image.url);
+  const paired = pairs(product);
+  if (paired) {
+    if (attached) return "Front";
+    return [...paired.values()].some((back) => back.url === image.url) ? "Back" : null;
+  }
   const back = backImage(product);
   if (!back) return null;
   if (image.url === back.url) return "Back";
-  const attached = product.variants.some((variant) => variant.image?.url === image.url);
   if (attached || image.url === product.featuredImage?.url) return "Front";
   if (image.altText && FRONT_ALT.test(image.altText)) return "Front";
   return null;

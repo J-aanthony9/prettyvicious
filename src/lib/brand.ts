@@ -171,6 +171,8 @@ export const FIT_NOTES = {
     body: "These are heavyweight, relaxed streetwear cuts, so they wear big and boxy on purpose. The size chart shows flat, laid-flat measurements (the garment on a table), not body measurements. If you want the oversized look, take your usual size. If you want a closer fit, size down. Check the chart before you order, since made-to-order pieces can't be exchanged for fit.",
   },
   // Waiting on fit notes from Meghan. Do not invent these.
+  hoodie: null,
+  "zip-hoodie": null,
   "essential-tee": null,
   crewneck: null,
 } as const satisfies Record<string, { heading: string; body: string } | null>;

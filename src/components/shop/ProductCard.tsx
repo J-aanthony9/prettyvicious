@@ -1,4 +1,5 @@
 import Image from "next/image";
+import FadeImage from "@/components/shop/FadeImage";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import { cardNote, cardSwatches, hasPriceRange, inCurrentDrop, leadBack } from "@/lib/product";
@@ -27,7 +28,7 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
       <Link href={href} className="block overflow-hidden rounded active:opacity-90">
         <div className="card-face relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded border border-[color:var(--hairline-soft)] transition-transform duration-[350ms] group-hover:-translate-y-[5px]">
           {image ? (
-            <Image
+            <FadeImage
               src={image.url}
               alt={back ? `${product.title}, back` : image.altText || product.title}
               fill

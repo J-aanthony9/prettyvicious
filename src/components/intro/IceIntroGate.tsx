@@ -37,7 +37,7 @@ type Lettering = "script" | "blackletter";
  */
 export default function IceIntroGate() {
   const [play, setPlay] = useState<Lettering | null>(null);
-  const [images, setImages] = useState<IceImages>({ fog: null, frost: null });
+  const [images, setImages] = useState<IceImages>({ fog: null, frost: null, kiss: null });
 
   useEffect(() => {
     const url = new URL(window.location.href);

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import FadeImage from "@/components/shop/FadeImage";
 import Link from "next/link";
 import SectionHead from "@/components/SectionHead";
 import { readCart } from "@/lib/cart-session";
@@ -68,7 +68,7 @@ export default async function CartPage() {
                 className="relative h-28 w-[88px] shrink-0 overflow-hidden border border-[color:var(--hairline)] bg-veil"
               >
                 {image ? (
-                  <Image
+                  <FadeImage
                     src={image.url}
                     alt={image.altText || line.merchandise.product.title}
                     fill

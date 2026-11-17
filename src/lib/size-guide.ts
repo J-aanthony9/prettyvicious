@@ -21,6 +21,23 @@ export type SizeGuideRow = { size: string } & Record<SizeGuideColumn, number>;
 
 /** Centimetres. */
 export const SIZE_CHARTS: Record<GarmentKey, SizeGuideRow[]> = {
+  // Snow washed hoodie, from the supplier's chart (inches, converted back
+  // to the centimetres they were made from). The supplier lists S to 2XL.
+  hoodie: [
+    { size: "S", length: 70, shoulder: 57, chest: 67, sleeve: 61 },
+    { size: "M", length: 72, shoulder: 58.5, chest: 69, sleeve: 62 },
+    { size: "L", length: 74, shoulder: 60, chest: 71, sleeve: 63 },
+    { size: "XL", length: 76, shoulder: 61.5, chest: 73, sleeve: 64 },
+    { size: "2XL", length: 78, shoulder: 63, chest: 75, sleeve: 65 },
+  ],
+  // Zip-up hoodie (the leopard piece), from the supplier's chart.
+  "zip-hoodie": [
+    { size: "S", length: 62, shoulder: 62, chest: 69, sleeve: 54 },
+    { size: "M", length: 63.5, shoulder: 63.5, chest: 71, sleeve: 55 },
+    { size: "L", length: 65, shoulder: 65, chest: 73, sleeve: 56 },
+    { size: "XL", length: 66.5, shoulder: 66.5, chest: 75, sleeve: 57 },
+    { size: "2XL", length: 68, shoulder: 68, chest: 77, sleeve: 58 },
+  ],
   // Snow washed oversized tee. The same blank Drop 001 used, and it matches
   // the chart Tapstitch attaches to the snow washed listings.
   "oversized-tee": [
