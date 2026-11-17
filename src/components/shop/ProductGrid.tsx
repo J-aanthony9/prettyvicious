@@ -1,6 +1,5 @@
 import ProductCard from "@/components/shop/ProductCard";
 import PlaceholderCard from "@/components/shop/PlaceholderCard";
-import Reveal from "@/components/Reveal";
 import { DROPS } from "@/lib/brand";
 import type { ProductSummary } from "@/lib/shopify/types";
 
@@ -18,6 +17,13 @@ function wideColumns(count: number): string {
     : "min-[900px]:grid-cols-3";
 }
 
+/** The first rows: their pictures load with the page, the rest as they near. */
+const EAGER_CARDS = 6;
+
+/**
+ * Product cards sit still: no fade or slide as they scroll in, so the
+ * pictures are simply there when a shopper reaches them.
+ */
 export default function ProductGrid({ products }: { products: ProductSummary[] }) {
   const count = products.length || PLACEHOLDERS.length;
 
@@ -27,14 +33,10 @@ export default function ProductGrid({ products }: { products: ProductSummary[] }
     >
       {products.length > 0
         ? products.map((product, index) => (
-            <Reveal key={product.id} delay={(index % 3) * 90}>
-              <ProductCard product={product} />
-            </Reveal>
+            <ProductCard key={product.id} product={product} eager={index < EAGER_CARDS} />
           ))
-        : PLACEHOLDERS.map((label, index) => (
-            <Reveal key={label} delay={index * 90}>
-              <PlaceholderCard label={label} tag={`Drop ${DROPS.current.number}`} />
-            </Reveal>
+        : PLACEHOLDERS.map((label) => (
+            <PlaceholderCard key={label} label={label} tag={`Drop ${DROPS.current.number}`} />
           ))}
     </div>
   );

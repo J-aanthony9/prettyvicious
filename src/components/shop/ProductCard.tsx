@@ -1,12 +1,16 @@
 import Image from "next/image";
-import FadeImage from "@/components/shop/FadeImage";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import { cardNote, cardSwatches, hasPriceRange, inCurrentDrop, leadBack } from "@/lib/product";
 import { DROPS } from "@/lib/brand";
 import type { ProductSummary } from "@/lib/shopify/types";
 
-export default function ProductCard({ product }: { product: ProductSummary }) {
+/**
+ * `eager` loads the card's picture with the page instead of waiting until
+ * it is scrolled near, so the first rows are already there when a shopper
+ * scrolls down to them. Low priority, so it never holds up the hero.
+ */
+export default function ProductCard({ product, eager = false }: { product: ProductSummary; eager?: boolean }) {
   // This drop's hero is the back print. When the card can find it, the back
   // leads and the front shows on hover (mice only; on a phone the swatches
   // and the product page carry the front).
@@ -28,11 +32,13 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
       <Link href={href} className="block overflow-hidden rounded active:opacity-90">
         <div className="card-face relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded border border-[color:var(--hairline-soft)] transition-transform duration-[350ms] group-hover:-translate-y-[5px]">
           {image ? (
-            <FadeImage
+            <Image
               src={image.url}
               alt={back ? `${product.title}, back` : image.altText || product.title}
               fill
               sizes={sizes}
+              loading={eager ? "eager" : "lazy"}
+              fetchPriority={eager ? "low" : undefined}
               className="object-cover"
             />
           ) : (
@@ -89,7 +95,15 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
                 aria-label={`${product.title}, ${swatch.value}`}
                 className="relative block h-11 w-11 overflow-hidden rounded-sm border border-[color:var(--hairline)] bg-white transition-colors duration-300 hover:border-[color:var(--color-accent)] active:border-[color:var(--color-accent)]"
               >
-                <Image src={swatch.image.url} alt="" fill sizes="44px" className="object-contain" />
+                <Image
+                  src={swatch.image.url}
+                  alt=""
+                  fill
+                  sizes="44px"
+                  loading={eager ? "eager" : "lazy"}
+                  fetchPriority={eager ? "low" : undefined}
+                  className="object-contain"
+                />
               </Link>
             </li>
           ))}
