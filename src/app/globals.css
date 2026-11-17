@@ -283,15 +283,35 @@ body {
    Reveal on scroll
    -------------------------------------------------------------------------- */
 
+/* Sections fade up as they arrive. Whatever is on screen when the page
+   opens plays this straight from the first paint, in CSS, without waiting
+   for the page's JavaScript (on a phone that wait left the product grid
+   empty for a couple of seconds, then snapped everything in at once).
+   It starts at a whisper of opacity rather than none, so the browser
+   still counts the content as shown from the first frame. Sections
+   further down get .reveal-wait from Reveal.tsx once the page is running,
+   and fade up as they are scrolled to. */
 .reveal {
+  animation: reveal-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms) both;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0.02;
+    transform: translate3d(0, 18px, 0);
+  }
+}
+
+.reveal.reveal-wait {
+  animation: none;
   opacity: 0;
   transform: translate3d(0, 18px, 0);
   transition:
-    opacity 1s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 1s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
 }
 
-.reveal.is-in {
+.reveal.reveal-wait.is-in {
   opacity: 1;
   transform: none;
 }
@@ -442,7 +462,9 @@ body {
     transform: none !important;
   }
 
-  .reveal {
+  .reveal,
+  .reveal.reveal-wait {
+    animation: none;
     opacity: 1;
     transform: none;
     transition: none;
@@ -709,11 +731,14 @@ body {
   mask-composite: add;
 }
 
-.reveal:not(.is-in) .ink-title {
+.reveal.reveal-wait:not(.is-in) .ink-title {
   --ink: 0;
 }
 
-.reveal.is-in .ink-title {
+/* The title inks in with its section: at once when it is on screen at
+   load, on arrival when it is further down. */
+.reveal:not(.reveal-wait) .ink-title,
+.reveal.reveal-wait.is-in .ink-title {
   animation: ink-in 1.7s cubic-bezier(0.33, 0.1, 0.25, 1) 0.15s both;
 }
 
