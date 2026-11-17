@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import FadeImage from "@/components/shop/FadeImage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ShopifyImage } from "@/lib/shopify/types";
 import { useScrollLock } from "@/lib/use-scroll-lock";
@@ -118,7 +118,7 @@ export default function Gallery({
               className={`relative aspect-[4/5] w-full shrink-0 snap-center border border-[color:var(--hairline)] ${FRAME}`}
               aria-label={`Open ${image.altText || title} full size`}
             >
-              <Image
+              <FadeImage
                 src={image.url}
                 alt={image.altText || title}
                 fill
@@ -157,7 +157,7 @@ export default function Gallery({
           className={`group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden border border-[color:var(--hairline)] ${FRAME}`}
           aria-label={`Open ${alt} full size`}
         >
-          <Image
+          <FadeImage
             src={current.url}
             alt={alt}
             fill
@@ -186,7 +186,7 @@ export default function Gallery({
                     : "border-[color:var(--hairline)] hover:border-[color:var(--color-accent-deep)]"
                 }`}
               >
-                <Image src={image.url} alt="" fill sizes="120px" className="object-contain" />
+                <FadeImage src={image.url} alt="" fill sizes="120px" className="object-contain" />
                 {labels[image.url] ? (
                   <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-ink/75 py-0.5 text-center text-[9px] font-semibold uppercase tracking-[0.2em] text-bone">
                     {labels[image.url]}

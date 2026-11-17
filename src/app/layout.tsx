@@ -129,13 +129,13 @@ export default async function RootLayout({
         {ICE ? (
           <script
             dangerouslySetInnerHTML={{
-              __html: `try{var q=new URLSearchParams(location.search).get("intro");if(q==="script"||q==="blackletter"||(location.pathname==="/"&&document.cookie.split("; ").indexOf("pv-ice-intro=1")<0&&!/shopify|checkout/i.test(document.referrer))){document.documentElement.setAttribute("data-ice-cover","");["/brand/ice/depth.webp","/brand/ice/fog.webp","/brand/ice/frost-corner.webp"].forEach(function(h){var l=document.createElement("link");l.rel="preload";l.as="image";l.href=h;document.head.appendChild(l)})}}catch(e){}`,
+              __html: `try{var q=new URLSearchParams(location.search).get("intro");if(q==="script"||q==="blackletter"||(location.pathname==="/"&&document.cookie.split("; ").indexOf("pv-ice-intro=1")<0&&!/shopify|checkout/i.test(document.referrer))){document.documentElement.setAttribute("data-ice-cover","");["/brand/ice/depth.webp","/brand/ice/fog.webp","/brand/ice/frost-corner.webp","/brand/ice/kiss.webp"].forEach(function(h){var l=document.createElement("link");l.rel="preload";l.as="image";l.href=h;document.head.appendChild(l)})}}catch(e){}`,
             }}
           />
         ) : null}
         {/* Without JS the reveal observer never runs, so show everything. */}
         <noscript>
-          <style>{`.reveal { opacity: 1; transform: none; }`}</style>
+          <style>{`.reveal { opacity: 1; transform: none; } .fade-img { opacity: 1; } .frost-shimmer { display: none; }`}</style>
         </noscript>
       </head>
       <body>

@@ -1482,3 +1482,47 @@ html[data-ice="on"] .frozen-pv-glare::before {
     url(/brand/ice/wall.webp) center / cover no-repeat,
     var(--color-ink);
 }
+
+/* ---------- Product images fade in (components/shop/FadeImage.tsx) ---------- */
+
+.fade-img {
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+
+.fade-img.is-loaded {
+  opacity: 1;
+}
+
+/* A faint cold glint sweeping the empty frame while the image loads. */
+.frost-shimmer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.frost-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(196, 214, 230, 0.16) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: frost-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes frost-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-img {
+    transition: none;
+  }
+  .frost-shimmer::before {
+    animation: none;
+    opacity: 0;
+  }
+}

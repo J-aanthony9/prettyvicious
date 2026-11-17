@@ -35,9 +35,15 @@ export function liftCover(): void {
 export const ICE_ASSETS = {
   fog: "/brand/ice/fog.webp",
   frost: "/brand/ice/frost-corner.webp",
+  /** A real kiss print: black on transparent, pressed into the fog. */
+  kiss: "/brand/ice/kiss.webp",
 } as const;
 
-export type IceImages = { fog: HTMLImageElement | null; frost: HTMLImageElement | null };
+export type IceImages = {
+  fog: HTMLImageElement | null;
+  frost: HTMLImageElement | null;
+  kiss: HTMLImageElement | null;
+};
 
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
@@ -59,9 +65,11 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
  * intro then draws its own fog instead, so it is never held up for long).
  */
 export function loadIceImages(wait = 1500): Promise<IceImages> {
-  const empty: IceImages = { fog: null, frost: null };
+  const empty: IceImages = { fog: null, frost: null, kiss: null };
   return Promise.race([
-    Promise.all([loadImage(ICE_ASSETS.fog), loadImage(ICE_ASSETS.frost)]).then(([fog, frost]) => ({ fog, frost })),
+    Promise.all([loadImage(ICE_ASSETS.fog), loadImage(ICE_ASSETS.frost), loadImage(ICE_ASSETS.kiss)]).then(
+      ([fog, frost, kiss]) => ({ fog, frost, kiss }),
+    ),
     new Promise<IceImages>((resolve) => window.setTimeout(() => resolve(empty), wait)),
   ]);
 }

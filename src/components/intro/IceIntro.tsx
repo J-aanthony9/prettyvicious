@@ -370,7 +370,7 @@ function blackletterPlan(w: number, h: number, dpr: number) {
 
 export default function IceIntro({
   lettering,
-  images = { fog: null, frost: null },
+  images = { fog: null, frost: null, kiss: null },
   onDone,
 }: {
   lettering: "script" | "blackletter";
@@ -446,7 +446,19 @@ export default function IceIntro({
     let kissAt = 0;
     let kissed = false;
     let kissBox: { x: number; y: number; size: number; under: HTMLCanvasElement } | null = null;
-    let kissPrint: ReturnType<typeof buildKiss> | null = null;
+    // The print is ready before the writing ends: the real kiss photo
+    // (public/brand/ice/kiss.webp) when it loaded, the drawn one otherwise.
+    // Built here, not on the kiss's first frame, so nothing heavy runs
+    // while it fades in (on a big desktop canvas that made it pop).
+    const kissPrint: { mask: CanvasImageSource; width: number; height: number; anchorY: number } = (() => {
+      const photo = images.kiss;
+      if (photo && photo.naturalWidth) {
+        const width = plan.kiss.width * 1.12;
+        const height = (width * photo.naturalHeight) / photo.naturalWidth;
+        return { mask: photo, width, height, anchorY: height * 0.5 };
+      }
+      return buildKiss(plan.kiss.width, dpr);
+    })();
 
     root.style.setProperty("--ice-prompt-top", `${Math.round(plan.bottom + 14)}px`);
 
@@ -519,7 +531,6 @@ export default function IceIntro({
      */
     const kissFrame = (t: number) => {
       const k = plan.kiss;
-      if (!kissPrint) kissPrint = buildKiss(k.width, dpr);
       if (!kissBox) {
         const size = k.width * 2.2;
         const x = Math.max(0, Math.floor((k.x - size / 2) * dpr));
